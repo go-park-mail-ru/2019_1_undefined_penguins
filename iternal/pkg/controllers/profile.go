@@ -21,10 +21,6 @@ func Me(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	bytes, err := json.Marshal(user)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("error"))
-	}
 	w.Write(bytes)
 
 }
