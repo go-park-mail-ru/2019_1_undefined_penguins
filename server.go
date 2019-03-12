@@ -183,7 +183,7 @@ func Me(w http.ResponseWriter, r *http.Request) {
 	}
 	user, found := sessions[cookie.Value]
 	if !found {
-		//УТОЧНИТЬ У ФРОНТА КАКОЙ СТАТУС
+		//УТОЧНИТЬ У ФРОНТА КАКОЙ СТАТУС!
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("You are not authorized"))
 		return
