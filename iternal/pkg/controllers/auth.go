@@ -1,16 +1,15 @@
-package main
+package controllers
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
 
-	"github.com/gorilla/mux"
-	// uuid "github.com/satori/uuid"
+	uuid "github.com/satori/uuid"
 )
 
+// later remove hardcode
 type User struct {
 	ID       uint   `json:"id"`
 	Login    string `json:"login"`
@@ -89,8 +88,61 @@ var users = map[string]User{
 	},
 }
 
+// end later remove hardcode
+
 func RootHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("hello penguins"))
+}
+
+func SignIn(w http.ResponseWriter, r *http.Request) {
+	//временно для тестов, перепилить на body
+	email := r.FormValue("email")
+	password := r.FormValue("password")
+	user, found := users[email]
+	if !found {
+		//УТОЧНИТЬ У ФРОНТА КАКОЙ СТАТУС
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("Not found"))
+		return
+	}
+	if user.Password != password {
+		//УТОЧНИТЬ У ФРОНТА КАКОЙ СТАТУС
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("Password is wrong"))
+		return
+	}
+	sessionID, err := uuid.NewV4()
+	if err != nil {
+		panic(err)
+	}
+	sessions[sessionID.String()] = users[email]
+	http.SetCookie(w, &http.Cookie{
+		Name:     "sessionid",
+		Value:    sessionID.String(),
+		Expires:  time.Now().Add(20 * time.Minute),
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true,
+	})
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func SignOut(w http.ResponseWriter, r *http.Request) {
+	if !isAuth(r) {
+		models.SendMessage(w, http.StatusUnauthorized, "already signed out")
+		return
+	}
+
+	jwtCookie, errNoCookie := r.Cookie(auth.CookieName)
+	if errNoCookie != nil {
+		models.SendMessage(w, http.StatusUnauthorized, "already signed out")
+		return
+	}
+
+	jwtCookie.Expires = time.Unix(0, 0)
+	http.SetCookie(w, jwtCookie)
+	models.SendMessage(w, http.StatusOK, "signed out")
 }
 
 func SignUp(w http.ResponseWriter, r *http.Request) {
@@ -138,39 +190,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func SignIn(w http.ResponseWriter, r *http.Request) {
-	//временно для тестов, перепилить на body
-	email := r.FormValue("email")
-	password := r.FormValue("password")
-	user, found := users[email]
-	if !found {
-		//УТОЧНИТЬ У ФРОНТА КАКОЙ СТАТУС
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("Not found"))
-		return
-	}
-	if user.Password != password {
-		//УТОЧНИТЬ У ФРОНТА КАКОЙ СТАТУС
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("Password is wrong"))
-		return
-	}
-	sessionID, err := uuid.NewV4()
-	if err != nil {
-		panic(err)
-	}
-	sessions[sessionID.String()] = users[email]
-	http.SetCookie(w, &http.Cookie{
-		Name:     "sessionid",
-		Value:    sessionID.String(),
-		Expires:  time.Now().Add(20 * time.Minute),
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   true,
-	})
-
-	w.WriteHeader(http.StatusOK)
-
+func IsAuth(w http.ResponseWriter, r *http.Request) {
 }
 
 func Me(w http.ResponseWriter, r *http.Request) {
@@ -195,28 +215,4 @@ func Me(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Write(bytes)
 
-}
-
-func GetLeaders(w http.ResponseWriter, r *http.Request) {
-	fmt.Print(r)
-	bytes, err := json.Marshal(users)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(`{"error":"=("}`))
-	}
-	w.Write(bytes)
-
-}
-
-func main() {
-	r := mux.NewRouter()
-
-	r.HandleFunc("/", RootHandler)
-	r.HandleFunc("/me", Me).Methods("GET")
-	r.HandleFunc("/leaders", GetLeaders).Methods("GET")
-	r.HandleFunc("/signup", SignUp).Methods("POST")
-	//ВРЕМЕННО, ДАЛЕЕ НА ПУТ
-	r.HandleFunc("/signin", SignIn).Methods("POST")
-	http.ListenAndServe(":8080", r)
-	// t := time.Now()
 }
