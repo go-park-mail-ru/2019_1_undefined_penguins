@@ -128,23 +128,6 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func SignOut(w http.ResponseWriter, r *http.Request) {
-	if !isAuth(r) {
-		models.SendMessage(w, http.StatusUnauthorized, "already signed out")
-		return
-	}
-
-	jwtCookie, errNoCookie := r.Cookie(auth.CookieName)
-	if errNoCookie != nil {
-		models.SendMessage(w, http.StatusUnauthorized, "already signed out")
-		return
-	}
-
-	jwtCookie.Expires = time.Unix(0, 0)
-	http.SetCookie(w, jwtCookie)
-	models.SendMessage(w, http.StatusOK, "signed out")
-}
-
 func SignUp(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {

@@ -1,10 +1,11 @@
 package server
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
+
+	"github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/controllers"
 )
 
 type Params struct {
@@ -12,16 +13,14 @@ type Params struct {
 }
 
 func StartApp(params Params) error {
-	fmt.Println("Server starting at " + params.Port)
 
 	router := mux.NewRouter()
 
-	router.HandleFunc("/", RootHandler)
-	router.HandleFunc("/me", Me).Methods("GET")
-	router.HandleFunc("/leaders", GetLeaders).Methods("GET")
-	router.HandleFunc("/signup", SignUp).Methods("POST")
-	//ВРЕМЕННО, ДАЛЕЕ НА ПУТ
-	router.HandleFunc("/signin", SignIn).Methods("POST")
+	router.HandleFunc("/", controllers.RootHandler)
+	router.HandleFunc("/me", controllers.Me).Methods("GET")
+	router.HandleFunc("/leaders", controllers.GetLeaders).Methods("GET")
+	router.HandleFunc("/signup", controllers.SignUp).Methods("POST")
+	router.HandleFunc("/signin", controllers.SignIn).Methods("POST")
 	http.ListenAndServe(":8080", router)
 
 	staticPath := "some/future/directory"
