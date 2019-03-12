@@ -9,7 +9,7 @@ import (
 func main() {
 	params := server.Params{Port: os.Getenv("PORT")}
 	if params.Port == "" {
-		params.Port = "3000"
+		params.Port = "8080"
 	}
 
 	err := server.StartApp(params)

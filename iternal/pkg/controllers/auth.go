@@ -12,9 +12,10 @@ import (
 )
 
 func setupResponse(w *http.ResponseWriter, r *http.Request) {
-	(*w).Header().Set("Access-Controle-Allow-Origin", "*")
+	(*w).Header().Set("Access-Controle-Allow-Origin", "http://localhost:8080")
+	(*w).Header().Set("Access-Control-Allow-Credentials", "true")
+	(*w).Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	(*w).Header().Set("Access-Controle-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-	(*w).Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	fmt.Print("hi")
 }
 
@@ -99,7 +100,7 @@ var users = map[string]User{
 		Login:        "Penguin4",
 		Email:        "d.penguin4@corp.mail.ru",
 		Name:         "Рядовой Пингвин",
-		HashPassword: "$2a$14$GrGEHcSfqNBiB/rcM.um8edRSbsgaW/e5kgejC5stKh9oZK5LcksK",
+		HashPassword: "password",
 		// LastVisit:  "25.02.2019",
 		Score:      72,
 		avatarName: "default4.png",
@@ -114,49 +115,75 @@ func RootHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func SignIn(w http.ResponseWriter, r *http.Request) {
-	//временно для тестов, перепилить на body
-	// email := r.FormValue("email")
-	// password := r.FormValue("password")
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		panic(err)
-	}
-	var userInfo SignUpStruct
-	err = json.Unmarshal(body, &userInfo)
-	if err != nil {
-		panic(err)
-	}
-	user, found := users[userInfo.Email]
-	if !found {
-		//УТОЧНИТЬ У ФРОНТА КАКОЙ СТАТУС
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("Not found"))
+	fmt.Println(r.Method)
+	fmt.Println(r.RequestURI)
+	if r.Method == "POST" {
+		body, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+
+			panic(err)
+		}
+		var userInfo SignUpStruct
+		//временно для тестов, перепилить на body
+		// userInfo.Email = r.FormValue("email")
+		// userInfo.Password = r.FormValue("password")
+		err = json.Unmarshal(body, &userInfo)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println(userInfo)
+
+		user, found := users[userInfo.Email]
+		if !found {
+			//УТОЧНИТЬ У ФРОНТА КАКОЙ СТАТУС
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte("Not found"))
+			return
+		}
+		// if CheckPasswordHash(userInfo.Password, user.HashPassword) {
+		if userInfo.Password != user.HashPassword {
+
+			//УТОЧНИТЬ У ФРОНТА КАКОЙ СТАТУС
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte("HashPassword is wrong"))
+			return
+		}
+		sessionID, err := uuid.NewV4()
+		if err != nil {
+			panic(err)
+		}
+		sessions[sessionID.String()] = users[userInfo.Email]
+		http.SetCookie(w, &http.Cookie{
+			Name:     "sessionid",
+			Value:    sessionID.String(),
+			Expires:  time.Now().Add(20 * time.Minute),
+			Path:     "/",
+			HttpOnly: true,
+			Secure:   true,
+		})
+		setupResponse(&w, r)
+		fmt.Println(r)
+		w.WriteHeader(http.StatusOK)
+	} else {
+		// origin := r.Header.Get("Origin")
+
+		responseHeader := w.Header()
+		responseHeader.Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+		responseHeader.Set("Access-Control-Allow-Credentials", "true")
+
+		if accessControlRequestHeaders := r.Header.Get("Access-Control-Request-Headers"); accessControlRequestHeaders != "" {
+			responseHeader.Set("Access-Control-Allow-Headers", accessControlRequestHeaders)
+		}
+		responseHeader.Set("Access-Control-Allow-Origin", "http://localhost:8080")
+		w.WriteHeader(200)
 		return
 	}
-	if CheckPasswordHash(userInfo.Password, user.HashPassword) {
-		//УТОЧНИТЬ У ФРОНТА КАКОЙ СТАТУС
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("HashPassword is wrong"))
-		return
-	}
-	sessionID, err := uuid.NewV4()
-	if err != nil {
-		panic(err)
-	}
-	sessions[sessionID.String()] = users[userInfo.Email]
-	http.SetCookie(w, &http.Cookie{
-		Name:     "sessionid",
-		Value:    sessionID.String(),
-		Expires:  time.Now().Add(20 * time.Minute),
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   true,
-	})
-	setupResponse(&w, r)
-	w.WriteHeader(http.StatusOK)
+
 }
 
 func SignUp(w http.ResponseWriter, r *http.Request) {
+	fmt.Println(r.Method)
+	fmt.Println(r.RequestURI)
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		panic(err)
@@ -194,6 +221,8 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 			Secure:   true,
 		})
 		w.WriteHeader(http.StatusOK)
+
+		fmt.Print(w)
 	} else {
 		//УТОЧНИТЬ У ФРОНТА КАКОЙ СТАТУС
 		w.WriteHeader(http.StatusNotFound)
@@ -203,6 +232,8 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 }
 
 func SignOut(w http.ResponseWriter, r *http.Request) {
+	fmt.Println(r.Method)
+	fmt.Println(r.RequestURI)
 	cookie, err := r.Cookie("sessionid")
 	if err != nil {
 		//УТОЧНИТЬ У ФРОНТА КАКОЙ СТАТУС
