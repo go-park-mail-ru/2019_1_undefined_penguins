@@ -16,6 +16,14 @@ func StartApp(params Params) error {
 
 	router := mux.NewRouter()
 
+	router.HandleFunc("/", RootHandler)
+	router.HandleFunc("/me", Me).Methods("GET")
+	router.HandleFunc("/leaders", GetLeaders).Methods("GET")
+	router.HandleFunc("/signup", SignUp).Methods("POST")
+	//ВРЕМЕННО, ДАЛЕЕ НА ПУТ
+	router.HandleFunc("/signin", SignIn).Methods("POST")
+	http.ListenAndServe(":8080", router)
+
 	staticPath := "some/future/directory"
 	staticHandler := http.StripPrefix(
 		"/static",
