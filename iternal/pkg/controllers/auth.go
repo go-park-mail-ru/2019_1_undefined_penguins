@@ -19,9 +19,8 @@ func setupResponse(w *http.ResponseWriter, r *http.Request) {
 	responseHeader.Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 	responseHeader.Set("Access-Control-Allow-Credentials", "true")
 
-	// if accessControlRequestHeaders := r.Header.Get("Access-Control-Request-Headers"); accessControlRequestHeaders != "" {
 	responseHeader.Set("Access-Control-Allow-Headers", "Content-Type")
-	// }
+
 	responseHeader.Set("Access-Control-Allow-Origin", origin)
 	(*w).WriteHeader(200)
 }
@@ -147,9 +146,7 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 			panic(err)
 		}
 		var userInfo SignUpStruct
-		//временно для тестов, перепилить на body
-		// userInfo.Email = r.FormValue("email")
-		// userInfo.Password = r.FormValue("password")
+
 		err = json.Unmarshal(body, &userInfo)
 		if err != nil {
 			panic(err)
@@ -162,20 +159,8 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte("Not found"))
 			return
 		}
-		fmt.Println("Hashes:")
-
-		hash := HashAndSalt(getPwd(userInfo.Password))
-		fmt.Println(hash)
-		hash = HashAndSalt(getPwd(userInfo.Password))
-		fmt.Println(hash)
-		hash = HashAndSalt(getPwd(userInfo.Password))
-		fmt.Println(hash)
-		fmt.Println("\n\n")
 
 		if ComparePasswords(userInfo.Password, getPwd(user.HashPassword)) {
-			// hash, err := HashPassword(userInfo.Password)
-			// fmt.Println("This is hash: " + hash)
-			// if userInfo.Password != user.HashPassword {
 
 			w.WriteHeader(http.StatusNotFound)
 			w.Write([]byte("HashPassword is wrong"))
@@ -188,11 +173,11 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 		}
 		sessions[sessionID.String()] = users[userInfo.Email]
 		http.SetCookie(w, &http.Cookie{
-			Name:    "sessionid",
-			Value:   sessionID.String(),
-			Expires: time.Now().Add(20 * time.Minute),
-			Path:    "/",
-			// HttpOnly: true,
+			Name:     "sessionid",
+			Value:    sessionID.String(),
+			Expires:  time.Now().Add(20 * time.Minute),
+			Path:     "/",
+			HttpOnly: true,
 			// Secure:   true,
 		})
 		setupResponse(&w, r)
@@ -207,50 +192,70 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 }
 
 func SignUp(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(r.Method)
-	fmt.Println(r.RequestURI)
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		panic(err)
-	}
-	var userInfo SignUpStruct
-	err = json.Unmarshal(body, &userInfo)
-	if err != nil {
-		panic(err)
-	}
-	_, found := users[userInfo.Email]
-	hash := HashAndSalt(getPwd(userInfo.Password))
-	if !found && err != nil {
-		users[userInfo.Email] = User{
-			ID:           4,
-			Login:        "Default",
-			Email:        userInfo.Email,
-			Name:         "Default",
-			HashPassword: hash,
-			// LastVisit:  "25.02.2019",
-			Score:      0,
-			avatarName: "default4.png",
-			avatarBlob: "./images/user.svg",
+	if r.Method == "OPTIONS" {
+		origin := r.Header.Get("Origin")
+
+		responseHeader := w.Header()
+		responseHeader.Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+		responseHeader.Set("Access-Control-Allow-Credentials", "true")
+
+		if accessControlRequestHeaders := r.Header.Get("Access-Control-Request-Headers"); accessControlRequestHeaders != "" {
+			responseHeader.Set("Access-Control-Allow-Headers", accessControlRequestHeaders)
 		}
-		sessionID, err := uuid.NewV4()
+		responseHeader.Set("Access-Control-Allow-Origin", origin)
+		w.WriteHeader(200)
+		return
+	} else {
+		fmt.Println(r.Method)
+		fmt.Println(r.RequestURI)
+		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			panic(err)
 		}
-		sessions[sessionID.String()] = users[userInfo.Email]
-		http.SetCookie(w, &http.Cookie{
-			Name:     "sessionid",
-			Value:    sessionID.String(),
-			Expires:  time.Now().Add(60 * time.Hour),
-			HttpOnly: true,
-			// Secure:   true,
-		})
-		w.WriteHeader(http.StatusOK)
-	} else {
+		var userInfo SignUpStruct
+		err = json.Unmarshal(body, &userInfo)
 
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("error"))
-		return
+		if err != nil {
+			panic(err)
+		}
+
+		_, found := users[userInfo.Email]
+		hash := HashAndSalt(getPwd(userInfo.Password))
+
+		if !found {
+
+			users[userInfo.Email] = User{
+				ID:           4,
+				Login:        "Default",
+				Email:        userInfo.Email,
+				Name:         "Default",
+				HashPassword: hash,
+				// LastVisit:  "25.02.2019",
+				Score:      0,
+				avatarName: "default4.png",
+				avatarBlob: "./images/user.svg",
+			}
+			sessionID, err := uuid.NewV4()
+			if err != nil {
+				panic(err)
+			}
+			sessions[sessionID.String()] = users[userInfo.Email]
+			http.SetCookie(w, &http.Cookie{
+				Name:     "sessionid",
+				Value:    sessionID.String(),
+				Expires:  time.Now().Add(60 * time.Hour),
+				HttpOnly: true,
+				// Secure:   true,
+			})
+			setupResponse(&w, r)
+			w.WriteHeader(http.StatusOK)
+		} else {
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte("error"))
+			return
+		}
 	}
+
 }
 
 func SignOut(w http.ResponseWriter, r *http.Request) {
