@@ -26,7 +26,7 @@ func Me(w http.ResponseWriter, r *http.Request) {
 		cookie, err := r.Cookie("sessionid")
 		if err != nil {
 
-			fmt.Println("Я не нашел сессию")
+			fmt.Println("Session was not found")
 			w.WriteHeader(http.StatusNotFound)
 			w.Write([]byte("You are not authorized"))
 			return
@@ -43,7 +43,6 @@ func Me(w http.ResponseWriter, r *http.Request) {
 
 		w.Write(bytes)
 		w.WriteHeader(http.StatusOK)
-		fmt.Print(w)
 
 	}
 
