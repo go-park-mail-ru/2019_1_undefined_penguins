@@ -191,18 +191,57 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func ChangeProfile(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "OPTIONS" {
+		setupResponse(&w, r)
+		w.WriteHeader(200)
+		return
+	} else {
+		fmt.Println(r.Method)
+		fmt.Println(r.RequestURI)
+
+		cookie, err := r.Cookie("sessionid")
+		if err != nil {
+			fmt.Println("1")
+			fmt.Println("Session was not found")
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte("You are not authorized"))
+			return
+		}
+		_, found := sessions[cookie.Value]
+		if !found {
+			fmt.Println("2")
+
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte("You are not authorized"))
+			return
+		} else {
+			body, err := ioutil.ReadAll(r.Body)
+			if err != nil {
+				panic(err)
+			}
+			var userUpdates User
+			err = json.Unmarshal(body, &userUpdates)
+			sessions[cookie.Value] = userUpdates
+			setupResponse(&w, r)
+
+			strVar, err := json.Marshal(userUpdates)
+			if err != nil {
+				fmt.Println("3")
+
+				panic(err)
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+			w.WriteHeader(http.StatusOK)
+			w.Write(strVar)
+		}
+	}
+}
+
 func SignUp(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "OPTIONS" {
-		origin := r.Header.Get("Origin")
-
-		responseHeader := w.Header()
-		responseHeader.Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-		responseHeader.Set("Access-Control-Allow-Credentials", "true")
-
-		if accessControlRequestHeaders := r.Header.Get("Access-Control-Request-Headers"); accessControlRequestHeaders != "" {
-			responseHeader.Set("Access-Control-Allow-Headers", accessControlRequestHeaders)
-		}
-		responseHeader.Set("Access-Control-Allow-Origin", origin)
+		setupResponse(&w, r)
 		w.WriteHeader(200)
 		return
 	} else {
