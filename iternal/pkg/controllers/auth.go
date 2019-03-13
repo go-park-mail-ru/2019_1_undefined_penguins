@@ -145,8 +145,8 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 
 			panic(err)
 		}
+		defer r.Body.Close()
 		var userInfo SignUpStruct
-
 		err = json.Unmarshal(body, &userInfo)
 		if err != nil {
 			panic(err)
@@ -220,6 +220,8 @@ func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				panic(err)
 			}
+			defer r.Body.Close()
+
 			var userUpdates User
 			err = json.Unmarshal(body, &userUpdates)
 			sessions[cookie.Value] = userUpdates
@@ -251,6 +253,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			panic(err)
 		}
+		defer r.Body.Close()
 		var userInfo SignUpStruct
 		err = json.Unmarshal(body, &userInfo)
 
