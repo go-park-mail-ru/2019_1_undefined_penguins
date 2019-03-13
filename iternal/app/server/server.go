@@ -20,7 +20,7 @@ func StartApp(params Params) error {
 	router.HandleFunc("/leaders", controllers.GetLeaders).Methods("GET", "OPTIONS")
 	router.HandleFunc("/signup", controllers.SignUp).Methods("POST", "OPTIONS")
 	router.HandleFunc("/login", controllers.SignIn).Methods("POST", "OPTIONS")
-	router.HandleFunc("/signin", controllers.SignOut).Methods("POST", "OPTIONS")
-
+	router.HandleFunc("/signout", controllers.SignOut).Methods("GET", "OPTIONS")
+	router.HandleFunc("/change_profile", controllers.SignOut).Methods("PUT", "OPTIONS")
 	return http.ListenAndServe(":"+params.Port, router)
 }

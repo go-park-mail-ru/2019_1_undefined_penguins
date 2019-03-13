@@ -25,14 +25,15 @@ func Me(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(r.RequestURI)
 		cookie, err := r.Cookie("sessionid")
 		if err != nil {
-			//УТОЧНИТЬ У ФРОНТА КАКОЙ СТАТУС
+
+			fmt.Println("Я не нашел сессию")
 			w.WriteHeader(http.StatusNotFound)
 			w.Write([]byte("You are not authorized"))
 			return
 		}
 		user, found := sessions[cookie.Value]
 		if !found {
-			//УТОЧНИТЬ У ФРОНТА КАКОЙ СТАТУС!
+
 			w.WriteHeader(http.StatusNotFound)
 			w.Write([]byte("You are not authorized"))
 			return

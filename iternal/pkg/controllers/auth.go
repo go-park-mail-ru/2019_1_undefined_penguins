@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"time"
 
@@ -12,21 +13,43 @@ import (
 )
 
 func setupResponse(w *http.ResponseWriter, r *http.Request) {
-	(*w).Header().Set("Access-Controle-Allow-Origin", "http://localhost:8080")
-	(*w).Header().Set("Access-Control-Allow-Credentials", "true")
-	(*w).Header().Set("Access-Control-Allow-Headers", "Content-Type")
-	(*w).Header().Set("Access-Controle-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-	fmt.Print("hi")
+	origin := r.Header.Get("Origin")
+
+	responseHeader := (*w).Header()
+	responseHeader.Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	responseHeader.Set("Access-Control-Allow-Credentials", "true")
+
+	// if accessControlRequestHeaders := r.Header.Get("Access-Control-Request-Headers"); accessControlRequestHeaders != "" {
+	responseHeader.Set("Access-Control-Allow-Headers", "Content-Type")
+	// }
+	responseHeader.Set("Access-Control-Allow-Origin", origin)
+	(*w).WriteHeader(200)
 }
 
-func HashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
-	return string(bytes), err
+func getPwd(pwd string) []byte {
+	return []byte(pwd)
 }
 
-func CheckPasswordHash(password, hash string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-	return err == nil
+func HashAndSalt(pwd []byte) string {
+
+	hash, err := bcrypt.GenerateFromPassword(pwd, bcrypt.MinCost)
+	if err != nil {
+		log.Println(err)
+	}
+
+	return string(hash)
+}
+
+func ComparePasswords(hashedPwd string, plainPwd []byte) bool {
+
+	byteHash := []byte(hashedPwd)
+	err := bcrypt.CompareHashAndPassword(byteHash, plainPwd)
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+
+	return true
 }
 
 // later remove hardcode
@@ -67,7 +90,7 @@ var users = map[string]User{
 		Login:        "Penguin1",
 		Email:        "a.penguin1@corp.mail.ru",
 		Name:         "Пингвин Северного Полюса",
-		HashPassword: "$2a$14$GrGEHcSfqNBiB/rcM.um8edRSbsgaW/e5kgejC5stKh9oZK5LcksK",
+		HashPassword: "$2a$14$9s00w8l7VKS2gRr2mtmg..1hvANedLWgmux3yOjkS80dTZlXLnKs2",
 		// LastVisit:  "25.02.2019",
 		Score:      0,
 		avatarName: "default1.png",
@@ -78,7 +101,7 @@ var users = map[string]User{
 		Login:        "Penguin2",
 		Email:        "b.penguin2@corp.mail.ru",
 		Name:         "Пингвин Южного Полюса",
-		HashPassword: "$2a$14$GrGEHcSfqNBiB/rcM.um8edRSbsgaW/e5kgejC5stKh9oZK5LcksK",
+		HashPassword: "$2a$14$9s00w8l7VKS2gRr2mtmg..1hvANedLWgmux3yOjkS80dTZlXLnKs2",
 		// LastVisit:  "25.02.2019",
 		Score:      100500,
 		avatarName: "default2.png",
@@ -89,7 +112,7 @@ var users = map[string]User{
 		Login:        "Penguin3",
 		Email:        "c.penguin3@corp.mail.ru",
 		Name:         "Залетный Пингвин",
-		HashPassword: "$2a$14$GrGEHcSfqNBiB/rcM.um8edRSbsgaW/e5kgejC5stKh9oZK5LcksK",
+		HashPassword: "$2a$14$9s00w8l7VKS2gRr2mtmg..1hvANedLWgmux3yOjkS80dTZlXLnKs2",
 		// LastVisit:  "25.02.2019",
 		Score:      173,
 		avatarName: "default3.png",
@@ -100,7 +123,7 @@ var users = map[string]User{
 		Login:        "Penguin4",
 		Email:        "d.penguin4@corp.mail.ru",
 		Name:         "Рядовой Пингвин",
-		HashPassword: "password",
+		HashPassword: "$2a$04$U2BYDHAfGa2cqJwlhSA2D.XyWD8kq1sAvh2s8nRlV5huDEJLF8pDu",
 		// LastVisit:  "25.02.2019",
 		Score:      72,
 		avatarName: "default4.png",
@@ -131,50 +154,52 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			panic(err)
 		}
-		fmt.Println(userInfo)
 
 		user, found := users[userInfo.Email]
 		if !found {
-			//УТОЧНИТЬ У ФРОНТА КАКОЙ СТАТУС
+
 			w.WriteHeader(http.StatusNotFound)
 			w.Write([]byte("Not found"))
 			return
 		}
-		// if CheckPasswordHash(userInfo.Password, user.HashPassword) {
-		if userInfo.Password != user.HashPassword {
+		fmt.Println("Hashes:")
 
-			//УТОЧНИТЬ У ФРОНТА КАКОЙ СТАТУС
+		hash := HashAndSalt(getPwd(userInfo.Password))
+		fmt.Println(hash)
+		hash = HashAndSalt(getPwd(userInfo.Password))
+		fmt.Println(hash)
+		hash = HashAndSalt(getPwd(userInfo.Password))
+		fmt.Println(hash)
+		fmt.Println("\n\n")
+
+		if ComparePasswords(userInfo.Password, getPwd(user.HashPassword)) {
+			// hash, err := HashPassword(userInfo.Password)
+			// fmt.Println("This is hash: " + hash)
+			// if userInfo.Password != user.HashPassword {
+
 			w.WriteHeader(http.StatusNotFound)
 			w.Write([]byte("HashPassword is wrong"))
 			return
 		}
 		sessionID, err := uuid.NewV4()
+		fmt.Println(sessionID.String())
 		if err != nil {
 			panic(err)
 		}
 		sessions[sessionID.String()] = users[userInfo.Email]
 		http.SetCookie(w, &http.Cookie{
-			Name:     "sessionid",
-			Value:    sessionID.String(),
-			Expires:  time.Now().Add(20 * time.Minute),
-			Path:     "/",
-			HttpOnly: true,
-			Secure:   true,
+			Name:    "sessionid",
+			Value:   sessionID.String(),
+			Expires: time.Now().Add(20 * time.Minute),
+			Path:    "/",
+			// HttpOnly: true,
+			// Secure:   true,
 		})
 		setupResponse(&w, r)
-		fmt.Println(r)
+
 		w.WriteHeader(http.StatusOK)
 	} else {
-		// origin := r.Header.Get("Origin")
-
-		responseHeader := w.Header()
-		responseHeader.Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-		responseHeader.Set("Access-Control-Allow-Credentials", "true")
-
-		if accessControlRequestHeaders := r.Header.Get("Access-Control-Request-Headers"); accessControlRequestHeaders != "" {
-			responseHeader.Set("Access-Control-Allow-Headers", accessControlRequestHeaders)
-		}
-		responseHeader.Set("Access-Control-Allow-Origin", "http://localhost:8080")
+		setupResponse(&w, r)
 		w.WriteHeader(200)
 		return
 	}
@@ -194,7 +219,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	_, found := users[userInfo.Email]
-	hash, err := HashPassword(userInfo.Password)
+	hash := HashAndSalt(getPwd(userInfo.Password))
 	if !found && err != nil {
 		users[userInfo.Email] = User{
 			ID:           4,
@@ -207,24 +232,21 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 			avatarName: "default4.png",
 			avatarBlob: "./images/user.svg",
 		}
-		sessionId, err := uuid.NewV4()
+		sessionID, err := uuid.NewV4()
 		if err != nil {
 			panic(err)
 		}
-		sessions[sessionId.String()] = users[userInfo.Email]
+		sessions[sessionID.String()] = users[userInfo.Email]
 		http.SetCookie(w, &http.Cookie{
 			Name:     "sessionid",
-			Value:    sessionId.String(),
+			Value:    sessionID.String(),
 			Expires:  time.Now().Add(60 * time.Hour),
-			Path:     "/",
 			HttpOnly: true,
-			Secure:   true,
+			// Secure:   true,
 		})
 		w.WriteHeader(http.StatusOK)
-
-		fmt.Print(w)
 	} else {
-		//УТОЧНИТЬ У ФРОНТА КАКОЙ СТАТУС
+
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("error"))
 		return
@@ -236,7 +258,7 @@ func SignOut(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(r.RequestURI)
 	cookie, err := r.Cookie("sessionid")
 	if err != nil {
-		//УТОЧНИТЬ У ФРОНТА КАКОЙ СТАТУС
+
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("You are not authorized"))
 		return
@@ -247,7 +269,7 @@ func SignOut(w http.ResponseWriter, r *http.Request) {
 		Expires:  time.Unix(0, 0),
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   true,
+		// Secure:   true,
 	})
 	delete(sessions, cookie.Value)
 	if err != nil {
