@@ -3,47 +3,81 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 )
 
 func Me(w http.ResponseWriter, r *http.Request) {
+	logMethodAndURL(r)
 	if r.Method == "OPTIONS" {
-		origin := r.Header.Get("Origin")
-
-		responseHeader := w.Header()
-		responseHeader.Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-		responseHeader.Set("Access-Control-Allow-Credentials", "true")
-
-		if accessControlRequestHeaders := r.Header.Get("Access-Control-Request-Headers"); accessControlRequestHeaders != "" {
-			responseHeader.Set("Access-Control-Allow-Headers", accessControlRequestHeaders)
-		}
-		responseHeader.Set("Access-Control-Allow-Origin", origin)
+		SetupCORS(&w, r)
 		w.WriteHeader(200)
 		return
+	}
+	cookie, err := r.Cookie("sessionid")
+	if err != nil {
+		fmt.Println("Session was not found")
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("You are not authorized"))
+		return
+	}
+	user, found := sessions[cookie.Value]
+	if !found {
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("You are not authorized"))
+		return
+	}
+	SetupCORS(&w, r)
+	bytes, err := json.Marshal(user)
+
+	w.Write(bytes)
+	w.WriteHeader(http.StatusOK)
+
+}
+
+func ChangeProfile(w http.ResponseWriter, r *http.Request) {
+	logMethodAndURL(r)
+
+	if r.Method == "OPTIONS" {
+		SetupCORS(&w, r)
+		w.WriteHeader(200)
+		return
+	}
+
+	cookie, err := r.Cookie("sessionid")
+	if err != nil {
+		fmt.Println("Session was not found")
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("You are not authorized"))
+		return
+	}
+	_, found := sessions[cookie.Value]
+	if !found {
+
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("You are not authorized"))
+		return
 	} else {
-		fmt.Println(r.Method)
-		fmt.Println(r.RequestURI)
-		cookie, err := r.Cookie("sessionid")
+		body, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			panic(err)
+		}
+		defer r.Body.Close()
+
+		var userUpdates User
+		err = json.Unmarshal(body, &userUpdates)
+		sessions[cookie.Value] = userUpdates
+		SetupCORS(&w, r)
+
+		strVar, err := json.Marshal(userUpdates)
 		if err != nil {
 
-			fmt.Println("Session was not found")
+			panic(err)
 			w.WriteHeader(http.StatusNotFound)
-			w.Write([]byte("You are not authorized"))
 			return
 		}
-		user, found := sessions[cookie.Value]
-		if !found {
-
-			w.WriteHeader(http.StatusNotFound)
-			w.Write([]byte("You are not authorized"))
-			return
-		}
-		setupResponse(&w, r)
-		bytes, err := json.Marshal(user)
-
-		w.Write(bytes)
 		w.WriteHeader(http.StatusOK)
-
+		w.Write(strVar)
 	}
 
 }

@@ -8,7 +8,7 @@ import (
 
 func GetLeaders(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "OPTIONS" {
-		setupResponse(&w, r)
+		SetupCORS(&w, r)
 		w.WriteHeader(200)
 		return
 	} else {
@@ -18,7 +18,7 @@ func GetLeaders(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(`{"error":"=("}`))
 		}
-		setupResponse(&w, r)
+		SetupCORS(&w, r)
 		w.Write(bytes)
 		fmt.Println(bytes)
 

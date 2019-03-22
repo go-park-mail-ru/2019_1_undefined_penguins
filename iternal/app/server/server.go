@@ -12,10 +12,14 @@ type Params struct {
 	Port string
 }
 
+func RootHandler(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("hello penguins"))
+}
+
 func StartApp(params Params) error {
 
 	router := mux.NewRouter()
-	router.HandleFunc("/", controllers.RootHandler)
+	router.HandleFunc("/", RootHandler)
 	router.HandleFunc("/me", controllers.Me).Methods("GET", "OPTIONS")
 	router.HandleFunc("/leaders", controllers.GetLeaders).Methods("GET", "OPTIONS")
 	router.HandleFunc("/signup", controllers.SignUp).Methods("POST", "OPTIONS")
