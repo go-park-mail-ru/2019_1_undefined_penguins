@@ -14,5 +14,4 @@ func SetupCORS(w *http.ResponseWriter, r *http.Request) {
 	responseHeader.Set("Access-Control-Allow-Headers", "Content-Type")
 
 	responseHeader.Set("Access-Control-Allow-Origin", origin)
-	(*w).WriteHeader(200)
 }

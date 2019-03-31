@@ -3,6 +3,8 @@ package controllers
 import (
 	"net/http"
 	"time"
+
+	"github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/models"
 )
 
 func CreateCookie(w *http.ResponseWriter, sessionID string) {
@@ -13,6 +15,7 @@ func CreateCookie(w *http.ResponseWriter, sessionID string) {
 		HttpOnly: true,
 		// Secure:   true,
 	})
+
 }
 
 func DeleteCookie(w *http.ResponseWriter, cookie *http.Cookie) {
@@ -24,5 +27,5 @@ func DeleteCookie(w *http.ResponseWriter, cookie *http.Cookie) {
 		HttpOnly: true,
 		// Secure:   true,
 	})
-	delete(sessions, cookie.Value)
+	delete(models.Sessions, cookie.Value)
 }

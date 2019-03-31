@@ -7,6 +7,7 @@ import (
 )
 
 func main() {
+
 	params := server.Params{Port: os.Getenv("PORT")}
 	if params.Port == "" {
 		params.Port = "8080"

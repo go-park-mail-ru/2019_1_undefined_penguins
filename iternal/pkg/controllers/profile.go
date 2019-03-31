@@ -5,79 +5,76 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/helpers"
+	"github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/models"
 )
 
 func Me(w http.ResponseWriter, r *http.Request) {
 	logMethodAndURL(r)
+	SetupCORS(&w, r)
 	if r.Method == "OPTIONS" {
-		SetupCORS(&w, r)
-		w.WriteHeader(200)
 		return
 	}
 	cookie, err := r.Cookie("sessionid")
 	if err != nil {
-		fmt.Println("Session was not found")
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("You are not authorized"))
+		w.WriteHeader(http.StatusForbidden)
 		return
 	}
-	user, found := sessions[cookie.Value]
+	email, found := models.Sessions[cookie.Value]
 	if !found {
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("You are not authorized"))
+		w.WriteHeader(http.StatusForbidden)
 		return
 	}
-	SetupCORS(&w, r)
+	user := helpers.GetUserByEmail(email)
+
+	if user == nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
 	bytes, err := json.Marshal(user)
-
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 	w.Write(bytes)
-	w.WriteHeader(http.StatusOK)
-
 }
 
 func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 	logMethodAndURL(r)
-
+	SetupCORS(&w, r)
 	if r.Method == "OPTIONS" {
-		SetupCORS(&w, r)
-		w.WriteHeader(200)
 		return
 	}
-
 	cookie, err := r.Cookie("sessionid")
 	if err != nil {
-		fmt.Println("Session was not found")
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("You are not authorized"))
+		w.WriteHeader(http.StatusForbidden)
 		return
 	}
-	_, found := sessions[cookie.Value]
+	email, found := models.Sessions[cookie.Value]
 	if !found {
-
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("You are not authorized"))
+		w.WriteHeader(http.StatusForbidden)
 		return
-	} else {
-		body, err := ioutil.ReadAll(r.Body)
-		if err != nil {
-			panic(err)
-		}
-		defer r.Body.Close()
-
-		var userUpdates User
-		err = json.Unmarshal(body, &userUpdates)
-		sessions[cookie.Value] = userUpdates
-		SetupCORS(&w, r)
-
-		strVar, err := json.Marshal(userUpdates)
-		if err != nil {
-
-			panic(err)
-			w.WriteHeader(http.StatusNotFound)
-			return
-		}
-		w.WriteHeader(http.StatusOK)
-		w.Write(strVar)
 	}
-
+	fmt.Println(email)
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	defer r.Body.Close()
+	var user models.User
+	err = json.Unmarshal(body, &user)
+	fmt.Println(user)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	err = helpers.UpdateUser(&user, email)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	models.Sessions[cookie.Value] = user.Email
+	w.Write(body)
 }
