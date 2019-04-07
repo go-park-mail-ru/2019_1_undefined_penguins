@@ -31,8 +31,6 @@ func GetLeaders(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetLeaderboardPage(w http.ResponseWriter, r *http.Request) {
-	logMethodAndURL(r)
-	SetupCORS(&w, r)
 	if r.Method == "OPTIONS" {
 		return
 	}

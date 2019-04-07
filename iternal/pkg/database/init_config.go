@@ -32,6 +32,7 @@ func InitConfig() {
 
 	file, err := os.Open(dir + "/configs/database.json")
 	if err != nil {
+		//remove panic
 		panic(err)
 	}
 	body, _ := ioutil.ReadAll(file)
@@ -43,6 +44,7 @@ func InitConfig() {
 func Connect() *pgx.ConnPool {
 	connectionPool, err := pgx.NewConnPool(connectionPoolConfig)
 	if err != nil {
+		//remove FATAL, panic, use fmt 
 		log.Fatal(err)
 	}
 	return connectionPool
@@ -52,7 +54,7 @@ func StartTransaction() *pgx.Tx {
 	connection := Connect()
 	if transaction, err := connection.Begin(); err != nil {
 		log.Fatal(err)
-
+		//return nil
 		return transaction
 	} else {
 

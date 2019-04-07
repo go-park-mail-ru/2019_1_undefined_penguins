@@ -12,9 +12,8 @@ import (
 	uuid "github.com/satori/uuid"
 )
 
+//add concret error + body (w.Write())
 func SignIn(w http.ResponseWriter, r *http.Request) {
-	logMethodAndURL(r)
-	SetupCORS(&w, r)
 	if r.Method == "OPTIONS" {
 		return
 	}
@@ -39,7 +38,7 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
-	sessionID, err := uuid.NewV4()
+	sessionID := uuid.NewV4()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -55,8 +54,6 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 }
 
 func SignUp(w http.ResponseWriter, r *http.Request) {
-	SetupCORS(&w, r)
-	logMethodAndURL(r)
 	if r.Method == "OPTIONS" {
 		return
 	}
@@ -66,7 +63,8 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer r.Body.Close()
-	var user models.User
+	// var user models.User
+	var user =  models.User{}  //где User - это таблица
 	err = json.Unmarshal(body, &user)
 	found := helpers.GetUserByEmail(user.Email)
 	if found != nil {
@@ -83,7 +81,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	sessionID, err := uuid.NewV4()
+	sessionID := uuid.NewV4()
 	if err != nil {
 
 		w.WriteHeader(http.StatusInternalServerError)
@@ -91,12 +89,11 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Println(sessionID)
 	CreateCookie(&w, sessionID.String())
+	//сюда как то подрубить мемкэш, вместо user.Email будет id
 	models.Sessions[sessionID.String()] = user.Email
 }
 
 func SignOut(w http.ResponseWriter, r *http.Request) {
-	logMethodAndURL(r)
-	SetupCORS(&w, r)
 	if r.Method == "OPTIONS" {
 		return
 	}
@@ -108,3 +105,5 @@ func SignOut(w http.ResponseWriter, r *http.Request) {
 	}
 	DeleteCookie(&w, cookie)
 }
+
+//add w.Write() everywhere

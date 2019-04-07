@@ -41,6 +41,7 @@ WHERE email = $1`
 func UpdateUser(user *models.User, oldEmail string) error {
 	transaction := database.StartTransaction()
 	defer transaction.Rollback()
+	user.Password = "" //Лови коммент
 	if _, err := transaction.Exec(updateUserByEmail, oldEmail, user.Login, user.Email, user.Name); err != nil {
 		fmt.Println(err)
 		transaction.Rollback()
@@ -51,6 +52,7 @@ func UpdateUser(user *models.User, oldEmail string) error {
 		transaction.Rollback()
 		return err
 	}
+
 	return nil
 }
 
@@ -104,6 +106,8 @@ func GetLeaders(id int) []*models.User {
 			user.Password = ""
 			users = append(users, &user)
 		}
+		//close\
+		elements.Close()
 	}
 	return users
 }

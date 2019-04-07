@@ -11,8 +11,6 @@ import (
 )
 
 func Me(w http.ResponseWriter, r *http.Request) {
-	logMethodAndURL(r)
-	SetupCORS(&w, r)
 	if r.Method == "OPTIONS" {
 		return
 	}
@@ -41,8 +39,6 @@ func Me(w http.ResponseWriter, r *http.Request) {
 }
 
 func ChangeProfile(w http.ResponseWriter, r *http.Request) {
-	logMethodAndURL(r)
-	SetupCORS(&w, r)
 	if r.Method == "OPTIONS" {
 		return
 	}
