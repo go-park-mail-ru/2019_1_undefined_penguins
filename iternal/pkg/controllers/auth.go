@@ -6,10 +6,12 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	db "github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/database"
 	"github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/helpers"
 	"github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/models"
 
-	uuid "github.com/satori/uuid"
+	"github.com/satori/uuid"
+
 )
 
 //add concret error + body (w.Write())
@@ -29,12 +31,15 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	found := helpers.GetUserByEmail(user.Email)
+
+	found := db.GetUserByEmail(user.Email)
+
 	if found == nil {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	if !CheckPasswordHash(user.Password, found.HashPassword) {
+
+	if !helpers.CheckPasswordHash(user.Password, found.HashPassword) {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
@@ -44,11 +49,14 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	bytes, err := json.Marshal(found)
+
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	CreateCookie(&w, sessionID.String())
+
+	helpers.CreateCookie(&w, sessionID.String())
+
 	models.Sessions[sessionID.String()] = user.Email
 	w.Write(bytes)
 }
@@ -66,21 +74,27 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	// var user models.User
 	var user =  models.User{}  //где User - это таблица
 	err = json.Unmarshal(body, &user)
-	found := helpers.GetUserByEmail(user.Email)
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	found := db.GetUserByEmail(user.Email)
 	if found != nil {
 		w.WriteHeader(409)
 		return
 	}
 
-	user.HashPassword, err = HashPassword(user.Password)
+	user.HashPassword, err = helpers.HashPassword(user.Password)
 
-	err = helpers.CreateUser(&user)
+	err = db.CreateUser(&user)
 	fmt.Println(err)
 	if err != nil {
 
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
 	sessionID := uuid.NewV4()
 	if err != nil {
 
@@ -88,7 +102,9 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Println(sessionID)
-	CreateCookie(&w, sessionID.String())
+
+	helpers.CreateCookie(&w, sessionID.String())
+
 	//сюда как то подрубить мемкэш, вместо user.Email будет id
 	models.Sessions[sessionID.String()] = user.Email
 }
@@ -103,7 +119,9 @@ func SignOut(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("You are not authorized"))
 		return
 	}
-	DeleteCookie(&w, cookie)
+
+	helpers.DeleteCookie(&w, cookie)
+
 }
 
 //add w.Write() everywhere

@@ -3,69 +3,67 @@ package database
 import (
 	"encoding/json"
 	"io/ioutil"
-	"log"
+
 	"os"
 
+	h "github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/helpers"
 	"github.com/jackc/pgx"
 )
 
-type Database struct {
-	Host     string
-	Port     uint16
-	Database string
-	User     string
-}
+var connection *pgx.ConnPool = nil
 
 var connectionConfig pgx.ConnConfig
-
-// var Connection *pgx.ConnPool
 var connectionPoolConfig = pgx.ConnPoolConfig{
 	MaxConnections: 8,
 }
-
-func InitConfig() {
-
+//TODO check connect
+func initConfig() error {
 	dir, err := os.Getwd()
 	if err != nil {
-		log.Fatal(err)
+		h.LogMsg("Init DB error: " + err.Error())
+		return err
+
 	}
 
 	file, err := os.Open(dir + "/configs/database.json")
 	if err != nil {
-		//remove panic
-		panic(err)
+
+		h.LogMsg("Open DB error: " + err.Error())
+		return err
 	}
+
 	body, _ := ioutil.ReadAll(file)
 	err = json.Unmarshal(body, &connectionConfig)
-	connectionPoolConfig.ConnConfig = connectionConfig
-
-}
-
-func Connect() *pgx.ConnPool {
-	connectionPool, err := pgx.NewConnPool(connectionPoolConfig)
 	if err != nil {
-		//remove FATAL, panic, use fmt 
-		log.Fatal(err)
+		h.LogMsg("Init parse DB error: " + err.Error())
+		return err
 	}
-	return connectionPool
+
+	connectionPoolConfig.ConnConfig = connectionConfig
+	return nil
 }
 
-func StartTransaction() *pgx.Tx {
-	connection := Connect()
-	if transaction, err := connection.Begin(); err != nil {
-		log.Fatal(err)
-		//return nil
-		return transaction
-	} else {
-
-		return transaction
+func Connect() (error) {
+	if connection != nil {
+		return nil
 	}
-}
-
-func CommitTransaction(transaction *pgx.Tx) error {
-	if err := transaction.Commit(); err != nil {
-		transaction.Rollback()
+	err := initConfig()
+	if err != nil {
+		return err
+	}
+	connection, err = pgx.NewConnPool(connectionPoolConfig)
+	if err != nil {
+		h.LogMsg("Connect DB error: " + err.Error())
 		return err
 	}
 	return nil
 }
+
+func Disconnect()  {
+	if connection != nil {
+		connection.Close()
+		connection = nil
+	}
+}
+
+

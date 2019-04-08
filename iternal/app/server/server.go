@@ -6,9 +6,12 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/controllers"
-	"github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/database"
-	"github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/middleware"
+
+	c "github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/controllers"
+	db "github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/database"
+	mw "github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/middleware"
+	"github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/helpers"
+
 )
 
 type Params struct {
@@ -22,25 +25,32 @@ func RootHandler(w http.ResponseWriter, r *http.Request) {
 func StartApp(params Params) error {
 	//check this 2 funcs, is nil - return 'жёпка'
 	//close connect
-	database.InitConfig()
-	database.Connect()
+
+	//db.InitConfig()
+	err := db.Connect()
+	if err != nil {
+		helpers.LogMsg("Connection error: " + err.Error())
+		return err
+	}
+	defer db.Disconnect()
 	router := mux.NewRouter()
 
-	router.Use(middleware.LoggingMiddleware)
-	router.Use(middleware.CORSMiddleware)
-	router.Use(middleware.PanicMiddleware)
-	router.Use(middleware.AuthMiddleware)
+	router.Use(mw.LoggingMiddleware)
+	router.Use(mw.CORSMiddleware)
+	router.Use(mw.PanicMiddleware)
+	router.Use(mw.AuthMiddleware)
 
 
 	router.HandleFunc("/", RootHandler)
-	router.HandleFunc("/me", controllers.Me).Methods("GET", "OPTIONS")
+	router.HandleFunc("/me", c.Me).Methods("GET", "OPTIONS")
 
-	router.HandleFunc("/leaders", controllers.GetLeaders).Methods("GET", "OPTIONS")
-	router.HandleFunc("/leaderboard/{id:[0-9]+}", controllers.GetLeaderboardPage).Methods("GET", "OPTIONS")
-	router.HandleFunc("/signup", controllers.SignUp).Methods("POST", "OPTIONS")
-	router.HandleFunc("/login", controllers.SignIn).Methods("POST", "OPTIONS")
-	router.HandleFunc("/signout", controllers.SignOut).Methods("GET", "OPTIONS")
-	router.HandleFunc("/change_profile", controllers.ChangeProfile).Methods("PUT", "OPTIONS")
+	router.HandleFunc("/leaders", c.GetLeaders).Methods("GET", "OPTIONS")
+	router.HandleFunc("/leaderboard/{id:[0-9]+}", c.GetLeaderboardPage).Methods("GET", "OPTIONS")
+	router.HandleFunc("/signup", c.SignUp).Methods("POST", "OPTIONS")
+	router.HandleFunc("/login", c.SignIn).Methods("POST", "OPTIONS")
+	router.HandleFunc("/signout", c.SignOut).Methods("GET", "OPTIONS")
+	router.HandleFunc("/change_profile", c.ChangeProfile).Methods("PUT", "OPTIONS")
+
 	fmt.Println("Server started")
 	return http.ListenAndServe(":"+params.Port, router)
 }
