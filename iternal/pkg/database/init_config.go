@@ -3,6 +3,7 @@ package database
 import (
 	"encoding/json"
 	"io/ioutil"
+
 	"os"
 
 	h "github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/helpers"
@@ -21,10 +22,12 @@ func initConfig() error {
 	if err != nil {
 		h.LogMsg("Init DB error: " + err.Error())
 		return err
+
 	}
 
 	file, err := os.Open(dir + "/configs/database.json")
 	if err != nil {
+
 		h.LogMsg("Open DB error: " + err.Error())
 		return err
 	}
@@ -62,4 +65,5 @@ func Disconnect()  {
 		connection = nil
 	}
 }
+
 

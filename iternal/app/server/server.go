@@ -6,10 +6,12 @@ import (
 
 	"github.com/gorilla/mux"
 
+
 	c "github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/controllers"
 	db "github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/database"
 	mw "github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/middleware"
 	"github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/helpers"
+
 )
 
 type Params struct {
@@ -23,6 +25,7 @@ func RootHandler(w http.ResponseWriter, r *http.Request) {
 func StartApp(params Params) error {
 	//check this 2 funcs, is nil - return 'жёпка'
 	//close connect
+
 	//db.InitConfig()
 	err := db.Connect()
 	if err != nil {
@@ -47,6 +50,7 @@ func StartApp(params Params) error {
 	router.HandleFunc("/login", c.SignIn).Methods("POST", "OPTIONS")
 	router.HandleFunc("/signout", c.SignOut).Methods("GET", "OPTIONS")
 	router.HandleFunc("/change_profile", c.ChangeProfile).Methods("PUT", "OPTIONS")
+
 	fmt.Println("Server started")
 	return http.ListenAndServe(":"+params.Port, router)
 }
