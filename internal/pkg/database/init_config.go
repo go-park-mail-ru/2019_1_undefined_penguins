@@ -6,7 +6,7 @@ import (
 
 	"os"
 
-	h "2019_1_undefined_penguins/iternal/pkg/helpers"
+	h "2019_1_undefined_penguins/internal/pkg/helpers"
 	"github.com/jackc/pgx"
 )
 

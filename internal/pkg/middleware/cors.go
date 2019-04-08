@@ -3,7 +3,7 @@ package middleware
 import (
 	"net/http"
 
-	_ "2019_1_undefined_penguins/iternal/pkg/controllers"
+	_ "2019_1_undefined_penguins/internal/pkg/controllers"
 )
 
 //TODO check

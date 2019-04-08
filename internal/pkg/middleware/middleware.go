@@ -5,9 +5,9 @@ import (
 	"log"
 	"net/http"
 
-	_ "2019_1_undefined_penguins/iternal/pkg/controllers"
+	_ "2019_1_undefined_penguins/internal/pkg/controllers"
 
-	"2019_1_undefined_penguins/iternal/pkg/helpers"
+	"2019_1_undefined_penguins/internal/pkg/helpers"
 )
 
 func LoggingMiddleware(next http.Handler) http.Handler {

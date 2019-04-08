@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"2019_1_undefined_penguins/iternal/pkg/models"
+	"2019_1_undefined_penguins/internal/pkg/models"
 )
 
 func CreateCookie(w *http.ResponseWriter, sessionID string) {

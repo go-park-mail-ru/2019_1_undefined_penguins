@@ -1,8 +1,8 @@
 package database
 
 import (
-	"2019_1_undefined_penguins/iternal/pkg/helpers"
-	"2019_1_undefined_penguins/iternal/pkg/models"
+	"2019_1_undefined_penguins/internal/pkg/helpers"
+	"2019_1_undefined_penguins/internal/pkg/models"
 	"fmt"
 )
 

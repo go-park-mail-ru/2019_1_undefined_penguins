@@ -6,10 +6,10 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	//"2019_1_undefined_penguins/iternal/pkg/helpers"
-	"2019_1_undefined_penguins/iternal/pkg/models"
+	//"2019_1_undefined_penguins/internal/pkg/helpers"
+	"2019_1_undefined_penguins/internal/pkg/models"
 
-	db "2019_1_undefined_penguins/iternal/pkg/database"
+	db "2019_1_undefined_penguins/internal/pkg/database"
 )
 
 func Me(w http.ResponseWriter, r *http.Request) {

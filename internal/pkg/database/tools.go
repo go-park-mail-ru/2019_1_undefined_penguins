@@ -1,7 +1,7 @@
 package database
 
 import (
-	"2019_1_undefined_penguins/iternal/pkg/models"
+	"2019_1_undefined_penguins/internal/pkg/models"
 
 	"github.com/jackc/pgx"
 )

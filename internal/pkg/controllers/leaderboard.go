@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strconv"
 
-	db "2019_1_undefined_penguins/iternal/pkg/database"
-	"2019_1_undefined_penguins/iternal/pkg/models"
+	db "2019_1_undefined_penguins/internal/pkg/database"
+	"2019_1_undefined_penguins/internal/pkg/models"
 
 	"github.com/gorilla/mux"
 )

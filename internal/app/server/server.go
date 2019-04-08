@@ -6,12 +6,12 @@ import (
 
 	"github.com/gorilla/mux"
 
-	c "2019_1_undefined_penguins/iternal/pkg/controllers"
-	db "2019_1_undefined_penguins/iternal/pkg/database"
+	c "2019_1_undefined_penguins/internal/pkg/controllers"
+	db "2019_1_undefined_penguins/internal/pkg/database"
 
-	"2019_1_undefined_penguins/iternal/pkg/helpers"
+	"2019_1_undefined_penguins/internal/pkg/helpers"
 
-	mw "2019_1_undefined_penguins/iternal/pkg/middleware"
+	mw "2019_1_undefined_penguins/internal/pkg/middleware"
 )
 
 type Params struct {
