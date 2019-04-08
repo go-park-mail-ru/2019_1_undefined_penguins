@@ -5,224 +5,110 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"time"
 
-	uuid "github.com/satori/uuid"
-	"golang.org/x/crypto/bcrypt"
+	db "github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/database"
+	"github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/helpers"
+	"github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/models"
+
+	"github.com/satori/uuid"
 )
 
-func setupResponse(w *http.ResponseWriter, r *http.Request) {
-	(*w).Header().Set("Access-Controle-Allow-Origin", "*")
-	(*w).Header().Set("Access-Controle-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-	(*w).Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
-	fmt.Print("hi")
-}
-
-func HashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
-	return string(bytes), err
-}
-
-func CheckPasswordHash(password, hash string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-	return err == nil
-}
-
-// later remove hardcode
-type User struct {
-	ID           uint   `json:"id"`
-	Login        string `json:"login"`
-	Email        string `json:"email"`
-	Name         string `json:"name"`
-	HashPassword string `json:"password"`
-	// LastVisit  Time   `json:"lastVisit"`
-	Score      uint   `json:"score"`
-	avatarName string `json:"avatarName"`
-	avatarBlob string `json:"avatarBlob"`
-}
-
-type SignUpStruct struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
-type MeStruct struct {
-	Login string `json:"login"`
-	Email string `json:"email"`
-	Name  string `json:"name"`
-	Score uint   `json:"score"`
-}
-
-var sessions map[string]User
-
-func init() {
-	sessions = make(map[string]User)
-
-}
-
-var users = map[string]User{
-	"a.penguin1@corp.mail.ru": User{
-		ID:           1,
-		Login:        "Penguin1",
-		Email:        "a.penguin1@corp.mail.ru",
-		Name:         "Пингвин Северного Полюса",
-		HashPassword: "$2a$14$GrGEHcSfqNBiB/rcM.um8edRSbsgaW/e5kgejC5stKh9oZK5LcksK",
-		// LastVisit:  "25.02.2019",
-		Score:      0,
-		avatarName: "default1.png",
-		avatarBlob: "./images/user.svg",
-	},
-	"b.penguin2@corp.mail.ru": User{
-		ID:           2,
-		Login:        "Penguin2",
-		Email:        "b.penguin2@corp.mail.ru",
-		Name:         "Пингвин Южного Полюса",
-		HashPassword: "$2a$14$GrGEHcSfqNBiB/rcM.um8edRSbsgaW/e5kgejC5stKh9oZK5LcksK",
-		// LastVisit:  "25.02.2019",
-		Score:      100500,
-		avatarName: "default2.png",
-		avatarBlob: "./images/user.svg",
-	},
-	"c.penguin3@corp.mail.ru": User{
-		ID:           3,
-		Login:        "Penguin3",
-		Email:        "c.penguin3@corp.mail.ru",
-		Name:         "Залетный Пингвин",
-		HashPassword: "$2a$14$GrGEHcSfqNBiB/rcM.um8edRSbsgaW/e5kgejC5stKh9oZK5LcksK",
-		// LastVisit:  "25.02.2019",
-		Score:      173,
-		avatarName: "default3.png",
-		avatarBlob: "./images/user.svg",
-	},
-	"d.penguin4@corp.mail.ru": User{
-		ID:           4,
-		Login:        "Penguin4",
-		Email:        "d.penguin4@corp.mail.ru",
-		Name:         "Рядовой Пингвин",
-		HashPassword: "$2a$14$GrGEHcSfqNBiB/rcM.um8edRSbsgaW/e5kgejC5stKh9oZK5LcksK",
-		// LastVisit:  "25.02.2019",
-		Score:      72,
-		avatarName: "default4.png",
-		avatarBlob: "./images/user.svg",
-	},
-}
-
-// end later remove hardcode
-
-func RootHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("hello penguins"))
-}
-
+//add concret error + body (w.Write())
 func SignIn(w http.ResponseWriter, r *http.Request) {
-	//временно для тестов, перепилить на body
-	// email := r.FormValue("email")
-	// password := r.FormValue("password")
+	if r.Method == "OPTIONS" {
+		return
+	}
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		panic(err)
-	}
-	var userInfo SignUpStruct
-	err = json.Unmarshal(body, &userInfo)
-	if err != nil {
-		panic(err)
-	}
-	user, found := users[userInfo.Email]
-	if !found {
-		//УТОЧНИТЬ У ФРОНТА КАКОЙ СТАТУС
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("Not found"))
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	if CheckPasswordHash(userInfo.Password, user.HashPassword) {
-		//УТОЧНИТЬ У ФРОНТА КАКОЙ СТАТУС
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("HashPassword is wrong"))
+	defer r.Body.Close()
+	var user models.User
+	err = json.Unmarshal(body, &user)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	sessionID, err := uuid.NewV4()
-	if err != nil {
-		panic(err)
+	found := db.GetUserByEmail(user.Email)
+	if found == nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
 	}
-	sessions[sessionID.String()] = users[userInfo.Email]
-	http.SetCookie(w, &http.Cookie{
-		Name:     "sessionid",
-		Value:    sessionID.String(),
-		Expires:  time.Now().Add(20 * time.Minute),
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   true,
-	})
-	setupResponse(&w, r)
-	w.WriteHeader(http.StatusOK)
+	if !helpers.CheckPasswordHash(user.Password, found.HashPassword) {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+	sessionID := uuid.NewV4()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	bytes, err := json.Marshal(found)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	helpers.CreateCookie(&w, sessionID.String())
+	models.Sessions[sessionID.String()] = user.Email
+	w.Write(bytes)
 }
 
 func SignUp(w http.ResponseWriter, r *http.Request) {
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		panic(err)
-	}
-	var userInfo SignUpStruct
-	err = json.Unmarshal(body, &userInfo)
-	if err != nil {
-		panic(err)
-	}
-	_, found := users[userInfo.Email]
-	hash, err := HashPassword(userInfo.Password)
-	if !found && err != nil {
-		users[userInfo.Email] = User{
-			ID:           4,
-			Login:        "Default",
-			Email:        userInfo.Email,
-			Name:         "Default",
-			HashPassword: hash,
-			// LastVisit:  "25.02.2019",
-			Score:      0,
-			avatarName: "default4.png",
-			avatarBlob: "./images/user.svg",
-		}
-		sessionId, err := uuid.NewV4()
-		if err != nil {
-			panic(err)
-		}
-		sessions[sessionId.String()] = users[userInfo.Email]
-		http.SetCookie(w, &http.Cookie{
-			Name:     "sessionid",
-			Value:    sessionId.String(),
-			Expires:  time.Now().Add(60 * time.Hour),
-			Path:     "/",
-			HttpOnly: true,
-			Secure:   true,
-		})
-		w.WriteHeader(http.StatusOK)
-	} else {
-		//УТОЧНИТЬ У ФРОНТА КАКОЙ СТАТУС
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("error"))
+	if r.Method == "OPTIONS" {
 		return
 	}
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	defer r.Body.Close()
+	// var user models.User
+	var user =  models.User{}  //где User - это таблица
+	err = json.Unmarshal(body, &user)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	found := db.GetUserByEmail(user.Email)
+	if found != nil {
+		w.WriteHeader(409)
+		return
+	}
+
+	user.HashPassword, err = helpers.HashPassword(user.Password)
+
+	err = db.CreateUser(&user)
+	fmt.Println(err)
+	if err != nil {
+
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	sessionID := uuid.NewV4()
+	if err != nil {
+
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	fmt.Println(sessionID)
+	helpers.CreateCookie(&w, sessionID.String())
+	//сюда как то подрубить мемкэш, вместо user.Email будет id
+	models.Sessions[sessionID.String()] = user.Email
 }
 
 func SignOut(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "OPTIONS" {
+		return
+	}
 	cookie, err := r.Cookie("sessionid")
 	if err != nil {
-		//УТОЧНИТЬ У ФРОНТА КАКОЙ СТАТУС
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("You are not authorized"))
 		return
 	}
-	http.SetCookie(w, &http.Cookie{
-		Name:     "sessionid",
-		Value:    "",
-		Expires:  time.Unix(0, 0),
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   true,
-	})
-	delete(sessions, cookie.Value)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("error"))
-	}
-	w.WriteHeader(http.StatusOK)
-
+	helpers.DeleteCookie(&w, cookie)
 }
+
+//add w.Write() everywhere
