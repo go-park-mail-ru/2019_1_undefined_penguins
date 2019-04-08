@@ -1,8 +1,9 @@
 package database
 
 import (
-	"github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/models"
-	"github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/helpers"
+	"2019_1_undefined_penguins/iternal/pkg/helpers"
+	"2019_1_undefined_penguins/iternal/pkg/models"
+	"fmt"
 )
 
 const insertUser = `
@@ -73,7 +74,9 @@ func GetLeaders(id int) []models.User {
 		return users
 	}
 	defer rows.Close()
+	fmt.Println(users)
 
 	users = RowsToUsers(rows)
+	fmt.Println(users)
 	return users
 }

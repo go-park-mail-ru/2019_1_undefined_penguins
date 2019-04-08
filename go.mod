@@ -1,4 +1,4 @@
-module github.com/go-park-mail-ru/2019_1_undefined_penguins
+module 2019_1_undefined_penguins
 
 require (
 	github.com/gorilla/mux v1.7.0
