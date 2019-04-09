@@ -4,16 +4,23 @@ import (
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 	"2019_1_undefined_penguins/internal/pkg/models"
 	"fmt"
+
 )
+
+
+const selectUser = `
+INSERT INTO users (email, hashpassword)
+VALUES ($1, $2)
+RETURNING login, score`
 
 const insertUser = `
 INSERT INTO users (email, hashpassword)
 VALUES ($1, $2)
-RETURNING login, name, score`
+RETURNING login, score`
 
 func CreateUser(newUser *models.User) error {
 	if _, err := Exec(insertUser, newUser.Email, newUser.HashPassword); err != nil {
-		helpers.LogMsg(err.Error())
+		helpers.LogMsg(err)
 		return err
 	}
 
@@ -24,14 +31,14 @@ const updateUserByEmail = `
 UPDATE users
 SET lastVisit = now(),
 	login = $2,
-	email = $3,
-	name = $4
+	email = $3
 WHERE email = $1`
 
 func UpdateUser(user *models.User, oldEmail string) error {
 	user.Password = "" //Лови коммент
-	if _, err := Exec(updateUserByEmail, oldEmail, user.Login, user.Email, user.Name); err != nil {
-		helpers.LogMsg(err.Error())
+	_, err := Exec(updateUserByEmail, oldEmail, user.Login, user.Email)
+	if err != nil {
+		helpers.LogMsg(err)
 		return err
 	}
 
@@ -39,44 +46,38 @@ func UpdateUser(user *models.User, oldEmail string) error {
 }
 
 const selectByEmail = `
-SELECT login, name, score, email, hashpassword
+SELECT login, email, hashpassword
 FROM users
 WHERE email = $1`
 
-func GetUserByEmail(email string) *models.User {
-	var user []models.User
-	rows, err := Query(selectByEmail, email)
-	if err != nil {
-		helpers.LogMsg(err.Error())
-		return nil
-	}
-	defer rows.Close()
+func GetUserByEmail(email string) (*models.User, error) {
+	var user models.User
 
-	user = RowsToUsers(rows)
-	if len(user) != 0 {
-		user[0].Password = ""
-		return &user[0]
+	err := connection.QueryRow(selectByEmail, email).Scan(&user.Login, &user.Email, &user.HashPassword)
+	if err != nil {
+		return nil, err
 	}
-	return nil
+
+	return &user, nil
 }
 
+
 const GetLeadersPage = `
-SELECT login, email, score
+SELECT login, score, email
 FROM users
 ORDER BY score DESC
 LIMIT 3 OFFSET $1`
 
-func GetLeaders(id int) []models.User {
+func GetLeaders(id int) ([]models.User, error) {
 	var users []models.User
 	rows, err := Query(GetLeadersPage, (id-1)*3)
 	if err != nil {
-		helpers.LogMsg(err.Error())
-		return users
+		helpers.LogMsg(err)
+		return users, err
 	}
 	defer rows.Close()
-	fmt.Println(users)
 
 	users = RowsToUsers(rows)
 	fmt.Println(users)
-	return users
+	return users, nil
 }

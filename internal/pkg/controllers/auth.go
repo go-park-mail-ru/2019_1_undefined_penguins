@@ -14,7 +14,6 @@ import (
 	"github.com/satori/uuid"
 )
 
-//add concret error + body (w.Write())
 func SignIn(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "OPTIONS" {
 		return
@@ -32,7 +31,7 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	found := db.GetUserByEmail(user.Email)
+	found, _ := db.GetUserByEmail(user.Email)
 
 	if found == nil {
 		w.WriteHeader(http.StatusNotFound)
@@ -58,7 +57,7 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 	helpers.CreateCookie(&w, sessionID.String())
 
 	models.Sessions[sessionID.String()] = user.Email
-	w.Write(bytes)
+	w.Write(bytes) // calls WriteHeader(http.StatusOK) by default
 }
 
 func SignUp(w http.ResponseWriter, r *http.Request) {
@@ -67,37 +66,36 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
+		helpers.LogMsg(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	defer r.Body.Close()
-	// var user models.User
-	var user = models.User{} //где User - это таблица
+	var user models.User
+	//var user = models.User{} //где User - это таблица
 	err = json.Unmarshal(body, &user)
 
 	if err != nil {
-		fmt.Println(err)
+		helpers.LogMsg(err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	found := db.GetUserByEmail(user.Email)
+	found, _ := db.GetUserByEmail(user.Email)
 	if found != nil {
-		w.WriteHeader(409)
+		w.WriteHeader(http.StatusConflict)
 		return
 	}
 
 	user.HashPassword, err = helpers.HashPassword(user.Password)
 
 	err = db.CreateUser(&user)
-	fmt.Println(err)
 	if err != nil {
-
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	sessionID := uuid.NewV4()
 	if err != nil {
-
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -124,4 +122,3 @@ func SignOut(w http.ResponseWriter, r *http.Request) {
 
 }
 
-//add w.Write() everywhere

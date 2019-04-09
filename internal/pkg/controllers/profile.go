@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
+	//"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -10,6 +10,7 @@ import (
 	"2019_1_undefined_penguins/internal/pkg/models"
 
 	db "2019_1_undefined_penguins/internal/pkg/database"
+	"github.com/jackc/pgx"
 )
 
 func Me(w http.ResponseWriter, r *http.Request) {
@@ -27,8 +28,7 @@ func Me(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := db.GetUserByEmail(email)
-
+	user, err := db.GetUserByEmail(email)
 	if user == nil {
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -55,7 +55,6 @@ func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
-	fmt.Println(email)
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -64,17 +63,22 @@ func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	var user models.User
 	err = json.Unmarshal(body, &user)
-	fmt.Println(user)
+
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	err = db.UpdateUser(&user, email)
-
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+		switch errPgx := err.(pgx.PgError); errPgx.Code  {
+			case "23505":
+				w.WriteHeader(http.StatusConflict)
+				return
+			default:
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+		}
 	}
 	models.Sessions[cookie.Value] = user.Email
 	w.Write(body)
