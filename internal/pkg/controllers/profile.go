@@ -5,9 +5,10 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	//"github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/helpers"
-	"github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/models"
-	db "github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/database"
+	//"2019_1_undefined_penguins/internal/pkg/helpers"
+	"2019_1_undefined_penguins/internal/pkg/models"
+
+	db "2019_1_undefined_penguins/internal/pkg/database"
 )
 
 func Me(w http.ResponseWriter, r *http.Request) {
@@ -24,6 +25,7 @@ func Me(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
+
 	user := db.GetUserByEmail(email)
 
 	if user == nil {
@@ -64,7 +66,9 @@ func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
 	err = db.UpdateUser(&user, email)
+
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return

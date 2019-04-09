@@ -5,13 +5,14 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/models"
-	db "github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/database"
+	db "2019_1_undefined_penguins/internal/pkg/database"
+	"2019_1_undefined_penguins/internal/pkg/models"
 
 	"github.com/gorilla/mux"
 )
 
 func GetLeaders(w http.ResponseWriter, r *http.Request) {
+
 	if r.Method == "OPTIONS" {
 		w.WriteHeader(200)
 		return
@@ -24,20 +25,24 @@ func GetLeaders(w http.ResponseWriter, r *http.Request) {
 		}
 		w.Write(bytes)
 	}
+
 }
 
 func GetLeaderboardPage(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "OPTIONS" {
 		return
 	}
+
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
+
 	users := db.GetLeaders(id)
 	if len(users) == 0 {
+
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}

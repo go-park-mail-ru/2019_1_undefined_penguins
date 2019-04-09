@@ -6,9 +6,10 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	db "github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/database"
-	"github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/helpers"
-	"github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/models"
+	db "2019_1_undefined_penguins/internal/pkg/database"
+
+	"2019_1_undefined_penguins/internal/pkg/helpers"
+	"2019_1_undefined_penguins/internal/pkg/models"
 
 	"github.com/satori/uuid"
 )
@@ -30,11 +31,14 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
 	found := db.GetUserByEmail(user.Email)
+
 	if found == nil {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
+
 	if !helpers.CheckPasswordHash(user.Password, found.HashPassword) {
 		w.WriteHeader(http.StatusForbidden)
 		return
@@ -45,11 +49,14 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	bytes, err := json.Marshal(found)
+
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
 	helpers.CreateCookie(&w, sessionID.String())
+
 	models.Sessions[sessionID.String()] = user.Email
 	w.Write(bytes)
 }
@@ -65,8 +72,9 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 	// var user models.User
-	var user =  models.User{}  //где User - это таблица
+	var user = models.User{} //где User - это таблица
 	err = json.Unmarshal(body, &user)
+
 	if err != nil {
 		helpers.LogMsg(err)
 		return
@@ -85,13 +93,16 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
 	sessionID := uuid.NewV4()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	fmt.Println(sessionID)
+
 	helpers.CreateCookie(&w, sessionID.String())
+
 	//сюда как то подрубить мемкэш, вместо user.Email будет id
 	models.Sessions[sessionID.String()] = user.Email
 }
@@ -106,7 +117,9 @@ func SignOut(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("You are not authorized"))
 		return
 	}
+
 	helpers.DeleteCookie(&w, cookie)
+
 }
 
 //add w.Write() everywhere

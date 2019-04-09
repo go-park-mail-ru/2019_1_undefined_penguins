@@ -6,10 +6,12 @@ import (
 
 	"github.com/gorilla/mux"
 
-	c "github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/controllers"
-	db "github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/database"
-	mw "github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/middleware"
-	"github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/helpers"
+	c "2019_1_undefined_penguins/internal/pkg/controllers"
+	db "2019_1_undefined_penguins/internal/pkg/database"
+
+	"2019_1_undefined_penguins/internal/pkg/helpers"
+
+	mw "2019_1_undefined_penguins/internal/pkg/middleware"
 )
 
 type Params struct {
@@ -43,6 +45,7 @@ func StartApp(params Params) error {
 	router.HandleFunc("/login", c.SignIn).Methods("POST", "OPTIONS")
 	router.HandleFunc("/signout", c.SignOut).Methods("GET", "OPTIONS")
 	router.HandleFunc("/change_profile", c.ChangeProfile).Methods("PUT", "OPTIONS")
+
 	fmt.Println("Server started")
 	return http.ListenAndServe(":"+params.Port, router)
 }

@@ -5,17 +5,10 @@ import (
 	//"log"
 	"net/http"
 
-	_ "github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/controllers"
-	"github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/helpers"
-)
+	_ "2019_1_undefined_penguins/internal/pkg/controllers"
 
-func LoggingMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		//log.Println(r.Method + r.RequestURI)
-		helpers.LogMsg(r.Method + r.RequestURI)
-		next.ServeHTTP(w, r)
-	})
-}
+	"2019_1_undefined_penguins/internal/pkg/helpers"
+)
 
 //TODO check
 func CORSMiddleware(next http.Handler) http.Handler {
@@ -28,6 +21,14 @@ func CORSMiddleware(next http.Handler) http.Handler {
 		responseHeader.Set("Access-Control-Allow-Headers", "Content-Type")
 		responseHeader.Set("Access-Control-Allow-Origin", origin)
 
+		next.ServeHTTP(w, r)
+	})
+}
+
+func LoggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		//log.Println(r.Method + r.RequestURI)
+		helpers.LogMsg(r.Method + r.RequestURI)
 		next.ServeHTTP(w, r)
 	})
 }
@@ -61,4 +62,3 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	})
 }
-

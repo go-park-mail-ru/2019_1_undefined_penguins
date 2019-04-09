@@ -1,9 +1,9 @@
 package database
 
 import (
-	"encoding/json"
-	"github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/models"
-	"github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/helpers"
+	"2019_1_undefined_penguins/internal/pkg/helpers"
+	"2019_1_undefined_penguins/internal/pkg/models"
+	"fmt"
 )
 
 
@@ -18,20 +18,20 @@ VALUES ($1, $2)
 RETURNING login, name, score`
 
 func CreateUser(newUser *models.User) error {
-	rows, err := database.Query("SELECT * FROM users WHERE LOWER(nickname)=LOWER($1) OR LOWER(email)=LOWER($2)", user.Nickname, user.Email)
-	if err != nil {
-		helpers.ResponseCtx(ctx, err.Error(), fasthttp.StatusInternalServerError)
-		return
-	}
-	defer rows.Close()
-
-	matchUsers := helpers.RowsToUsers(rows)
-
-	if len(matchUsers) != 0 {
-		j, _ := json.Marshal(matchUsers)
-		helpers.ResponseCtx(ctx, string(j), fasthttp.StatusConflict)
-		return
-	}
+	//rows, err := database.Query("SELECT * FROM users WHERE LOWER(nickname)=LOWER($1) OR LOWER(email)=LOWER($2)", user.Nickname, user.Email)
+	//if err != nil {
+	//	helpers.ResponseCtx(ctx, err.Error(), fasthttp.StatusInternalServerError)
+	//	return
+	//}
+	//defer rows.Close()
+	//
+	//matchUsers := helpers.RowsToUsers(rows)
+	//
+	//if len(matchUsers) != 0 {
+	//	j, _ := json.Marshal(matchUsers)
+	//	helpers.ResponseCtx(ctx, string(j), fasthttp.StatusConflict)
+	//	return
+	//}
 
 	if _, err := Exec(insertUser, newUser.Email, newUser.HashPassword); err != nil {
 		helpers.LogMsg(err)
@@ -95,7 +95,9 @@ func GetLeaders(id int) []models.User {
 		return users
 	}
 	defer rows.Close()
+	fmt.Println(users)
 
 	users = RowsToUsers(rows)
+	fmt.Println(users)
 	return users
 }
