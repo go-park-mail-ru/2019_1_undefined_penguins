@@ -18,21 +18,6 @@ VALUES ($1, $2)
 RETURNING login, name, score`
 
 func CreateUser(newUser *models.User) error {
-	//rows, err := database.Query("SELECT * FROM users WHERE LOWER(nickname)=LOWER($1) OR LOWER(email)=LOWER($2)", user.Nickname, user.Email)
-	//if err != nil {
-	//	helpers.ResponseCtx(ctx, err.Error(), fasthttp.StatusInternalServerError)
-	//	return
-	//}
-	//defer rows.Close()
-	//
-	//matchUsers := helpers.RowsToUsers(rows)
-	//
-	//if len(matchUsers) != 0 {
-	//	j, _ := json.Marshal(matchUsers)
-	//	helpers.ResponseCtx(ctx, string(j), fasthttp.StatusConflict)
-	//	return
-	//}
-
 	if _, err := Exec(insertUser, newUser.Email, newUser.HashPassword); err != nil {
 		helpers.LogMsg(err)
 		return err
@@ -64,25 +49,21 @@ SELECT login, name, email, hashpassword
 FROM users
 WHERE email = $1`
 
-func GetUserByEmail(email string) (models.User, error) {
+func GetUserByEmail(email string) (*models.User, error) {
 	var user models.User
 	rows, err := Query(selectByEmail, email)
 	if err != nil {
 		helpers.LogMsg(err)
-		return models.User{}, err
+		return nil, err
 	}
 	defer rows.Close()
 
 	err = connection.QueryRow(selectByEmail, email).Scan(&user.Login, &user.Name, &user.Email, &user.HashPassword)
 	if err != nil {
-		return models.User{}, err
+		return nil, err
 	}
-	//user = RowsToUsers(rows)
-	//if len(user) != 0 {
-	//	user[0].Password = ""
-	//	return &user[0]
-	//}
-	return user, nil
+
+	return &user, nil
 }
 
 const GetLeadersPage = `

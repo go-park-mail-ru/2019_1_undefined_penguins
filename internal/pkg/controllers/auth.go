@@ -14,7 +14,6 @@ import (
 	"github.com/satori/uuid"
 )
 
-//add concret error + body (w.Write())
 func SignIn(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "OPTIONS" {
 		return
@@ -32,11 +31,10 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	found, err := db.GetUserByEmail(user.Email)
+	found, _ := db.GetUserByEmail(user.Email)
 
-	if err != nil {
+	if found == nil {
 		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("No such user"))
 		return
 	}
 
@@ -68,21 +66,23 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
+		helpers.LogMsg(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	defer r.Body.Close()
-	// var user models.User
-	var user = models.User{} //где User - это таблица
+	var user models.User
+	//var user = models.User{} //где User - это таблица
 	err = json.Unmarshal(body, &user)
 
 	if err != nil {
 		helpers.LogMsg(err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	_, err = db.GetUserByEmail(user.Email)
-	if err == nil {
-		w.WriteHeader(409)
+	found, _ := db.GetUserByEmail(user.Email)
+	if found != nil {
+		w.WriteHeader(http.StatusConflict)
 		return
 	}
 
@@ -90,7 +90,6 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 
 	err = db.CreateUser(&user)
 	if err != nil {
-
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -123,4 +122,3 @@ func SignOut(w http.ResponseWriter, r *http.Request) {
 
 }
 
-//add w.Write() everywhere
