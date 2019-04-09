@@ -26,9 +26,9 @@ func Me(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := db.GetUserByEmail(email)
+	user, err := db.GetUserByEmail(email)
 
-	if user == nil {
+	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}

@@ -40,7 +40,7 @@ func StartApp(params Params) error {
 	router.HandleFunc("/", RootHandler)
 	router.HandleFunc("/me", c.Me).Methods("GET", "OPTIONS")
 	router.HandleFunc("/leaders", c.GetLeaders).Methods("GET", "OPTIONS")
-	router.HandleFunc("/leaderboard/{id:[0-9]+}", c.GetLeaderboardPage).Methods("GET", "OPTIONS")
+	router.HandleFunc("/leaders/{id:[0-9]+}", c.GetLeaderboardPage).Methods("GET", "OPTIONS")
 	router.HandleFunc("/signup", c.SignUp).Methods("POST", "OPTIONS")
 	router.HandleFunc("/login", c.SignIn).Methods("POST", "OPTIONS")
 	router.HandleFunc("/signout", c.SignOut).Methods("GET", "OPTIONS")

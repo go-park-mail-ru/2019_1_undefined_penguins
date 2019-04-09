@@ -17,7 +17,12 @@ func GetLeaders(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
 		return
 	} else {
-		users := models.User{}
+		users := []models.User{}
+		users, _ = db.GetLeaders(1)
+		if len(users) == 0 {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
 		bytes, err := json.Marshal(users)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -40,7 +45,7 @@ func GetLeaderboardPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	users := db.GetLeaders(id)
+	users, _ := db.GetLeaders(id)
 	if len(users) == 0 {
 
 		w.WriteHeader(http.StatusNotFound)

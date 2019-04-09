@@ -32,10 +32,11 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	found := db.GetUserByEmail(user.Email)
+	found, err := db.GetUserByEmail(user.Email)
 
-	if found == nil {
+	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("No such user"))
 		return
 	}
 
@@ -58,7 +59,7 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 	helpers.CreateCookie(&w, sessionID.String())
 
 	models.Sessions[sessionID.String()] = user.Email
-	w.Write(bytes)
+	w.Write(bytes) // calls WriteHeader(http.StatusOK) by default
 }
 
 func SignUp(w http.ResponseWriter, r *http.Request) {
@@ -79,8 +80,8 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 		helpers.LogMsg(err)
 		return
 	}
-	found := db.GetUserByEmail(user.Email)
-	if found != nil {
+	_, err = db.GetUserByEmail(user.Email)
+	if err == nil {
 		w.WriteHeader(409)
 		return
 	}

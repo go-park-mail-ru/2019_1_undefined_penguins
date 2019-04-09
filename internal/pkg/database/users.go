@@ -60,44 +60,48 @@ func UpdateUser(user *models.User, oldEmail string) error {
 }
 
 const selectByEmail = `
-SELECT login, name, score, email, hashpassword
+SELECT login, name, email, hashpassword
 FROM users
 WHERE email = $1`
 
-func GetUserByEmail(email string) *models.User {
-	var user []models.User
+func GetUserByEmail(email string) (models.User, error) {
+	var user models.User
 	rows, err := Query(selectByEmail, email)
 	if err != nil {
 		helpers.LogMsg(err)
-		return nil
+		return models.User{}, err
 	}
 	defer rows.Close()
 
-	user = RowsToUsers(rows)
-	if len(user) != 0 {
-		user[0].Password = ""
-		return &user[0]
+	err = connection.QueryRow(selectByEmail, email).Scan(&user.Login, &user.Name, &user.Email, &user.HashPassword)
+	if err != nil {
+		return models.User{}, err
 	}
-	return nil
+	//user = RowsToUsers(rows)
+	//if len(user) != 0 {
+	//	user[0].Password = ""
+	//	return &user[0]
+	//}
+	return user, nil
 }
 
 const GetLeadersPage = `
-SELECT login, email, score
+SELECT login, name, score, email
 FROM users
 ORDER BY score DESC
 LIMIT 3 OFFSET $1`
 
-func GetLeaders(id int) []models.User {
+func GetLeaders(id int) ([]models.User, error) {
 	var users []models.User
 	rows, err := Query(GetLeadersPage, (id-1)*3)
 	if err != nil {
 		helpers.LogMsg(err)
-		return users
+		return users, err
 	}
 	defer rows.Close()
 	fmt.Println(users)
 
 	users = RowsToUsers(rows)
 	fmt.Println(users)
-	return users
+	return users, nil
 }

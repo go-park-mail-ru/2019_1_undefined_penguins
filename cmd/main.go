@@ -1,9 +1,9 @@
 package main
 
 import (
-	"os"
-	"2019_1_undefined_penguins/internal/pkg/helpers"
 	"2019_1_undefined_penguins/internal/app/server"
+	"2019_1_undefined_penguins/internal/pkg/helpers"
+	"os"
 )
 
 func main() {
