@@ -1,9 +1,9 @@
 package helpers
 
 import (
-	"fmt"
+	"log"
 )
 
-func LogMsg(msg string) {
-	fmt.Println(msg)
+func LogMsg(msg ...interface{}) {
+	log.Println(msg)
 }

@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -53,7 +52,6 @@ func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
-	fmt.Println(email)
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -62,7 +60,6 @@ func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	var user models.User
 	err = json.Unmarshal(body, &user)
-	fmt.Println(user)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return

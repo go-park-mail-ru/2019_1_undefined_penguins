@@ -19,20 +19,20 @@ var connectionPoolConfig = pgx.ConnPoolConfig{
 func initConfig() error {
 	dir, err := os.Getwd()
 	if err != nil {
-		h.LogMsg("Init DB error: " + err.Error())
+		h.LogMsg("Init DB error: ", err)
 		return err
 	}
 
 	file, err := os.Open(dir + "/configs/database.json")
 	if err != nil {
-		h.LogMsg("Open DB error: " + err.Error())
+		h.LogMsg("Open DB error: ", err)
 		return err
 	}
 
 	body, _ := ioutil.ReadAll(file)
 	err = json.Unmarshal(body, &connectionConfig)
 	if err != nil {
-		h.LogMsg("Init parse DB error: " + err.Error())
+		h.LogMsg("Init parse DB error: ",  err)
 		return err
 	}
 

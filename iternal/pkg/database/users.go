@@ -1,9 +1,16 @@
 package database
 
 import (
+	"encoding/json"
 	"github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/models"
 	"github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/helpers"
 )
+
+
+const selectUser = `
+INSERT INTO users (email, hashpassword)
+VALUES ($1, $2)
+RETURNING login, name, score`
 
 const insertUser = `
 INSERT INTO users (email, hashpassword)
@@ -11,8 +18,23 @@ VALUES ($1, $2)
 RETURNING login, name, score`
 
 func CreateUser(newUser *models.User) error {
+	rows, err := database.Query("SELECT * FROM users WHERE LOWER(nickname)=LOWER($1) OR LOWER(email)=LOWER($2)", user.Nickname, user.Email)
+	if err != nil {
+		helpers.ResponseCtx(ctx, err.Error(), fasthttp.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	matchUsers := helpers.RowsToUsers(rows)
+
+	if len(matchUsers) != 0 {
+		j, _ := json.Marshal(matchUsers)
+		helpers.ResponseCtx(ctx, string(j), fasthttp.StatusConflict)
+		return
+	}
+
 	if _, err := Exec(insertUser, newUser.Email, newUser.HashPassword); err != nil {
-		helpers.LogMsg(err.Error())
+		helpers.LogMsg(err)
 		return err
 	}
 
@@ -30,7 +52,7 @@ WHERE email = $1`
 func UpdateUser(user *models.User, oldEmail string) error {
 	user.Password = "" //Лови коммент
 	if _, err := Exec(updateUserByEmail, oldEmail, user.Login, user.Email, user.Name); err != nil {
-		helpers.LogMsg(err.Error())
+		helpers.LogMsg(err)
 		return err
 	}
 
@@ -46,7 +68,7 @@ func GetUserByEmail(email string) *models.User {
 	var user []models.User
 	rows, err := Query(selectByEmail, email)
 	if err != nil {
-		helpers.LogMsg(err.Error())
+		helpers.LogMsg(err)
 		return nil
 	}
 	defer rows.Close()
@@ -69,7 +91,7 @@ func GetLeaders(id int) []models.User {
 	var users []models.User
 	rows, err := Query(GetLeadersPage, (id-1)*3)
 	if err != nil {
-		helpers.LogMsg(err.Error())
+		helpers.LogMsg(err)
 		return users
 	}
 	defer rows.Close()

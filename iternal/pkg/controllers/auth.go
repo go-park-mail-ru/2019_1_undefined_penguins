@@ -68,7 +68,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	var user =  models.User{}  //где User - это таблица
 	err = json.Unmarshal(body, &user)
 	if err != nil {
-		fmt.Println(err)
+		helpers.LogMsg(err)
 		return
 	}
 	found := db.GetUserByEmail(user.Email)
@@ -80,7 +80,6 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	user.HashPassword, err = helpers.HashPassword(user.Password)
 
 	err = db.CreateUser(&user)
-	fmt.Println(err)
 	if err != nil {
 
 		w.WriteHeader(http.StatusInternalServerError)
@@ -88,7 +87,6 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 	sessionID := uuid.NewV4()
 	if err != nil {
-
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

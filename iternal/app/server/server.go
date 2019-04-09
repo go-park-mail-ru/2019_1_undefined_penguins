@@ -21,15 +21,13 @@ func RootHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func StartApp(params Params) error {
-	//check this 2 funcs, is nil - return 'жёпка'
-	//close connect
-	//db.InitConfig()
 	err := db.Connect()
 	if err != nil {
-		helpers.LogMsg("Connection error: " + err.Error())
+		helpers.LogMsg("Connection error: ", err)
 		return err
 	}
 	defer db.Disconnect()
+
 	router := mux.NewRouter()
 
 	router.Use(mw.LoggingMiddleware)
@@ -37,10 +35,8 @@ func StartApp(params Params) error {
 	router.Use(mw.PanicMiddleware)
 	router.Use(mw.AuthMiddleware)
 
-
 	router.HandleFunc("/", RootHandler)
 	router.HandleFunc("/me", c.Me).Methods("GET", "OPTIONS")
-
 	router.HandleFunc("/leaders", c.GetLeaders).Methods("GET", "OPTIONS")
 	router.HandleFunc("/leaderboard/{id:[0-9]+}", c.GetLeaderboardPage).Methods("GET", "OPTIONS")
 	router.HandleFunc("/signup", c.SignUp).Methods("POST", "OPTIONS")

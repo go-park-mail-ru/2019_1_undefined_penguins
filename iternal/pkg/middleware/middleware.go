@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"fmt"
-	"log"
+	//"log"
 	"net/http"
 
 	_ "github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/controllers"
@@ -11,7 +11,8 @@ import (
 
 func LoggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Println(r.Method + r.RequestURI)
+		//log.Println(r.Method + r.RequestURI)
+		helpers.LogMsg(r.Method + r.RequestURI)
 		next.ServeHTTP(w, r)
 	})
 }
@@ -36,7 +37,7 @@ func PanicMiddleware(next http.Handler) http.Handler {
 		defer func() {
 			if err := recover(); err != nil {
 				fmt.Println(err)
-				helpers.LogMsg("Recovered panic")
+				helpers.LogMsg("Recovered panic: ", err)
 				http.Error(w, "Server error", 500)
 			}
 		}()
