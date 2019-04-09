@@ -4,7 +4,6 @@ type User struct {
 	ID           uint   `json:"-"`
 	Login        string `json:"login"`
 	Email        string `json:"email"`
-	Name         string `json:"name"`
 	Password     string `json:"password,omitempty"`
 	HashPassword string `json:"-"`
 	LastVisit    string `json:"lastVisit"`

@@ -9,20 +9,9 @@ import (
 
 func RowsToUsers(rows *pgx.Rows) []models.User {
 	users := []models.User{}
-	//for rows.Next() {
-	//	var user models.User
-	//	if err := rows.Scan(
-	//		&user.Login,
-	//		&user.Email,
-	//		&user.Score); err != nil {
-	//		return users
-	//	}
-	//
-	//	users = append(users, user)
-	//}
 	for rows.Next() {
 		entry := models.User{}
-		if err := rows.Scan(&entry.Login, &entry.Name, &entry.Score, &entry.Email); err == nil {
+		if err := rows.Scan(&entry.Login, &entry.Score, &entry.Email); err == nil {
 					fmt.Println(err)
 				}
 		users = append(users, entry)
