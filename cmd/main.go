@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/app/server"
+	"2019_1_undefined_penguins/internal/app/server"
 )
 
 func main() {

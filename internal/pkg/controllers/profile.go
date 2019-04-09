@@ -6,11 +6,10 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	//"2019_1_undefined_penguins/internal/pkg/helpers"
+	"2019_1_undefined_penguins/internal/pkg/models"
 
-	//"github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/helpers"
-	"github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/models"
-	db "github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/database"
-
+	db "2019_1_undefined_penguins/internal/pkg/database"
 )
 
 func Me(w http.ResponseWriter, r *http.Request) {
@@ -29,7 +28,6 @@ func Me(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user := db.GetUserByEmail(email)
-
 
 	if user == nil {
 		w.WriteHeader(http.StatusNotFound)

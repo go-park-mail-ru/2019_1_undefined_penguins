@@ -6,12 +6,12 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	db "github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/database"
-	"github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/helpers"
-	"github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/models"
+	db "2019_1_undefined_penguins/internal/pkg/database"
+
+	"2019_1_undefined_penguins/internal/pkg/helpers"
+	"2019_1_undefined_penguins/internal/pkg/models"
 
 	"github.com/satori/uuid"
-
 )
 
 //add concret error + body (w.Write())
@@ -72,7 +72,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 	// var user models.User
-	var user =  models.User{}  //где User - это таблица
+	var user = models.User{} //где User - это таблица
 	err = json.Unmarshal(body, &user)
 
 	if err != nil {

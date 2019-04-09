@@ -5,10 +5,8 @@ import (
 	"net/http"
 	"strconv"
 
-
-	"github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/models"
-	db "github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/database"
-
+	db "2019_1_undefined_penguins/internal/pkg/database"
+	"2019_1_undefined_penguins/internal/pkg/models"
 
 	"github.com/gorilla/mux"
 )

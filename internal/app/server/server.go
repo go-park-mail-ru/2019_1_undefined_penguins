@@ -6,12 +6,12 @@ import (
 
 	"github.com/gorilla/mux"
 
+	c "2019_1_undefined_penguins/internal/pkg/controllers"
+	db "2019_1_undefined_penguins/internal/pkg/database"
 
-	c "github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/controllers"
-	db "github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/database"
-	mw "github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/middleware"
-	"github.com/go-park-mail-ru/2019_1_undefined_penguins/iternal/pkg/helpers"
+	"2019_1_undefined_penguins/internal/pkg/helpers"
 
+	mw "2019_1_undefined_penguins/internal/pkg/middleware"
 )
 
 type Params struct {
@@ -39,7 +39,6 @@ func StartApp(params Params) error {
 	router.Use(mw.CORSMiddleware)
 	router.Use(mw.PanicMiddleware)
 	router.Use(mw.AuthMiddleware)
-
 
 	router.HandleFunc("/", RootHandler)
 	router.HandleFunc("/me", c.Me).Methods("GET", "OPTIONS")
