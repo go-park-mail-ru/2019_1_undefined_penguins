@@ -47,10 +47,10 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	//sessionID := uuid.NewV4()
-	ttl := 15 * time.Second
+	ttl := 3600 * time.Second
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"username": user.Email,
+		"userEmail": user.Email,
 		"exp": time.Now().UTC().Add(ttl).Unix(),
 	})
 	//jwt.StandardClaims
@@ -130,10 +130,10 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 
 
 	//sessionID := uuid.NewV4()
-	ttl := 15 * time.Second
+	ttl := 3600 * time.Second
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"username": user.Email,
+		"userEmail": user.Email,
 		"exp": time.Now().UTC().Add(ttl).Unix(),
 	})
 

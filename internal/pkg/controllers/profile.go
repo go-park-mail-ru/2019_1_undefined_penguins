@@ -52,7 +52,7 @@ func Me(w http.ResponseWriter, r *http.Request) {
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		temp := token.Claims.(jwt.MapClaims)
 		fmt.Println(temp)
-		user, err := db.GetUserByEmail(claims["username"].(string))
+		user, err := db.GetUserByEmail(claims["userEmail"].(string))
 		if user == nil {
 			w.WriteHeader(http.StatusNotFound)
 			return
@@ -129,7 +129,7 @@ func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		err = db.UpdateUser(&user, claims["username"].(string))
+		err = db.UpdateUser(&user, claims["userEmail"].(string))
 		if err != nil {
 			switch errPgx := err.(pgx.PgError); errPgx.Code  {
 			case "23505":
