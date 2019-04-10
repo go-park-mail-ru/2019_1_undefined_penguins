@@ -2,8 +2,8 @@ package middleware
 
 import (
 	"fmt"
-	//"log"
 	"net/http"
+
 
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 )
@@ -47,7 +47,7 @@ func PanicMiddleware(next http.Handler) http.Handler {
 //TODO check
 func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.RequestURI != "/me" {
+		if r.RequestURI != "/me" || r.RequestURI != "/" {
 			next.ServeHTTP(w, r)
 			return
 		}
