@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -110,21 +111,24 @@ func UploadPage(w http.ResponseWriter, r *http.Request) {
 
 func UploadImage(w http.ResponseWriter, r *http.Request) {
 
-	cookie, err := r.Cookie("sessionid")
-	if err != nil {
-		w.WriteHeader(http.StatusForbidden)
-		return
-	}
-	email, found := models.Sessions[cookie.Value]
-	if !found {
-		w.WriteHeader(http.StatusForbidden)
-		return
-	}
-	user, err := db.GetUserByEmail(email)
-	if user == nil {
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
+	// cookie, err := r.Cookie("sessionid")
+	// if err != nil {
+	// 	w.WriteHeader(http.StatusForbidden)
+	// 	return
+	// }
+	// email, found := models.Sessions[cookie.Value]
+	// if !found {
+	// 	w.WriteHeader(http.StatusForbidden)
+	// 	return
+	// }
+	// user, err := db.GetUserByEmail(email)
+	// if user == nil {
+	// 	w.WriteHeader(http.StatusNotFound)
+	// 	return
+	// }
+
+	var user models.User
+	user.Login = "iamfrommoscow"
 
 	err := r.ParseMultipartForm(5 * 1024 * 1025)
 	if err != nil {
@@ -139,6 +143,8 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 	defer file.Close()
 	extension := filepath.Ext(handler.Filename)
 	if extension == "" {
+		fmt.Println(err)
+
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -146,19 +152,26 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 	t := time.Now()
 
 	fileName := user.Login + t.Format("20060102150405") + extension
-	fileAndPath := "../2019_1_undefined_penguins/" + fileName
+	fileAndPath := "static/" + fileName
 	saveFile, err := os.Create(fileAndPath)
-
+	if err != nil {
+		fmt.Println("Create", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 	defer saveFile.Close()
 
 	_, err = io.Copy(saveFile, file)
 	if err != nil {
+		fmt.Println("Copy", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	err = database.UpdateImage(user.Login, fileName)
 	if err != nil {
+		fmt.Println(err)
+
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
