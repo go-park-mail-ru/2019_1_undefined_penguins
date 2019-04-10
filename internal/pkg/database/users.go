@@ -4,14 +4,7 @@ import (
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 	"2019_1_undefined_penguins/internal/pkg/models"
 	"fmt"
-
 )
-
-
-const selectUser = `
-INSERT INTO users (email, hashpassword)
-VALUES ($1, $2)
-RETURNING login, score`
 
 const insertUser = `
 INSERT INTO users (email, hashpassword)
@@ -45,22 +38,34 @@ func UpdateUser(user *models.User, oldEmail string) error {
 	return nil
 }
 
+const updateImageByLogin = `
+SELECT insertPicture($1, $2);
+`
+
+func UpdateImage(login string, avatar string) error {
+	_, err := Exec(updateImageByLogin, login, avatar)
+	if err != nil {
+		helpers.LogMsg(err)
+		return err
+	}
+	return nil
+}
+
 const selectByEmail = `
-SELECT login, email, hashpassword
+SELECT login, email, hashpassword, picture
 FROM users
 WHERE email = $1`
 
 func GetUserByEmail(email string) (*models.User, error) {
 	var user models.User
 
-	err := connection.QueryRow(selectByEmail, email).Scan(&user.Login, &user.Email, &user.HashPassword)
+	err := connection.QueryRow(selectByEmail, email).Scan(&user.Login, &user.Email, &user.HashPassword, &user.Picture)
 	if err != nil {
 		return nil, err
 	}
 
 	return &user, nil
 }
-
 
 const GetLeadersPage = `
 SELECT login, score, email

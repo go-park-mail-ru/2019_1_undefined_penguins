@@ -1,6 +1,7 @@
 package server
 
 import (
+	"2019_1_undefined_penguins/internal/pkg/fileserver"
 	"fmt"
 	"net/http"
 	"os"
@@ -30,7 +31,6 @@ func StartApp(params Params) error {
 		return err
 	}
 	defer db.Disconnect()
-
 	router := mux.NewRouter()
 
 	//router.Use(mw.LoggingMiddleware)
@@ -46,7 +46,13 @@ func StartApp(params Params) error {
 	router.HandleFunc("/login", c.SignIn).Methods("POST", "OPTIONS")
 	router.HandleFunc("/signout", c.SignOut).Methods("GET", "OPTIONS")
 	router.HandleFunc("/change_profile", c.ChangeProfile).Methods("PUT", "OPTIONS")
+	router.HandleFunc("/upload", c.UploadPage).Methods("GET", "OPTIONS")
+	router.HandleFunc("/upload", c.UploadImage).Methods("POST")
 
-	fmt.Println("Server started")
-	return http.ListenAndServe(":"+params.Port, handlers.LoggingHandler(os.Stdout, router))
+
+  fmt.Println("Server started at " + params.Port)
+	go func() {
+		fileserver.Start()
+	}()
+  return http.ListenAndServe(":"+params.Port, handlers.LoggingHandler(os.Stdout, router))
 }
