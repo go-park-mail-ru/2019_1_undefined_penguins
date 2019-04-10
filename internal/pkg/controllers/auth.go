@@ -120,8 +120,12 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 
 
+	//sessionID := uuid.NewV4()
+	ttl := 15 * time.Second
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"username": user.Email,
+		"exp": time.Now().UTC().Add(ttl).Unix(),
 	})
 
 	str, err := token.SignedString(SECRET)

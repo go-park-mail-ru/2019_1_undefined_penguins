@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"2019_1_undefined_penguins/internal/pkg/helpers"
 	"encoding/json"
 	"fmt"
 
@@ -58,6 +59,8 @@ func Me(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusUnauthorized)
 	w.Write([]byte("not authorized"))
+	helpers.DeleteCookie(&w, cookie)
+
 	fmt.Println(err)
 
 
@@ -134,5 +137,7 @@ func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusUnauthorized)
 	w.Write([]byte("not authorized"))
+	helpers.DeleteCookie(&w, cookie)
+
 	fmt.Println(err)
 }
