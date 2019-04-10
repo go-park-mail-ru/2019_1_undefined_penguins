@@ -52,14 +52,14 @@ func UpdateImage(login string, avatar string) error {
 }
 
 const selectByEmail = `
-SELECT login, email, hashpassword
+SELECT login, email, hashpassword, picture
 FROM users
 WHERE email = $1`
 
 func GetUserByEmail(email string) (*models.User, error) {
 	var user models.User
 
-	err := connection.QueryRow(selectByEmail, email).Scan(&user.Login, &user.Email, &user.HashPassword)
+	err := connection.QueryRow(selectByEmail, email).Scan(&user.Login, &user.Email, &user.HashPassword, &user.Picture)
 	if err != nil {
 		return nil, err
 	}

@@ -8,8 +8,7 @@ type User struct {
 	HashPassword string `json:"-"`
 	LastVisit    string `json:"lastVisit"`
 	Score        uint   `json:"score"`
-	avatarName   string `json:"avatarName"`
-	avatarBlob   string `json:"avatarBlob"`
+	Picture      string `json:"avatarUrl"`
 }
 
 // `type SignUpStruct struct {
