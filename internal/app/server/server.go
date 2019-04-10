@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/mux"
 
@@ -10,7 +11,7 @@ import (
 	db "2019_1_undefined_penguins/internal/pkg/database"
 
 	"2019_1_undefined_penguins/internal/pkg/helpers"
-
+	"github.com/gorilla/handlers"
 	mw "2019_1_undefined_penguins/internal/pkg/middleware"
 )
 
@@ -32,7 +33,7 @@ func StartApp(params Params) error {
 
 	router := mux.NewRouter()
 
-	router.Use(mw.LoggingMiddleware)
+	//router.Use(mw.LoggingMiddleware)
 	router.Use(mw.CORSMiddleware)
 	router.Use(mw.PanicMiddleware)
 	router.Use(mw.AuthMiddleware)
@@ -47,5 +48,5 @@ func StartApp(params Params) error {
 	router.HandleFunc("/change_profile", c.ChangeProfile).Methods("PUT", "OPTIONS")
 
 	fmt.Println("Server started")
-	return http.ListenAndServe(":"+params.Port, router)
+	return http.ListenAndServe(":"+params.Port, handlers.LoggingHandler(os.Stdout, router))
 }

@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	_ "2019_1_undefined_penguins/internal/pkg/controllers"
-
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 )
 

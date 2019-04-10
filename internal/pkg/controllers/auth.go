@@ -2,17 +2,21 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
+	"time"
+
+	//"fmt"
 	"io/ioutil"
 	"net/http"
 
 	db "2019_1_undefined_penguins/internal/pkg/database"
-
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 	"2019_1_undefined_penguins/internal/pkg/models"
-
-	"github.com/satori/uuid"
+	jwt "github.com/dgrijalva/jwt-go"
+	//"github.com/satori/uuid"
 )
+
+
+var SECRET = []byte("myawesomesecret")
 
 func SignIn(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "OPTIONS" {
@@ -42,22 +46,40 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
-	sessionID := uuid.NewV4()
+	//sessionID := uuid.NewV4()
+	ttl := 5 * time.Second
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"username": user.Email,
+		"exp": time.Now().UTC().Add(ttl).Unix(),
+	})
+	//jwt.StandardClaims
+
+	str, err := token.SignedString(SECRET)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("=(" + err.Error()))
 		return
 	}
-	bytes, err := json.Marshal(found)
 
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+	cookie := &http.Cookie{
+		Name:  "sessionid",
+		Value: str,
 	}
 
-	helpers.CreateCookie(&w, sessionID.String())
+	http.SetCookie(w, cookie)
+	w.Write([]byte(str))
 
-	models.Sessions[sessionID.String()] = user.Email
-	w.Write(bytes) // calls WriteHeader(http.StatusOK) by default
+	//bytes, err := json.Marshal(found)
+	//
+	//if err != nil {
+	//	w.WriteHeader(http.StatusInternalServerError)
+	//	return
+	//}
+	//
+	//helpers.CreateCookie(&w, sessionID.String())
+	//
+	//models.Sessions[sessionID.String()] = user.Email
+	//w.Write(bytes) // calls WriteHeader(http.StatusOK) by default
 }
 
 func SignUp(w http.ResponseWriter, r *http.Request) {
@@ -94,17 +116,33 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sessionID := uuid.NewV4()
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"username": user.Email,
+	})
+
+	str, err := token.SignedString(SECRET)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("=(" + err.Error()))
 		return
 	}
-	fmt.Println(sessionID)
 
-	helpers.CreateCookie(&w, sessionID.String())
+	cookie := &http.Cookie{
+		Name:  "sessionid",
+		Value: str,
+	}
 
-	//сюда как то подрубить мемкэш, вместо user.Email будет id
-	models.Sessions[sessionID.String()] = user.Email
+	http.SetCookie(w, cookie)
+	w.Write([]byte(str))
+
+
+	//sessionID := uuid.NewV4()
+	//
+	//helpers.CreateCookie(&w, sessionID.String())
+	//
+	////сюда как то подрубить мемкэш, вместо user.Email будет id
+	//models.Sessions[sessionID.String()] = user.Email
+
 }
 
 func SignOut(w http.ResponseWriter, r *http.Request) {
