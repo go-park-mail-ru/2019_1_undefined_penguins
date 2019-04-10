@@ -110,24 +110,21 @@ func UploadPage(w http.ResponseWriter, r *http.Request) {
 
 func UploadImage(w http.ResponseWriter, r *http.Request) {
 
-	// cookie, err := r.Cookie("sessionid")
-	// if err != nil {
-	// 	w.WriteHeader(http.StatusForbidden)
-	// 	return
-	// }
-	// email, found := models.Sessions[cookie.Value]
-	// if !found {
-	// 	w.WriteHeader(http.StatusForbidden)
-	// 	return
-	// }
-	// user, err := db.GetUserByEmail(email)
-	// if user == nil {
-	// 	w.WriteHeader(http.StatusNotFound)
-	// 	return
-	// }
-
-	var user models.User
-	user.Login = "iamfrommoscow"
+	cookie, err := r.Cookie("sessionid")
+	if err != nil {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+	email, found := models.Sessions[cookie.Value]
+	if !found {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+	user, err := db.GetUserByEmail(email)
+	if user == nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
 
 	err := r.ParseMultipartForm(5 * 1024 * 1025)
 	if err != nil {
