@@ -22,7 +22,7 @@ func Me(w http.ResponseWriter, r *http.Request) {
 	}
 	cookie, err := r.Cookie("sessionid")
 	if err != nil {
-		w.WriteHeader(http.StatusForbidden)
+		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 	//email, _ := models.Sessions[cookie.Value]
@@ -56,6 +56,7 @@ func Me(w http.ResponseWriter, r *http.Request) {
 		w.Write(bytes)
 		return
 	}
+	w.WriteHeader(http.StatusUnauthorized)
 	w.Write([]byte("not authorized"))
 	fmt.Println(err)
 
@@ -81,7 +82,7 @@ func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 
 	cookie, err := r.Cookie("sessionid")
 	if err != nil {
-		w.WriteHeader(http.StatusForbidden)
+		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 	//email, _ := models.Sessions[cookie.Value]
@@ -131,6 +132,7 @@ func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 		w.Write(body)
 
 	}
+	w.WriteHeader(http.StatusUnauthorized)
 	w.Write([]byte("not authorized"))
 	fmt.Println(err)
 }

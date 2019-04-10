@@ -47,7 +47,7 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	//sessionID := uuid.NewV4()
-	ttl := 5 * time.Second
+	ttl := 15 * time.Second
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"username": user.Email,
@@ -61,9 +61,12 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//helpers.CreateCookie(&w, str)
 	cookie := &http.Cookie{
 		Name:  "sessionid",
 		Value: str,
+		Expires:  time.Now().Add(60 * time.Hour),
+		HttpOnly: true,
 	}
 
 	http.SetCookie(w, cookie)
