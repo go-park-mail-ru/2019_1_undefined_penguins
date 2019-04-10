@@ -69,8 +69,17 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 	}
 
+
+	bytes, err := json.Marshal(found)
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+
 	http.SetCookie(w, cookie)
-	w.Write([]byte(str))
+	w.Write(bytes)
 
 	//bytes, err := json.Marshal(found)
 	//
