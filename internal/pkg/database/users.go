@@ -64,6 +64,7 @@ func GetUserByEmail(email string) (*models.User, error) {
 		fmt.Println(err)
 		return nil, err
 	}
+	user.Picture = "http://localhost:8081/data/" + user.Picture
 	return &user, nil
 }
 

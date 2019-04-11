@@ -149,8 +149,16 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 	}
 	fmt.Println(cookie.Expires)
+	user.Password = ""
+	bytes, err := json.Marshal(user)
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	http.SetCookie(w, cookie)
-	w.Write([]byte(str))
+	w.Write(bytes)
 
 	//sessionID := uuid.NewV4()
 	//
