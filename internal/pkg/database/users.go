@@ -7,12 +7,16 @@ import (
 )
 
 const insertUser = `
-INSERT INTO users (email, hashpassword)
-VALUES ($1, $2)
+INSERT INTO users (email, login, hashpassword)
+VALUES ($1, $2, $3)
 RETURNING login, score`
 
 func CreateUser(newUser *models.User) error {
-	if _, err := Exec(insertUser, newUser.Email, newUser.HashPassword); err != nil {
+	fmt.Println("user", newUser)
+	fmt.Println("login", newUser.Login)
+	fmt.Println("pass", newUser.Password)
+
+	if _, err := Exec(insertUser, newUser.Email, newUser.Login, newUser.HashPassword); err != nil {
 		helpers.LogMsg(err)
 		return err
 	}

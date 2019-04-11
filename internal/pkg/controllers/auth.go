@@ -150,6 +150,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Println(cookie.Expires)
 	user.Password = ""
+	user.Picture = "http://localhost:8081/data/Default.png"
 	bytes, err := json.Marshal(user)
 
 	if err != nil {
