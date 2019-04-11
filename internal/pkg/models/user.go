@@ -9,6 +9,7 @@ type User struct {
 	LastVisit    string `json:"lastVisit"`
 	Score        uint   `json:"score"`
 	Picture      string `json:"avatarUrl"`
+	Games        uint   `json:"count"`
 }
 
 // `type SignUpStruct struct {
