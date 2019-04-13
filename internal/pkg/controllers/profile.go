@@ -10,7 +10,6 @@ import (
 	"path/filepath"
 	"time"
 
-
 	//"fmt"
 	"io/ioutil"
 	"net/http"
@@ -39,7 +38,6 @@ func Me(w http.ResponseWriter, r *http.Request) {
 	//	w.WriteHeader(http.StatusForbidden)
 	//	return
 	//}
-
 
 	token, err := jwt.Parse(cookie.Value, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -71,10 +69,7 @@ func Me(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println(err)
 
-
-
-
-	}
+}
 
 func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "OPTIONS" {
@@ -101,8 +96,6 @@ func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 	//	w.WriteHeader(http.StatusForbidden)
 	//	return
 	//}
-
-
 
 	token, err := jwt.Parse(cookie.Value, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -131,7 +124,7 @@ func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 
 		err = db.UpdateUser(&user, claims["userEmail"].(string))
 		if err != nil {
-			switch errPgx := err.(pgx.PgError); errPgx.Code  {
+			switch errPgx := err.(pgx.PgError); errPgx.Code {
 			case "23505":
 				w.WriteHeader(http.StatusConflict)
 				return
