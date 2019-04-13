@@ -47,7 +47,7 @@ func PanicMiddleware(next http.Handler) http.Handler {
 //TODO check
 func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.RequestURI != "/me" || r.RequestURI != "/" {
+		if r.RequestURI != "/me" {
 			next.ServeHTTP(w, r)
 			return
 		}
