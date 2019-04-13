@@ -53,6 +53,8 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		}
 		cookie, err := r.Cookie("sessionid")
 
+
+
 		if err != nil || cookie.Value == "" {
 			w.WriteHeader(http.StatusUnauthorized)
 			return

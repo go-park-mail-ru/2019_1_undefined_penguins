@@ -164,70 +164,99 @@ func UploadPage(w http.ResponseWriter, r *http.Request) {
 
 func UploadImage(w http.ResponseWriter, r *http.Request) {
 
+	//cookie, err := r.Cookie("sessionid")
+	//if err != nil {
+	//	w.WriteHeader(http.StatusForbidden)
+	//	return
+	//}
+
 	cookie, err := r.Cookie("sessionid")
 	if err != nil {
-		w.WriteHeader(http.StatusForbidden)
+		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
-	email, found := models.Sessions[cookie.Value]
-	if !found {
-		w.WriteHeader(http.StatusForbidden)
-		return
-	}
-	user, err := db.GetUserByEmail(email)
-	if user == nil {
-		w.WriteHeader(http.StatusNotFound)
-		return
+	//email, _ := models.Sessions[cookie.Value]
+	//if !found {
+	//	w.WriteHeader(http.StatusForbidden)
+	//	return
+	//}
+
+	token, err := jwt.Parse(cookie.Value, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+		}
+
+		return SECRET, nil
+	})
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		user, err := db.GetUserByEmail(claims["userEmail"].(string))
+		if user == nil {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
+		// var user models.User
+		// user.Login = "iamfrommoscow"
+
+		err = r.ParseMultipartForm(5 * 1024 * 1025)
+		if err != nil {
+			fmt.Println("Ошибка при парсинге тела запроса")
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		file, handler, err := r.FormFile("avatar")
+		if err != nil {
+			fmt.Println("Ошибка при получении файла из тела запроса")
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		defer file.Close()
+		extension := filepath.Ext(handler.Filename)
+		if extension == "" {
+			fmt.Println("Файл не имеет расширения")
+
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		t := time.Now()
+
+		fileName := user.Login + t.Format("20060102150405") + extension
+		fileAndPath := "static/" + fileName
+		saveFile, err := os.Create(fileAndPath)
+		if err != nil {
+			fmt.Println("Create", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		defer saveFile.Close()
+
+		_, err = io.Copy(saveFile, file)
+		if err != nil {
+			fmt.Println("Copy", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		err = database.UpdateImage(user.Login, fileName)
+		if err != nil {
+			fmt.Println("Ошибка при обновлении картинки в базе данных")
+
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	}
 
-	// var user models.User
-	// user.Login = "iamfrommoscow"
+	w.WriteHeader(http.StatusUnauthorized)
+	w.Write([]byte("not authorized"))
+	helpers.DeleteCookie(&w, cookie)
 
-	err = r.ParseMultipartForm(5 * 1024 * 1025)
-	if err != nil {
-		fmt.Println("Ошибка при парсинге тела запроса")
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	file, handler, err := r.FormFile("avatar")
-	if err != nil {
-		fmt.Println("Ошибка при получении файла из тела запроса")
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	defer file.Close()
-	extension := filepath.Ext(handler.Filename)
-	if extension == "" {
-		fmt.Println("Файл не имеет расширения")
+	fmt.Println(err)
+	//email, found := models.Sessions[cookie.Value]
+	//if !found {
+	//	w.WriteHeader(http.StatusForbidden)
+	//	return
+	//}
 
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	t := time.Now()
-
-	fileName := user.Login + t.Format("20060102150405") + extension
-	fileAndPath := "static/" + fileName
-	saveFile, err := os.Create(fileAndPath)
-	if err != nil {
-		fmt.Println("Create", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	defer saveFile.Close()
-
-	_, err = io.Copy(saveFile, file)
-	if err != nil {
-		fmt.Println("Copy", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	err = database.UpdateImage(user.Login, fileName)
-	if err != nil {
-		fmt.Println("Ошибка при обновлении картинки в базе данных")
-
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
 }
