@@ -10,7 +10,6 @@ import (
 	"path/filepath"
 	"time"
 
-
 	//"fmt"
 	"io/ioutil"
 	"net/http"
@@ -39,7 +38,6 @@ func Me(w http.ResponseWriter, r *http.Request) {
 	//	w.WriteHeader(http.StatusForbidden)
 	//	return
 	//}
-
 
 	token, err := jwt.Parse(cookie.Value, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -71,10 +69,7 @@ func Me(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println(err)
 
-
-
-
-	}
+}
 
 func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "OPTIONS" {
@@ -101,8 +96,6 @@ func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 	//	w.WriteHeader(http.StatusForbidden)
 	//	return
 	//}
-
-
 
 	token, err := jwt.Parse(cookie.Value, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -131,7 +124,7 @@ func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 
 		err = db.UpdateUser(&user, claims["userEmail"].(string))
 		if err != nil {
-			switch errPgx := err.(pgx.PgError); errPgx.Code  {
+			switch errPgx := err.(pgx.PgError); errPgx.Code {
 			case "23505":
 				w.WriteHeader(http.StatusConflict)
 				return
@@ -171,39 +164,41 @@ func UploadPage(w http.ResponseWriter, r *http.Request) {
 
 func UploadImage(w http.ResponseWriter, r *http.Request) {
 
-	// cookie, err := r.Cookie("sessionid")
-	// if err != nil {
-	// 	w.WriteHeader(http.StatusForbidden)
-	// 	return
-	// }
-	// email, found := models.Sessions[cookie.Value]
-	// if !found {
-	// 	w.WriteHeader(http.StatusForbidden)
-	// 	return
-	// }
-	// user, err := db.GetUserByEmail(email)
-	// if user == nil {
-	// 	w.WriteHeader(http.StatusNotFound)
-	// 	return
-	// }
-
-	var user models.User
-	user.Login = "iamfrommoscow"
-
-	err := r.ParseMultipartForm(5 * 1024 * 1025)
+	cookie, err := r.Cookie("sessionid")
 	if err != nil {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+	email, found := models.Sessions[cookie.Value]
+	if !found {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+	user, err := db.GetUserByEmail(email)
+	if user == nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	// var user models.User
+	// user.Login = "iamfrommoscow"
+
+	err = r.ParseMultipartForm(5 * 1024 * 1025)
+	if err != nil {
+		fmt.Println("Ошибка при парсинге тела запроса")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	file, handler, err := r.FormFile("avatar")
 	if err != nil {
+		fmt.Println("Ошибка при получении файла из тела запроса")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	defer file.Close()
 	extension := filepath.Ext(handler.Filename)
 	if extension == "" {
-		fmt.Println(err)
+		fmt.Println("Файл не имеет расширения")
 
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -230,7 +225,7 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 
 	err = database.UpdateImage(user.Login, fileName)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("Ошибка при обновлении картинки в базе данных")
 
 		w.WriteHeader(http.StatusInternalServerError)
 		return
