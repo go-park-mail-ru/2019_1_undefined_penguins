@@ -43,7 +43,10 @@ func Me(w http.ResponseWriter, r *http.Request) {
 	})
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		user, err := db.GetUserByID(claims["userID"].(string))
+		temp := claims["userID"]
+		mytemp := uint(temp.(float64))
+
+		user, err := db.GetUserByID(mytemp)
 		if user == nil {
 			w.WriteHeader(http.StatusNotFound)
 			return
@@ -99,7 +102,7 @@ func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 
 		temp := claims["userID"]
 		mytemp := uint(temp.(float64))
-		err = db.UpdateUserByID(&user, mytemp)
+		user, err = db.UpdateUserByID(user, mytemp)
 		if err != nil {
 			switch errPgx := err.(pgx.PgError); errPgx.Code {
 			case "23505":
@@ -113,7 +116,12 @@ func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 			}
 
 		}
-		w.Write(body)
+		bytes, err := json.Marshal(user)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		w.Write(bytes)
 		return
 	}
 	w.WriteHeader(http.StatusUnauthorized)
