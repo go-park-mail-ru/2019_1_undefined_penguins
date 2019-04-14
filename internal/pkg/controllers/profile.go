@@ -136,7 +136,7 @@ func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 		}
 		//models.Sessions[cookie.Value] = user.Email
 		w.Write(body)
-
+		return
 	}
 	w.WriteHeader(http.StatusUnauthorized)
 	w.Write([]byte("not authorized"))
