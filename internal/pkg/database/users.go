@@ -4,19 +4,26 @@ import (
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 	"2019_1_undefined_penguins/internal/pkg/models"
 	"fmt"
+	"github.com/jackc/pgx"
 )
 
 const insertUser = `
 INSERT INTO users (email, login, hashpassword)
 VALUES ($1, $2, $3)
-RETURNING login, score`
+RETURNING id, login, score`
 
 func CreateUser(newUser *models.User) error {
 	fmt.Println("user", newUser)
 	fmt.Println("login", newUser.Login)
 	fmt.Println("pass", newUser.Password)
 
-	if _, err := Exec(insertUser, newUser.Email, newUser.Login, newUser.HashPassword); err != nil {
+	if connection == nil {
+		return pgx.ErrDeadConn
+	}
+
+	//var row pgtype.Record
+	//err := conn.QueryRow("insert ... returning (...)").Scan(&row)
+	if err := connection.QueryRow(insertUser, newUser.Email, newUser.Login, newUser.HashPassword).Scan(&newUser.ID, &newUser.Login, &newUser.Score); err != nil {
 		helpers.LogMsg(err)
 		return err
 	}
@@ -45,6 +52,25 @@ func UpdateUser(user models.User, oldEmail string) (models.User, error) {
 	return user, nil
 }
 
+const updateUserByID = `
+UPDATE users
+SET lastVisit = now(),
+	login = $2,
+	email = $3
+WHERE id = $1`
+
+func UpdateUserByID(user *models.User, id uint) error {
+	user.Password = "" //Лови коммент
+	_, err := Exec(updateUserByID, id, user.Login, user.Email)
+	if err != nil {
+		helpers.LogMsg(err)
+		return err
+	}
+
+	return nil
+}
+
+
 const updateImageByLogin = `
 SELECT insertPicture($1, $2);
 `
@@ -59,14 +85,31 @@ func UpdateImage(login string, avatar string) error {
 }
 
 const selectByEmail = `
-SELECT login, email, hashpassword, score, name, games
+SELECT users.id, login, email, hashpassword, score, name, games
 FROM users, pictures
 WHERE users.email = $1
 AND users.picture = pictures.id`
 
 func GetUserByEmail(email string) (*models.User, error) {
 	var user models.User
-	err := connection.QueryRow(selectByEmail, email).Scan(&user.Login, &user.Email, &user.HashPassword, &user.Score, &user.Picture, &user.Games)
+	err := connection.QueryRow(selectByEmail, email).Scan(&user.ID, &user.Login, &user.Email, &user.HashPassword, &user.Score, &user.Picture, &user.Games)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	user.Picture = "http://localhost:8081/data/" + user.Picture
+	return &user, nil
+}
+
+const selectByID = `
+SELECT users.id, login, email, hashpassword, score, name, games
+FROM users, pictures
+WHERE users.id = $1
+AND users.picture = pictures.id`
+
+func GetUserByID(id string) (*models.User, error) {
+	var user models.User
+	err := connection.QueryRow(selectByID, id).Scan(&user.ID, &user.Login, &user.Email, &user.HashPassword, &user.Score, &user.Picture, &user.Games)
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
