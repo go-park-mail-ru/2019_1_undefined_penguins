@@ -116,6 +116,7 @@ func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 			}
 
 		}
+
 		bytes, err := json.Marshal(user)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -217,6 +218,7 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		return
 	}
 
 	w.WriteHeader(http.StatusUnauthorized)
