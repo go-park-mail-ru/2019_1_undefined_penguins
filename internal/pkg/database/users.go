@@ -4,6 +4,7 @@ import (
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 	"2019_1_undefined_penguins/internal/pkg/models"
 	"fmt"
+
 	"github.com/jackc/pgx"
 )
 
@@ -72,7 +73,6 @@ func UpdateUserByID(user models.User, id uint) (models.User, error) {
 
 	return user, nil
 }
-
 
 
 const updateImageByLogin = `
