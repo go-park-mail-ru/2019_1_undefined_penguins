@@ -43,7 +43,10 @@ func Me(w http.ResponseWriter, r *http.Request) {
 	})
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		user, err := db.GetUserByID(claims["userID"].(string))
+		temp := claims["userID"]
+		mytemp := uint(temp.(float64))
+
+		user, err := db.GetUserByID(mytemp)
 		if user == nil {
 			w.WriteHeader(http.StatusNotFound)
 			return
