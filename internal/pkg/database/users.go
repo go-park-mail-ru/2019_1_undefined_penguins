@@ -4,6 +4,7 @@ import (
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 	"2019_1_undefined_penguins/internal/pkg/models"
 	"fmt"
+
 	"github.com/jackc/pgx"
 )
 
@@ -53,23 +54,25 @@ func UpdateUser(user models.User, oldEmail string) (models.User, error) {
 }
 
 const updateUserByID = `
-UPDATE users
+UPDATE users AS u
 SET lastVisit = now(),
 	login = $2,
 	email = $3
-WHERE id = $1`
+FROM pictures AS p
+WHERE u.id = $1 
+AND u.picture = p.id
+RETURNING games, name, score`
 
-func UpdateUserByID(user *models.User, id uint) error {
+func UpdateUserByID(user models.User, id uint) (models.User, error) {
 	user.Password = "" //Лови коммент
-	_, err := Exec(updateUserByID, id, user.Login, user.Email)
+	err := connection.QueryRow(updateUserByID, id, user.Login, user.Email).Scan(&user.Score, &user.Picture, &user.Games)
 	if err != nil {
 		helpers.LogMsg(err)
-		return err
+		return user, err
 	}
 
-	return nil
+	return user, nil
 }
-
 
 const updateImageByLogin = `
 SELECT insertPicture($1, $2);

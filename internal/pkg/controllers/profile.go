@@ -99,7 +99,7 @@ func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 
 		temp := claims["userID"]
 		mytemp := uint(temp.(float64))
-		err = db.UpdateUserByID(&user, mytemp)
+		user, err = db.UpdateUserByID(user, mytemp)
 		if err != nil {
 			switch errPgx := err.(pgx.PgError); errPgx.Code {
 			case "23505":
