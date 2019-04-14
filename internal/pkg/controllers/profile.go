@@ -122,7 +122,7 @@ func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		err = db.UpdateUser(&user, claims["userEmail"].(string))
+		user, err = db.UpdateUser(user, claims["userEmail"].(string))
 		if err != nil {
 			switch errPgx := err.(pgx.PgError); errPgx.Code {
 			case "23505":
@@ -135,7 +135,12 @@ func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 
 		}
 		//models.Sessions[cookie.Value] = user.Email
-		w.Write(body)
+		bytes, err := json.Marshal(user)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		w.Write(bytes)
 		return
 	}
 	w.WriteHeader(http.StatusUnauthorized)
