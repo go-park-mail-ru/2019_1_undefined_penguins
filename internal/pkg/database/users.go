@@ -49,6 +49,25 @@ func UpdateUser(user *models.User, oldEmail string) error {
 	return nil
 }
 
+const updateUserByID = `
+UPDATE users
+SET lastVisit = now(),
+	login = $2,
+	email = $3
+WHERE id = $1`
+
+func UpdateUserByID(user *models.User, id uint) error {
+	user.Password = "" //Лови коммент
+	_, err := Exec(updateUserByID, id, user.Login, user.Email)
+	if err != nil {
+		helpers.LogMsg(err)
+		return err
+	}
+
+	return nil
+}
+
+
 const updateImageByLogin = `
 SELECT insertPicture($1, $2);
 `
@@ -71,6 +90,23 @@ AND users.picture = pictures.id`
 func GetUserByEmail(email string) (*models.User, error) {
 	var user models.User
 	err := connection.QueryRow(selectByEmail, email).Scan(&user.ID, &user.Login, &user.Email, &user.HashPassword, &user.Score, &user.Picture, &user.Games)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	user.Picture = "http://localhost:8081/data/" + user.Picture
+	return &user, nil
+}
+
+const selectByID = `
+SELECT users.id, login, email, hashpassword, score, name, games
+FROM users, pictures
+WHERE users.id = $1
+AND users.picture = pictures.id`
+
+func GetUserByID(id string) (*models.User, error) {
+	var user models.User
+	err := connection.QueryRow(selectByID, id).Scan(&user.ID, &user.Login, &user.Email, &user.HashPassword, &user.Score, &user.Picture, &user.Games)
 	if err != nil {
 		fmt.Println(err)
 		return nil, err

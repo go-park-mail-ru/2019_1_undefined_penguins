@@ -49,7 +49,7 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 	ttl := 3600 * time.Second
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"userID": user.ID,
+		"userID": 	 found.ID,
 		"userEmail": user.Email,
 		"exp":       time.Now().UTC().Add(ttl).Unix(),
 	})
