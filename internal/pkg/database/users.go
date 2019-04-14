@@ -70,10 +70,9 @@ func UpdateUserByID(user models.User, id uint) (models.User, error) {
 		helpers.LogMsg(err)
 		return user, err
 	}
-
+	user.Picture = "http://localhost:8081/data/" + user.Picture
 	return user, nil
 }
-
 
 const updateImageByLogin = `
 SELECT insertPicture($1, $2);
