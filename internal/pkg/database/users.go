@@ -41,7 +41,7 @@ func UpdateUser(user models.User, oldEmail string) (models.User, error) {
 		helpers.LogMsg(err)
 		return user, err
 	}
-
+	user.Picture = "http://localhost:8081/data/" + user.Picture
 	return user, nil
 }
 
