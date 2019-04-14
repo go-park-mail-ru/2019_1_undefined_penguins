@@ -32,21 +32,24 @@ func CreateUser(newUser *models.User) error {
 }
 
 const updateUserByEmail = `
-UPDATE users
+UPDATE users AS u
 SET lastVisit = now(),
 	login = $2,
 	email = $3
-WHERE email = $1`
+FROM pictures AS p
+WHERE u.email = $1 
+AND u.picture = p.id
+RETURNING games, name, score`
 
-func UpdateUser(user *models.User, oldEmail string) error {
+func UpdateUser(user models.User, oldEmail string) (models.User, error) {
 	user.Password = "" //Лови коммент
-	_, err := Exec(updateUserByEmail, oldEmail, user.Login, user.Email)
+	err := connection.QueryRow(updateUserByEmail, oldEmail, user.Login, user.Email).Scan(&user.Score, &user.Picture, &user.Games)
 	if err != nil {
 		helpers.LogMsg(err)
-		return err
+		return user, err
 	}
-
-	return nil
+	user.Picture = "http://localhost:8081/data/" + user.Picture
+	return user, nil
 }
 
 const updateUserByID = `
