@@ -13,7 +13,7 @@ import (
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 	"2019_1_undefined_penguins/internal/pkg/models"
 
-	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/dgrijalva/jwt-go"
 	//"github.com/satori/uuid"
 )
 
@@ -41,27 +41,26 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-
+	//TODO check why so long
 	if !helpers.CheckPasswordHash(user.Password, found.HashPassword) {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
-	//sessionID := uuid.NewV4()
 	ttl := 3600 * time.Second
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"userID": user.ID,
 		"userEmail": user.Email,
 		"exp":       time.Now().UTC().Add(ttl).Unix(),
 	})
-	//jwt.StandardClaims
 
 	str, err := token.SignedString(SECRET)
 	if err != nil {
+		w.WriteHeader(http.StatusForbidden)
 		w.Write([]byte("=(" + err.Error()))
 		return
 	}
 
-	//helpers.CreateCookie(&w, str)
 	cookie := &http.Cookie{
 		Name:     "sessionid",
 		Value:    str,
@@ -78,18 +77,6 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 
 	http.SetCookie(w, cookie)
 	w.Write(bytes)
-
-	//bytes, err := json.Marshal(found)
-	//
-	//if err != nil {
-	//	w.WriteHeader(http.StatusInternalServerError)
-	//	return
-	//}
-	//
-	//helpers.CreateCookie(&w, sessionID.String())
-	//
-	//models.Sessions[sessionID.String()] = user.Email
-	//w.Write(bytes) // calls WriteHeader(http.StatusOK) by default
 }
 
 func SignUp(w http.ResponseWriter, r *http.Request) {
@@ -104,7 +91,6 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 	var user models.User
-	//var user = models.User{} //где User - это таблица
 	err = json.Unmarshal(body, &user)
 
 	if err != nil {
@@ -122,21 +108,24 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 
 	err = db.CreateUser(&user)
 	if err != nil {
-		fmt.Println("Internal", err)
-
+		helpers.LogMsg(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
+	//newuser, _ := db.GetUserByEmail(user.Email)
+
 	ttl := 3600 * time.Second
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"userID": user.ID,
 		"userEmail": user.Email,
 		"exp":       time.Now().UTC().Add(ttl).Unix(),
 	})
 
 	str, err := token.SignedString(SECRET)
 	if err != nil {
+		w.WriteHeader(http.StatusForbidden)
 		w.Write([]byte("=(" + err.Error()))
 		return
 	}
@@ -159,14 +148,6 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 
 	http.SetCookie(w, cookie)
 	w.Write(bytes)
-
-	//sessionID := uuid.NewV4()
-	//
-	//helpers.CreateCookie(&w, sessionID.String())
-	//
-	////сюда как то подрубить мемкэш, вместо user.Email будет id
-	//models.Sessions[sessionID.String()] = user.Email
-
 }
 
 func SignOut(w http.ResponseWriter, r *http.Request) {
@@ -180,6 +161,7 @@ func SignOut(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	helpers.LogMsg("User " + cookie.Value + " has logged out")
 	helpers.DeleteCookie(&w, cookie)
-
+	w.WriteHeader(http.StatusOK)
 }
