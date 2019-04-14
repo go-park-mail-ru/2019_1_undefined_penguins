@@ -128,7 +128,6 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//sessionID := uuid.NewV4()
 	ttl := 3600 * time.Second
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
