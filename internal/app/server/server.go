@@ -1,7 +1,7 @@
 package server
 
 import (
-	"2019_1_undefined_penguins/internal/app/game"
+	//"2019_1_undefined_penguins/internal/app/game"
 	"2019_1_undefined_penguins/internal/pkg/fileserver"
 	"fmt"
 	"net/http"
@@ -13,8 +13,8 @@ import (
 	db "2019_1_undefined_penguins/internal/pkg/database"
 
 	"2019_1_undefined_penguins/internal/pkg/helpers"
-	"github.com/gorilla/handlers"
 	mw "2019_1_undefined_penguins/internal/pkg/middleware"
+	"github.com/gorilla/handlers"
 )
 
 type Params struct {
@@ -24,6 +24,7 @@ type Params struct {
 func RootHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("hello penguins"))
 }
+
 
 func StartApp(params Params) error {
 	err := db.Connect()
@@ -49,6 +50,7 @@ func StartApp(params Params) error {
 	router.HandleFunc("/change_profile", c.ChangeProfile).Methods("PUT", "OPTIONS")
 	router.HandleFunc("/upload", c.UploadPage).Methods("GET", "OPTIONS")
 	router.HandleFunc("/upload", c.UploadImage).Methods("POST")
+	router.HandleFunc("/ws", c.StartWS)
 
 
 	fmt.Println("Server started at " + params.Port)
@@ -56,9 +58,9 @@ func StartApp(params Params) error {
 		fileserver.Start()
 	}()
 
-	fmt.Println("Game started at " + "8082")
+	//fmt.Println("Game started at " + "8082")
 	//go func() {
-		game.Start()
+	//	game.Start()
 	//}()
 
 	return http.ListenAndServe(":"+params.Port, handlers.LoggingHandler(os.Stdout, router))

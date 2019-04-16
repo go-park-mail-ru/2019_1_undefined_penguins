@@ -6,7 +6,6 @@ import (
 )
 
 func Start() error {
-
 	staticHandler := http.StripPrefix(
 		"/data/",
 		http.FileServer(http.Dir("./static")),
