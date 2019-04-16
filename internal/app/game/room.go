@@ -56,7 +56,7 @@ func (r *Room) Run() {
 			helpers.LogMsg("Player "+player.ID+" joined")
 			player.SendMessage(&Message{"CONNECTED", nil})
 		case <-r.ticker.C:
-			helpers.LogMsg("Tick")
+			//helpers.LogMsg("Tick")
 
 			//my code
 

@@ -1,7 +1,6 @@
-package main
+package game
 
 import (
-	"2019_1_undefined_penguins/internal/app/game"
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 	"fmt"
 	"net/http"
@@ -9,8 +8,8 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-func main() {
-	pingGame := game.NewGame(10)
+func Start() error {
+	pingGame := NewGame(10)
 	go pingGame.Run()
 
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
@@ -32,14 +31,15 @@ func main() {
 
 		helpers.LogMsg("Connected to client")
 
-		player := game.NewPlayer(conn, cookie.Value)
+		player := NewPlayer(conn, cookie.Value)
 		go player.Listen()
 		pingGame.AddPlayer(player)
 	})
 
-	if err := http.ListenAndServe(":8082", nil); err != nil {
-		helpers.LogMsg("Cannot start server: ", err)
-	}
-
 	fmt.Println("Started game")
+
+	return http.ListenAndServe(":8082", nil)
+	//if err != nil {
+	//	helpers.LogMsg("Cannot start server: ", err)
+	//}
 }
