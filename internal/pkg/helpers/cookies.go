@@ -8,6 +8,7 @@ import (
 )
 
 func CreateCookie(w *http.ResponseWriter, sessionID string) {
+
 	http.SetCookie(*w, &http.Cookie{
 		Name:     "sessionid",
 		Value:    sessionID,

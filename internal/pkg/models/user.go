@@ -36,6 +36,10 @@ func init() {
 	Sessions = make(map[string]string)
 }
 
+func ReturnCountOfSessions() int {
+	return len(Sessions)
+}
+
 // var Users = map[string]User{
 // 	"a.penguin1@corp.mail.ru": User{
 // 		ID:           1,
