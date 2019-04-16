@@ -12,8 +12,9 @@ import (
 	db "2019_1_undefined_penguins/internal/pkg/database"
 
 	"2019_1_undefined_penguins/internal/pkg/helpers"
-	"github.com/gorilla/handlers"
 	mw "2019_1_undefined_penguins/internal/pkg/middleware"
+
+	"github.com/gorilla/handlers"
 )
 
 type Params struct {
@@ -40,19 +41,16 @@ func StartApp(params Params) error {
 
 	router.HandleFunc("/", RootHandler)
 	router.HandleFunc("/me", c.Me).Methods("GET", "OPTIONS")
-	router.HandleFunc("/leaders", c.GetLeaders).Methods("GET", "OPTIONS")
 	router.HandleFunc("/leaders/{id:[0-9]+}", c.GetLeaderboardPage).Methods("GET", "OPTIONS")
 	router.HandleFunc("/signup", c.SignUp).Methods("POST", "OPTIONS")
 	router.HandleFunc("/login", c.SignIn).Methods("POST", "OPTIONS")
 	router.HandleFunc("/signout", c.SignOut).Methods("GET", "OPTIONS")
 	router.HandleFunc("/change_profile", c.ChangeProfile).Methods("PUT", "OPTIONS")
-	router.HandleFunc("/upload", c.UploadPage).Methods("GET", "OPTIONS")
 	router.HandleFunc("/upload", c.UploadImage).Methods("POST")
 
-
-  fmt.Println("Server started at " + params.Port)
+	fmt.Println("Server started at " + params.Port)
 	go func() {
 		fileserver.Start()
 	}()
-  return http.ListenAndServe(":"+params.Port, handlers.LoggingHandler(os.Stdout, router))
+	return http.ListenAndServe(":"+params.Port, handlers.LoggingHandler(os.Stdout, router))
 }

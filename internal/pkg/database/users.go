@@ -95,7 +95,9 @@ AND users.picture = pictures.id`
 
 func GetUserByEmail(email string) (*models.User, error) {
 	var user models.User
+	fmt.Println("5")
 	err := connection.QueryRow(selectByEmail, email).Scan(&user.ID, &user.Login, &user.Email, &user.HashPassword, &user.Score, &user.Picture, &user.Games)
+	fmt.Println("6")
 	if err != nil {
 		fmt.Println(err)
 		return nil, err

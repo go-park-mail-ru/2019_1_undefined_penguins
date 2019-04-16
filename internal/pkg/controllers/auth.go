@@ -20,14 +20,18 @@ import (
 var SECRET = []byte("myawesomesecret")
 
 func SignIn(w http.ResponseWriter, r *http.Request) {
+
+	fmt.Println(r.URL.Path)
 	if r.Method == "OPTIONS" {
 		return
 	}
+
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
 	defer r.Body.Close()
 	var user models.User
 	err = json.Unmarshal(body, &user)
@@ -35,12 +39,16 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
 	found, _ := db.GetUserByEmail(user.Email)
 
 	if found == nil {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
+
+	fmt.Println("6")
+
 	//TODO check why so long
 	if !helpers.CheckPasswordHash(user.Password, found.HashPassword) {
 		w.WriteHeader(http.StatusForbidden)
@@ -49,7 +57,7 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 	ttl := 3600 * time.Second
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"userID": 	 found.ID,
+		"userID":    found.ID,
 		"userEmail": user.Email,
 		"exp":       time.Now().UTC().Add(ttl).Unix(),
 	})
@@ -118,7 +126,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	ttl := 3600 * time.Second
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"userID": user.ID,
+		"userID":    user.ID,
 		"userEmail": user.Email,
 		"exp":       time.Now().UTC().Add(ttl).Unix(),
 	})

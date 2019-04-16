@@ -3,6 +3,7 @@ package database
 import (
 	"encoding/json"
 	"io/ioutil"
+	"strings"
 
 	"os"
 
@@ -20,6 +21,7 @@ var connectionPoolConfig = pgx.ConnPoolConfig{
 
 //TODO check connect
 func initConfig() error {
+
 	dir, err := os.Getwd()
 	if err != nil {
 		h.LogMsg("Getting directory error: ", err)
@@ -29,8 +31,13 @@ func initConfig() error {
 
 	file, err := os.Open(dir + "/configs/database.json")
 	if err != nil {
-		h.LogMsg("Open directory error: ", err)
-		return err
+		dir = strings.Replace(dir, "/internal/pkg/controllers", "", -1)
+		file, err = os.Open(dir + "/configs/database.json")
+		if err != nil {
+			h.LogMsg("Open directory error: ", err)
+			return err
+		}
+
 	}
 
 	body, _ := ioutil.ReadAll(file)

@@ -132,23 +132,6 @@ func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 	helpers.LogMsg(err)
 }
 
-var uploadFormTmpl = []byte(`
-<html>
-	<body>
-	<form action="/upload" method="post" enctype="multipart/form-data">
-		Image: <input type="file" name="avatar">
-		<input type="submit" value="Upload">
-	</form>
-	</body>
-</html>
-`)
-
-func UploadPage(w http.ResponseWriter, r *http.Request) {
-
-	w.Write(uploadFormTmpl)
-
-}
-
 func UploadImage(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("sessionid")
 	if err != nil {
