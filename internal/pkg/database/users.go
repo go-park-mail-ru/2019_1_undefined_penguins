@@ -4,19 +4,24 @@ import (
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 	"2019_1_undefined_penguins/internal/pkg/models"
 	"fmt"
+
+	"github.com/jackc/pgx"
 )
 
 const insertUser = `
 INSERT INTO users (email, login, hashpassword)
 VALUES ($1, $2, $3)
-RETURNING login, score`
+RETURNING id, login, score`
 
 func CreateUser(newUser *models.User) error {
-	fmt.Println("user", newUser)
-	fmt.Println("login", newUser.Login)
-	fmt.Println("pass", newUser.Password)
 
-	if _, err := Exec(insertUser, newUser.Email, newUser.Login, newUser.HashPassword); err != nil {
+	if connection == nil {
+		return pgx.ErrDeadConn
+	}
+
+	//var row pgtype.Record
+	//err := conn.QueryRow("insert ... returning (...)").Scan(&row)
+	if err := connection.QueryRow(insertUser, newUser.Email, newUser.Login, newUser.HashPassword).Scan(&newUser.ID, &newUser.Login, &newUser.Score); err != nil {
 		helpers.LogMsg(err)
 		return err
 	}
@@ -25,21 +30,45 @@ func CreateUser(newUser *models.User) error {
 }
 
 const updateUserByEmail = `
-UPDATE users
+UPDATE users AS u
 SET lastVisit = now(),
 	login = $2,
 	email = $3
-WHERE email = $1`
+FROM pictures AS p
+WHERE u.email = $1 
+AND u.picture = p.id
+RETURNING games, name, score`
 
-func UpdateUser(user *models.User, oldEmail string) error {
+func UpdateUser(user models.User, oldEmail string) (models.User, error) {
 	user.Password = "" //Лови коммент
-	_, err := Exec(updateUserByEmail, oldEmail, user.Login, user.Email)
+	err := connection.QueryRow(updateUserByEmail, oldEmail, user.Login, user.Email).Scan(&user.Score, &user.Picture, &user.Games)
 	if err != nil {
 		helpers.LogMsg(err)
-		return err
+		return user, err
 	}
+	user.Picture = "http://localhost:8081/data/" + user.Picture
+	return user, nil
+}
 
-	return nil
+const updateUserByID = `
+UPDATE users AS u
+SET lastVisit = now(),
+	login = $2,
+	email = $3
+FROM pictures AS p
+WHERE u.id = $1 
+AND u.picture = p.id
+RETURNING games, name, score`
+
+func UpdateUserByID(user models.User, id uint) (models.User, error) {
+	user.Password = "" //Лови коммент
+	err := connection.QueryRow(updateUserByID, id, user.Login, user.Email).Scan(&user.Score, &user.Picture, &user.Games)
+	if err != nil {
+		helpers.LogMsg(err)
+		return user, err
+	}
+	user.Picture = "http://localhost:8081/data/" + user.Picture
+	return user, nil
 }
 
 const updateImageByLogin = `
@@ -56,14 +85,33 @@ func UpdateImage(login string, avatar string) error {
 }
 
 const selectByEmail = `
-SELECT login, email, hashpassword, score, name, games
+SELECT users.id, login, email, hashpassword, score, name, games
 FROM users, pictures
 WHERE users.email = $1
 AND users.picture = pictures.id`
 
 func GetUserByEmail(email string) (*models.User, error) {
 	var user models.User
-	err := connection.QueryRow(selectByEmail, email).Scan(&user.Login, &user.Email, &user.HashPassword, &user.Score, &user.Picture, &user.Games)
+	fmt.Println("5")
+	err := connection.QueryRow(selectByEmail, email).Scan(&user.ID, &user.Login, &user.Email, &user.HashPassword, &user.Score, &user.Picture, &user.Games)
+	fmt.Println("6")
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	user.Picture = "http://localhost:8081/data/" + user.Picture
+	return &user, nil
+}
+
+const selectByID = `
+SELECT users.id, login, email, hashpassword, score, name, games
+FROM users, pictures
+WHERE users.id = $1
+AND users.picture = pictures.id`
+
+func GetUserByID(id uint) (*models.User, error) {
+	var user models.User
+	err := connection.QueryRow(selectByID, id).Scan(&user.ID, &user.Login, &user.Email, &user.HashPassword, &user.Score, &user.Picture, &user.Games)
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
@@ -113,7 +161,7 @@ func AddGame(email string) error {
 }
 
 func NewRecord(email string, record int) error {
-	_, err := Exec(iterateGame, email, record)
+	_, err := Exec(newPersonalRecord, email, record)
 	if err != nil {
 		helpers.LogMsg(err)
 		return err

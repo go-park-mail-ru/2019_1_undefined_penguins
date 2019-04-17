@@ -3,10 +3,12 @@ package database
 import (
 	"encoding/json"
 	"io/ioutil"
+	"strings"
 
 	"os"
 
 	h "2019_1_undefined_penguins/internal/pkg/helpers"
+
 	"github.com/jackc/pgx"
 )
 
@@ -16,25 +18,35 @@ var connectionConfig pgx.ConnConfig
 var connectionPoolConfig = pgx.ConnPoolConfig{
 	MaxConnections: 8,
 }
+
 //TODO check connect
 func initConfig() error {
+
 	dir, err := os.Getwd()
 	if err != nil {
-		h.LogMsg("Init DB error: ", err)
+		h.LogMsg("Getting directory error: ", err)
 		return err
 
 	}
 
 	file, err := os.Open(dir + "/configs/database.json")
 	if err != nil {
-		h.LogMsg("Open DB error: ", err)
-		return err
+		dirRep := strings.Replace(dir, "/internal/pkg/controllers", "", -1)
+		file, err = os.Open(dirRep + "/configs/testbase.json")
+		if err != nil {
+			dirRep = strings.Replace(dir, "/internal/pkg/database", "", -1)
+			file, err = os.Open(dirRep + "/configs/testbase.json")
+			if err != nil {
+				h.LogMsg("Open directory error: ", err)
+				return err
+			}
+		}
 	}
 
 	body, _ := ioutil.ReadAll(file)
 	err = json.Unmarshal(body, &connectionConfig)
 	if err != nil {
-		h.LogMsg("Init parse DB error: ",  err)
+		h.LogMsg("Init parse DB error: ", err)
 		return err
 	}
 
@@ -42,7 +54,7 @@ func initConfig() error {
 	return nil
 }
 
-func Connect() (error) {
+func Connect() error {
 	if connection != nil {
 		return nil
 	}
@@ -58,11 +70,9 @@ func Connect() (error) {
 	return nil
 }
 
-func Disconnect()  {
+func Disconnect() {
 	if connection != nil {
 		connection.Close()
 		connection = nil
 	}
 }
-
-

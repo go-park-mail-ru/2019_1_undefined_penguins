@@ -33,11 +33,6 @@ func Me(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
-	//email, _ := models.Sessions[cookie.Value]
-	//if !found {
-	//	w.WriteHeader(http.StatusForbidden)
-	//	return
-	//}
 
 	token, err := jwt.Parse(cookie.Value, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -48,9 +43,10 @@ func Me(w http.ResponseWriter, r *http.Request) {
 	})
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		temp := token.Claims.(jwt.MapClaims)
-		fmt.Println(temp)
-		user, err := db.GetUserByEmail(claims["userEmail"].(string))
+		temp := claims["userID"]
+		mytemp := uint(temp.(float64))
+
+		user, err := db.GetUserByID(mytemp)
 		if user == nil {
 			w.WriteHeader(http.StatusNotFound)
 			return
@@ -67,35 +63,19 @@ func Me(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("not authorized"))
 	helpers.DeleteCookie(&w, cookie)
 
-	fmt.Println(err)
-
+	helpers.LogMsg(err)
 }
 
 func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "OPTIONS" {
 		return
 	}
-	//cookie, err := r.Cookie("sessionid")
-	//if err != nil {
-	//	w.WriteHeader(http.StatusForbidden)
-	//	return
-	//}
-	//email, found := models.Sessions[cookie.Value]
-	//if !found {
-	//	w.WriteHeader(http.StatusForbidden)
-	//	return
-	//}
 
 	cookie, err := r.Cookie("sessionid")
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
-	//email, _ := models.Sessions[cookie.Value]
-	//if !found {
-	//	w.WriteHeader(http.StatusForbidden)
-	//	return
-	//}
 
 	token, err := jwt.Parse(cookie.Value, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -106,8 +86,6 @@ func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 	})
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		temp := token.Claims.(jwt.MapClaims)
-		fmt.Println(temp)
 		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -122,64 +100,44 @@ func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		err = db.UpdateUser(&user, claims["userEmail"].(string))
+		temp := claims["userID"]
+		mytemp := uint(temp.(float64))
+		user, err = db.UpdateUserByID(user, mytemp)
 		if err != nil {
 			switch errPgx := err.(pgx.PgError); errPgx.Code {
 			case "23505":
+				helpers.LogMsg(errPgx)
 				w.WriteHeader(http.StatusConflict)
 				return
 			default:
+				helpers.LogMsg(errPgx)
 				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
 
 		}
-		//models.Sessions[cookie.Value] = user.Email
-		w.Write(body)
+
+		bytes, err := json.Marshal(user)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		w.Write(bytes)
 		return
 	}
 	w.WriteHeader(http.StatusUnauthorized)
 	w.Write([]byte("not authorized"))
 	helpers.DeleteCookie(&w, cookie)
 
-	fmt.Println(err)
-}
-
-var uploadFormTmpl = []byte(`
-<html>
-	<body>
-	<form action="/upload" method="post" enctype="multipart/form-data">
-		Image: <input type="file" name="avatar">
-		<input type="submit" value="Upload">
-	</form>
-	</body>
-</html>
-`)
-
-func UploadPage(w http.ResponseWriter, r *http.Request) {
-
-	w.Write(uploadFormTmpl)
-
+	helpers.LogMsg(err)
 }
 
 func UploadImage(w http.ResponseWriter, r *http.Request) {
-
-	//cookie, err := r.Cookie("sessionid")
-	//if err != nil {
-	//	w.WriteHeader(http.StatusForbidden)
-	//	return
-	//}
-
 	cookie, err := r.Cookie("sessionid")
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
-	//email, _ := models.Sessions[cookie.Value]
-	//if !found {
-	//	w.WriteHeader(http.StatusForbidden)
-	//	return
-	//}
 
 	token, err := jwt.Parse(cookie.Value, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -195,9 +153,6 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
-
-		// var user models.User
-		// user.Login = "iamfrommoscow"
 
 		err = r.ParseMultipartForm(5 * 1024 * 1025)
 		if err != nil {
@@ -246,17 +201,12 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		return
 	}
 
 	w.WriteHeader(http.StatusUnauthorized)
 	w.Write([]byte("not authorized"))
 	helpers.DeleteCookie(&w, cookie)
 
-	fmt.Println(err)
-	//email, found := models.Sessions[cookie.Value]
-	//if !found {
-	//	w.WriteHeader(http.StatusForbidden)
-	//	return
-	//}
-
+	helpers.LogMsg(err)
 }

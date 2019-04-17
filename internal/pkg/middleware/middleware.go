@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 
-
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 )
 
@@ -47,13 +46,11 @@ func PanicMiddleware(next http.Handler) http.Handler {
 //TODO check
 func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.RequestURI != "/me" || r.RequestURI != "/" {
+		if r.RequestURI != "/me" {
 			next.ServeHTTP(w, r)
 			return
 		}
 		cookie, err := r.Cookie("sessionid")
-
-
 
 		if err != nil || cookie.Value == "" {
 			w.WriteHeader(http.StatusUnauthorized)
