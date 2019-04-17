@@ -18,10 +18,6 @@ var SECRET = []byte("myawesomesecret")
 
 func SignIn(w http.ResponseWriter, r *http.Request) {
 
-
-	fmt.Println(r.URL.Path)
-
-
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
