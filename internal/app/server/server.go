@@ -1,6 +1,7 @@
 package server
 
 import (
+	//"2019_1_undefined_penguins/internal/app/game"
 	"2019_1_undefined_penguins/internal/pkg/fileserver"
 	"fmt"
 	"net/http"
@@ -20,6 +21,7 @@ import (
 type Params struct {
 	Port string
 }
+
 
 func StartApp(params Params) error {
 	err := db.Connect()
@@ -43,10 +45,20 @@ func StartApp(params Params) error {
 	router.HandleFunc("/signout", c.SignOut).Methods("GET", "OPTIONS")
 	router.HandleFunc("/change_profile", c.ChangeProfile).Methods("PUT", "OPTIONS")
 	router.HandleFunc("/upload", c.UploadImage).Methods("POST")
+	router.HandleFunc("/ws", c.StartWS)
+
 
 	fmt.Println("Server started at " + params.Port)
 	go func() {
 		fileserver.Start()
 	}()
+
+
+	//fmt.Println("Game started at " + "8082")
+	//go func() {
+	//	game.Start()
+	//}()
+
+
 	return http.ListenAndServe(":"+params.Port, handlers.LoggingHandler(os.Stdout, router))
 }
