@@ -18,6 +18,10 @@ func CORSMiddleware(next http.Handler) http.Handler {
 		responseHeader.Set("Access-Control-Allow-Headers", "Content-Type")
 		responseHeader.Set("Access-Control-Allow-Origin", origin)
 
+		if r.Method == "OPTIONS" {
+			return
+		}
+
 		next.ServeHTTP(w, r)
 	})
 }

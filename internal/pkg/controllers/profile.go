@@ -25,9 +25,6 @@ import (
 )
 
 func Me(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "OPTIONS" {
-		return
-	}
 	cookie, err := r.Cookie("sessionid")
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -67,10 +64,6 @@ func Me(w http.ResponseWriter, r *http.Request) {
 }
 
 func ChangeProfile(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "OPTIONS" {
-		return
-	}
-
 	cookie, err := r.Cookie("sessionid")
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
