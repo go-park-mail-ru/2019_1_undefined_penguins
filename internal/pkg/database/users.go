@@ -3,7 +3,6 @@ package database
 import (
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 	"2019_1_undefined_penguins/internal/pkg/models"
-	"fmt"
 
 	"github.com/jackc/pgx"
 )
@@ -19,8 +18,6 @@ func CreateUser(newUser *models.User) error {
 		return pgx.ErrDeadConn
 	}
 
-	//var row pgtype.Record
-	//err := conn.QueryRow("insert ... returning (...)").Scan(&row)
 	if err := connection.QueryRow(insertUser, newUser.Email, newUser.Login, newUser.HashPassword).Scan(&newUser.ID, &newUser.Login, &newUser.Score); err != nil {
 		helpers.LogMsg(err)
 		return err
@@ -40,7 +37,7 @@ AND u.picture = p.id
 RETURNING games, name, score`
 
 func UpdateUser(user models.User, oldEmail string) (models.User, error) {
-	user.Password = "" //Лови коммент
+	user.Password = ""
 	err := connection.QueryRow(updateUserByEmail, oldEmail, user.Login, user.Email).Scan(&user.Score, &user.Picture, &user.Games)
 	if err != nil {
 		helpers.LogMsg(err)
@@ -61,7 +58,7 @@ AND u.picture = p.id
 RETURNING games, name, score`
 
 func UpdateUserByID(user models.User, id uint) (models.User, error) {
-	user.Password = "" //Лови коммент
+	user.Password = ""
 	err := connection.QueryRow(updateUserByID, id, user.Login, user.Email).Scan(&user.Score, &user.Picture, &user.Games)
 	if err != nil {
 		helpers.LogMsg(err)
@@ -92,11 +89,8 @@ AND users.picture = pictures.id`
 
 func GetUserByEmail(email string) (*models.User, error) {
 	var user models.User
-	fmt.Println("5")
 	err := connection.QueryRow(selectByEmail, email).Scan(&user.ID, &user.Login, &user.Email, &user.HashPassword, &user.Score, &user.Picture, &user.Games)
-	fmt.Println("6")
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 	user.Picture = "http://localhost:8081/data/" + user.Picture
@@ -113,7 +107,7 @@ func GetUserByID(id uint) (*models.User, error) {
 	var user models.User
 	err := connection.QueryRow(selectByID, id).Scan(&user.ID, &user.Login, &user.Email, &user.HashPassword, &user.Score, &user.Picture, &user.Games)
 	if err != nil {
-		fmt.Println(err)
+		helpers.LogMsg(err)
 		return nil, err
 	}
 	user.Picture = "http://localhost:8081/data/" + user.Picture
@@ -136,7 +130,6 @@ func GetLeaders(id int) ([]models.User, error) {
 	defer rows.Close()
 
 	users = RowsToUsers(rows)
-	fmt.Println(users)
 	return users, nil
 }
 

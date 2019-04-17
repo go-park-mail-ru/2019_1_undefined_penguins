@@ -2,7 +2,6 @@ package game
 
 import (
 	"2019_1_undefined_penguins/internal/pkg/helpers"
-	"fmt"
 	"net/http"
 
 	"github.com/gorilla/websocket"
@@ -36,7 +35,7 @@ func Start() error {
 		pingGame.AddPlayer(player)
 	})
 
-	fmt.Println("Started game")
+	helpers.LogMsg("Started game")
 
 	return http.ListenAndServe(":8082", nil)
 	//if err != nil {

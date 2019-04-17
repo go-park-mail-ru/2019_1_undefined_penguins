@@ -1,7 +1,7 @@
 package fileserver
 
 import (
-	"fmt"
+	"2019_1_undefined_penguins/internal/pkg/helpers"
 	"net/http"
 )
 
@@ -12,7 +12,7 @@ func Start() error {
 	)
 	http.Handle("/data/", staticHandler)
 
-	fmt.Println("FileServer started at 8081")
+	helpers.LogMsg("FileServer started at 8081")
 	return http.ListenAndServe(":8081", nil)
 
 }

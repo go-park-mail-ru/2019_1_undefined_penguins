@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -13,13 +12,10 @@ import (
 
 func GetLeaderboardPage(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	fmt.Println(mux.Vars(r))
 	id, err := strconv.Atoi(vars["id"])
 
 	if err != nil {
 
-		fmt.Println(err)
-		fmt.Println(r.URL.Path)
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}

@@ -19,7 +19,6 @@ var connectionPoolConfig = pgx.ConnPoolConfig{
 	MaxConnections: 8,
 }
 
-//TODO check connect
 func initConfig() error {
 
 	dir, err := os.Getwd()

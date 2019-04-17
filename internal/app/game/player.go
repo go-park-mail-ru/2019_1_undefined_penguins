@@ -3,14 +3,15 @@ package game
 import (
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 	"fmt"
+
 	"github.com/gorilla/websocket"
 )
 
 type Player struct {
 	conn *websocket.Conn
-	ID string
-	in chan *IncomeMessage
-	out chan *Message
+	ID   string
+	in   chan *IncomeMessage
+	out  chan *Message
 	room *Room
 }
 
@@ -30,7 +31,7 @@ func (p *Player) Listen() {
 			err := p.conn.ReadJSON(message)
 			if websocket.IsUnexpectedCloseError(err) {
 				p.room.RemovePlayer(p)
-				helpers.LogMsg("Player "+p.ID+" disconnected")
+				helpers.LogMsg("Player " + p.ID + " disconnected")
 				return
 			}
 			if err != nil {
@@ -48,7 +49,6 @@ func (p *Player) Listen() {
 			p.conn.WriteJSON(message)
 		case message := <-p.in:
 			fmt.Printf("income: %#v", message)
-			fmt.Println("")
 		}
 	}
 }

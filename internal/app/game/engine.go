@@ -1,7 +1,7 @@
 package game
 
 import (
-	"fmt"
+	"2019_1_undefined_penguins/internal/pkg/helpers"
 	"math"
 )
 
@@ -14,14 +14,14 @@ func RotatePlayer(ps *PlayerState) {
 }
 
 func ShotPlayer(ps *PlayerState, b *BulletState) {
-	fmt.Println(b.X,b.Y)
+	helpers.LogMsg(b.X, b.Y)
 	if ps.Shoted {
 		return
 	}
 
 	RecountBullet(ps, b)
 
-	fmt.Println(b.X,b.Y)
+	helpers.LogMsg(b.X, b.Y)
 
 	if ps.X == b.X && ps.Y == b.Y {
 		ps.Shoted = true
@@ -29,14 +29,14 @@ func ShotPlayer(ps *PlayerState, b *BulletState) {
 	}
 }
 
-func RecountBullet (ps *PlayerState, b *BulletState) {
+func RecountBullet(ps *PlayerState, b *BulletState) {
 	const ownRandom = 0.25
 
 	if ps.ClockwiseDirection {
 		//TODO: create own random
-		b.Alpha = ps.Alpha + ownRandom * 100
+		b.Alpha = ps.Alpha + ownRandom*100
 	} else {
-		b.Alpha = ps.Alpha - ownRandom * 100
+		b.Alpha = ps.Alpha - ownRandom*100
 	}
 
 	b.X = 20 + int(math.Floor(math.Sin(b.Alpha*(math.Pi/180))))
@@ -45,9 +45,9 @@ func RecountBullet (ps *PlayerState, b *BulletState) {
 
 func CreateBullet(r *Room) BulletState {
 	return BulletState{
-		ID: r.ID,
-		X: 0,
-		Y: 0,
+		ID:    r.ID,
+		X:     0,
+		Y:     0,
 		Alpha: 0,
 	}
 }
