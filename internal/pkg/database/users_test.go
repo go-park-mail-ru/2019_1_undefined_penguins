@@ -193,22 +193,64 @@ func TestNewRecord(t *testing.T) {
 	}
 }
 
-// func TestUpdateByEmail(t *testing.T) {
-// 	err := Connect()
-// 	if err != nil {
-// 		helpers.LogMsg("Connection error: ", err)
-// 		t.Error(err)
-// 	}
-// 	defer Disconnect()
+func TestUpdateByID(t *testing.T) {
+	err := Connect()
+	if err != nil {
+		helpers.LogMsg("Connection error: ", err)
+		t.Error(err)
+	}
+	defer Disconnect()
 
-// 	var user models.User
-// 	user.Login = time.Now().Format("20060102150405") + "loginn"
-// 	user.Email = time.Now().Format("20060102150405") + "@pochta.ru"
-// 	user.Password = time.Now().Format("20060102150405") + "password"
-// 	err = CreateUser(&user)
-// 	found, err := GetUserByEmail(user.Email)
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
+	var user models.User
+	user.Login = time.Now().Format("20060102150405") + "loginn"
+	user.Email = time.Now().Format("20060102150405") + "@pochta.ru"
+	user.Password = time.Now().Format("20060102150405") + "password"
+	err = CreateUser(&user)
+	found, err := GetUserByEmail(user.Email)
+	if err != nil {
+		t.Error(err)
+	}
+	user.Login = time.Now().Format("20060102150405") + user.Login
+	user.Email = time.Now().Format("20060102150405") + user.Email
+	user.Password = time.Now().Format("20060102150405") + user.Password
+	UpdateUserByID(user, found.ID)
+	found, err = GetUserByEmail(user.Email)
+	if err != nil {
+		t.Error(err)
+	}
+	if found.Login != user.Login {
+		t.Error(err)
+	}
 
-// }
+}
+
+func TestUpdateByEmail(t *testing.T) {
+	err := Connect()
+	if err != nil {
+		helpers.LogMsg("Connection error: ", err)
+		t.Error(err)
+	}
+	defer Disconnect()
+
+	var user models.User
+	user.Login = time.Now().Format("20060102150405") + "loginn"
+	user.Email = time.Now().Format("20060102150405") + "@pochta.ru"
+	user.Password = time.Now().Format("20060102150405") + "password"
+	err = CreateUser(&user)
+	found, err := GetUserByEmail(user.Email)
+	if err != nil {
+		t.Error(err)
+	}
+	user.Login = time.Now().Format("20060102150405") + user.Login
+	user.Email = time.Now().Format("20060102150405") + user.Email
+	user.Password = time.Now().Format("20060102150405") + user.Password
+	UpdateUser(user, found.Email)
+	found, err = GetUserByEmail(user.Email)
+	if err != nil {
+		t.Error(err)
+	}
+	if found.Login != user.Login {
+		t.Error(err)
+	}
+
+}
