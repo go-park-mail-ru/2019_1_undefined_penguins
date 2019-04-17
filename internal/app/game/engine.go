@@ -31,7 +31,6 @@ func ShotPlayer(ps *PlayerState, b *BulletState) {
 
 func RecountBullet(ps *PlayerState, b *BulletState) {
 	const ownRandom = 0.25
-
 	if ps.ClockwiseDirection {
 		//TODO: create own random
 		b.Alpha = ps.Alpha + ownRandom*100
