@@ -1,9 +1,7 @@
 package server
 
 import (
-	//"2019_1_undefined_penguins/internal/app/game"
 	"2019_1_undefined_penguins/internal/pkg/fileserver"
-	"fmt"
 	"net/http"
 	"os"
 
@@ -22,7 +20,6 @@ type Params struct {
 	Port string
 }
 
-
 func StartApp(params Params) error {
 	err := db.Connect()
 	if err != nil {
@@ -32,7 +29,6 @@ func StartApp(params Params) error {
 	defer db.Disconnect()
 	router := mux.NewRouter()
 
-	//router.Use(mw.LoggingMiddleware)
 	router.Use(mw.CORSMiddleware)
 	router.Use(mw.PanicMiddleware)
 	router.Use(mw.AuthMiddleware)
@@ -47,18 +43,15 @@ func StartApp(params Params) error {
 	router.HandleFunc("/upload", c.UploadImage).Methods("POST")
 	router.HandleFunc("/ws", c.StartWS)
 
-
-	fmt.Println("Server started at " + params.Port)
+	helpers.LogMsg("Server started at " + params.Port)
 	go func() {
 		fileserver.Start()
 	}()
-
 
 	//fmt.Println("Game started at " + "8082")
 	//go func() {
 	//	game.Start()
 	//}()
-
 
 	return http.ListenAndServe(":"+params.Port, handlers.LoggingHandler(os.Stdout, router))
 }

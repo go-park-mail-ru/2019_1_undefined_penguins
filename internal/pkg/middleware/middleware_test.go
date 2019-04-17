@@ -8,7 +8,7 @@ import (
 func TestCORS(t *testing.T) {
 	_ = CORSMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if w.Header().Get("Access-Control-Allow-Headers") != "Content-Type" {
-			t.Fatal("CORS are not working")
+			t.Error("CORS are not working")
 		}
 	}))
 }

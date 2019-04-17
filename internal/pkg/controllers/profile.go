@@ -10,13 +10,11 @@ import (
 	"path/filepath"
 	"time"
 
-	//"fmt"
 	"io/ioutil"
 	"net/http"
 
-	db "2019_1_undefined_penguins/internal/pkg/database"
-	//"2019_1_undefined_penguins/internal/pkg/helpers"
 	"2019_1_undefined_penguins/internal/pkg/database"
+	db "2019_1_undefined_penguins/internal/pkg/database"
 	"2019_1_undefined_penguins/internal/pkg/models"
 
 	"github.com/jackc/pgx"
@@ -156,20 +154,20 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 
 		err = r.ParseMultipartForm(5 * 1024 * 1025)
 		if err != nil {
-			fmt.Println("Ошибка при парсинге тела запроса")
+			helpers.LogMsg("Ошибка при парсинге тела запроса")
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 		file, handler, err := r.FormFile("avatar")
 		if err != nil {
-			fmt.Println("Ошибка при получении файла из тела запроса")
+			helpers.LogMsg("Ошибка при получении файла из тела запроса")
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 		defer file.Close()
 		extension := filepath.Ext(handler.Filename)
 		if extension == "" {
-			fmt.Println("Файл не имеет расширения")
+			helpers.LogMsg("Файл не имеет расширения")
 
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -181,7 +179,7 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 		fileAndPath := "static/" + fileName
 		saveFile, err := os.Create(fileAndPath)
 		if err != nil {
-			fmt.Println("Create", err)
+			helpers.LogMsg("Create", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
@@ -189,14 +187,14 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 
 		_, err = io.Copy(saveFile, file)
 		if err != nil {
-			fmt.Println("Copy", err)
+			helpers.LogMsg("Copy", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
 		err = database.UpdateImage(user.Login, fileName)
 		if err != nil {
-			fmt.Println("Ошибка при обновлении картинки в базе данных")
+			helpers.LogMsg("Ошибка при обновлении картинки в базе данных")
 
 			w.WriteHeader(http.StatusInternalServerError)
 			return

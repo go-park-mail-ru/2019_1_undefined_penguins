@@ -39,7 +39,7 @@ func TestCreate(t *testing.T) {
 	err := Connect()
 	if err != nil {
 		helpers.LogMsg("Connection error: ", err)
-		t.Fatal(err)
+		t.Error(err)
 	}
 	defer Disconnect()
 
@@ -50,15 +50,15 @@ func TestCreate(t *testing.T) {
 	err = CreateUser(&user)
 
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 
 	found, err := GetUserByEmail(user.Email)
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 	if found.Login != user.Login {
-		t.Fatal(found.Login + "!=" + user.Login)
+		t.Error(found.Login + "!=" + user.Login)
 	}
 }
 
@@ -66,13 +66,13 @@ func TestGetUserByID(t *testing.T) {
 	err := Connect()
 	if err != nil {
 		helpers.LogMsg("Connection error: ", err)
-		t.Fatal(err)
+		t.Error(err)
 	}
 	defer Disconnect()
 
 	_, err = GetUserByID(1)
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 
 }
@@ -81,7 +81,7 @@ func TestUpdateImage(t *testing.T) {
 	err := Connect()
 	if err != nil {
 		helpers.LogMsg("Connection error: ", err)
-		t.Fatal(err)
+		t.Error(err)
 	}
 	defer Disconnect()
 
@@ -92,12 +92,12 @@ func TestUpdateImage(t *testing.T) {
 	err = CreateUser(&user)
 
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 
 	err = UpdateImage(user.Login, time.Now().Format("20060102150405")+"pic")
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 }
 
@@ -105,15 +105,15 @@ func TestLeaders(t *testing.T) {
 	err := Connect()
 	if err != nil {
 		helpers.LogMsg("Connection error: ", err)
-		t.Fatal(err)
+		t.Error(err)
 	}
 	defer Disconnect()
 	users, err := GetLeaders(1)
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 	if len(users) == 0 {
-		t.Fatal(err)
+		t.Error(err)
 	}
 }
 
@@ -121,7 +121,7 @@ func TestAddGame(t *testing.T) {
 	err := Connect()
 	if err != nil {
 		helpers.LogMsg("Connection error: ", err)
-		t.Fatal(err)
+		t.Error(err)
 	}
 	defer Disconnect()
 
@@ -132,22 +132,22 @@ func TestAddGame(t *testing.T) {
 	err = CreateUser(&user)
 
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 
 	err = AddGame(user.Email)
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 	found, err := GetUserByEmail(user.Email)
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 	if found.Login != user.Login {
-		t.Fatal(found.Login + "!=" + user.Login)
+		t.Error(found.Login + "!=" + user.Login)
 	}
 	if found.Games != 1 {
-		t.Fatal("Неверное количество игр")
+		t.Error("Неверное количество игр")
 	}
 
 }
@@ -156,7 +156,7 @@ func TestNewRecord(t *testing.T) {
 	err := Connect()
 	if err != nil {
 		helpers.LogMsg("Connection error: ", err)
-		t.Fatal(err)
+		t.Error(err)
 	}
 	defer Disconnect()
 
@@ -167,28 +167,28 @@ func TestNewRecord(t *testing.T) {
 	err = CreateUser(&user)
 
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 	record := 200
 	err = NewRecord(user.Email, record)
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 
 	found, err := GetUserByEmail(user.Email)
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 	if found.Login != user.Login {
-		t.Fatal(found.Login + "!=" + user.Login)
+		t.Error(found.Login + "!=" + user.Login)
 	}
 	if found.Games != 1 {
-		t.Fatal("Неверное количество игр")
+		t.Error("Неверное количество игр")
 	}
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 	if record != int(found.Score) {
-		t.Fatal("Неверно записан рекорд")
+		t.Error("Неверно записан рекорд")
 	}
 }

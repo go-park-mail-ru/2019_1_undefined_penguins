@@ -6,7 +6,6 @@ import (
 	"2019_1_undefined_penguins/internal/pkg/models"
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -44,16 +43,16 @@ func TestLogIn(t *testing.T) {
 	err := database.Connect()
 	if err != nil {
 		helpers.LogMsg("Connection error: ", err)
-		t.Fatal(err)
+		t.Error(err)
 	}
 	defer database.Disconnect()
 	user, err := GetUserFromJSON("testuser.json")
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 	data, err := json.Marshal(user)
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 	buf := bytes.NewBuffer(data)
 	req, err := http.NewRequest("POST", "/login", buf)
@@ -71,23 +70,22 @@ func TestLogInWrongPassword(t *testing.T) {
 	err := database.Connect()
 	if err != nil {
 		helpers.LogMsg("Connection error: ", err)
-		t.Fatal(err)
+		t.Error(err)
 	}
 	defer database.Disconnect()
 	user, err := GetUserFromJSON("testuser.json")
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 	user.Password = "password"
 	data, err := json.Marshal(user)
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 	buf := bytes.NewBuffer(data)
 	req, err := http.NewRequest("POST", "/login", buf)
 	w := httptest.NewRecorder()
 	handler := http.HandlerFunc(SignIn)
-	fmt.Println("1")
 	handler.ServeHTTP(w, req)
 	expectedStatus := http.StatusForbidden
 	if w.Code != expectedStatus {
@@ -100,7 +98,7 @@ func TestEmptyLogIn(t *testing.T) {
 	err := database.Connect()
 	if err != nil {
 		helpers.LogMsg("Connection error: ", err)
-		t.Fatal(err)
+		t.Error(err)
 	}
 	defer database.Disconnect()
 	buf := bytes.NewBuffer(nil)
@@ -119,22 +117,21 @@ func TestWrongUserSignIn(t *testing.T) {
 	err := database.Connect()
 	if err != nil {
 		helpers.LogMsg("Connection error: ", err)
-		t.Fatal(err)
+		t.Error(err)
 	}
 	defer database.Disconnect()
 	user, err := GetUserFromJSON("wronguser.json")
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 	data, err := json.Marshal(user)
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 	buf := bytes.NewBuffer(data)
 	req, err := http.NewRequest("POST", "/login", buf)
 	w := httptest.NewRecorder()
 	handler := http.HandlerFunc(SignIn)
-	fmt.Println("1")
 	handler.ServeHTTP(w, req)
 	expectedStatus := http.StatusNotFound
 	if w.Code != expectedStatus {
@@ -147,23 +144,22 @@ func TestWrongUserSignOut(t *testing.T) {
 	err := database.Connect()
 	if err != nil {
 		helpers.LogMsg("Connection error: ", err)
-		t.Fatal(err)
+		t.Error(err)
 	}
 	defer database.Disconnect()
 	user, err := GetUserFromJSON("wronguser.json")
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 
 	data, err := json.Marshal(user)
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 	buf := bytes.NewBuffer(data)
 	req, err := http.NewRequest("POST", "/login", buf)
 	w := httptest.NewRecorder()
 	handler := http.HandlerFunc(SignIn)
-	fmt.Println("1")
 	handler.ServeHTTP(w, req)
 	expectedStatus := http.StatusNotFound
 	if w.Code != expectedStatus {
@@ -185,23 +181,21 @@ func TestMe(t *testing.T) {
 	err := database.Connect()
 	if err != nil {
 		helpers.LogMsg("Connection error: ", err)
-		t.Fatal(err)
+		t.Error(err)
 	}
 	defer database.Disconnect()
 	user, err := GetUserFromJSON("testuser.json")
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
-	fmt.Println(user)
 	data, err := json.Marshal(user)
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 	buf := bytes.NewBuffer(data)
 	req, err := http.NewRequest("POST", "/login", buf)
 	w := httptest.NewRecorder()
 	handler := http.HandlerFunc(SignIn)
-	fmt.Println("1")
 	handler.ServeHTTP(w, req)
 	expectedStatus := http.StatusOK
 	if w.Code != expectedStatus {
@@ -242,23 +236,21 @@ func TestUnauthorizedMe(t *testing.T) {
 	err := database.Connect()
 	if err != nil {
 		helpers.LogMsg("Connection error: ", err)
-		t.Fatal(err)
+		t.Error(err)
 	}
 	defer database.Disconnect()
 	user, err := GetUserFromJSON("testuser.json")
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
-	fmt.Println(user)
 	data, err := json.Marshal(user)
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 	buf := bytes.NewBuffer(data)
 	req, err := http.NewRequest("POST", "/login", buf)
 	w := httptest.NewRecorder()
 	handler := http.HandlerFunc(SignIn)
-	fmt.Println("1")
 	handler.ServeHTTP(w, req)
 	expectedStatus := http.StatusOK
 	if w.Code != expectedStatus {
@@ -279,28 +271,26 @@ func TestSignOut(t *testing.T) {
 	err := database.Connect()
 	if err != nil {
 		helpers.LogMsg("Connection error: ", err)
-		t.Fatal(err)
+		t.Error(err)
 	}
 	defer database.Disconnect()
 	user, err := GetUserFromJSON("testuser.json")
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 	data, err := json.Marshal(user)
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 	buf := bytes.NewBuffer(data)
 	req, err := http.NewRequest("POST", "/login", buf)
 	w := httptest.NewRecorder()
 	handler := http.HandlerFunc(SignIn)
-	fmt.Println("1")
 	handler.ServeHTTP(w, req)
 	expectedStatus := http.StatusOK
 	if w.Code != expectedStatus {
 		t.Error(w.Code)
 	}
-	fmt.Println(w.HeaderMap["Set-Cookie"])
 	var ss []string
 
 	s := w.HeaderMap["Set-Cookie"][0]
@@ -336,19 +326,19 @@ func TestSignUp(t *testing.T) {
 	err := database.Connect()
 	if err != nil {
 		helpers.LogMsg("Connection error: ", err)
-		t.Fatal(err)
+		t.Error(err)
 	}
 	defer database.Disconnect()
 	user, err := GetUserFromJSON("wronguser.json")
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 	user.Login = time.Now().Format("20060102150405") + user.Login
 	user.Email = time.Now().Format("20060102150405") + user.Email
 	user.Password = time.Now().Format("20060102150405") + user.Password
 	data, err := json.Marshal(user)
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 	buf := bytes.NewBuffer(data)
 	req, err := http.NewRequest("POST", "/signup", buf)
@@ -365,16 +355,16 @@ func TestSignUpConflict(t *testing.T) {
 	err := database.Connect()
 	if err != nil {
 		helpers.LogMsg("Connection error: ", err)
-		t.Fatal(err)
+		t.Error(err)
 	}
 	defer database.Disconnect()
 	user, err := GetUserFromJSON("testuser.json")
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 	data, err := json.Marshal(user)
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 	buf := bytes.NewBuffer(data)
 	req, err := http.NewRequest("POST", "/signup", buf)
@@ -391,31 +381,29 @@ func TestSignUpUpdate(t *testing.T) {
 	err := database.Connect()
 	if err != nil {
 		helpers.LogMsg("Connection error: ", err)
-		t.Fatal(err)
+		t.Error(err)
 	}
 	defer database.Disconnect()
 	user, err := GetUserFromJSON("wronguser.json")
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 	user.Login = time.Now().Format("20060102150405") + user.Login + "2"
 	user.Email = time.Now().Format("20060102150405") + user.Email + "2"
 	user.Password = time.Now().Format("20060102150405") + user.Password + "2"
 	data, err := json.Marshal(user)
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 	buf := bytes.NewBuffer(data)
 	req, err := http.NewRequest("POST", "/signup", buf)
 	w := httptest.NewRecorder()
 	handler := http.HandlerFunc(SignUp)
-	fmt.Println("1")
 	handler.ServeHTTP(w, req)
 	expectedStatus := http.StatusOK
 	if w.Code != expectedStatus {
 		t.Error(w.Code)
 	}
-	fmt.Println(w.HeaderMap["Set-Cookie"])
 	var ss []string
 
 	s := w.HeaderMap["Set-Cookie"][0]
@@ -441,7 +429,7 @@ func TestSignUpUpdate(t *testing.T) {
 	user.Password = time.Now().Format("20060102150405") + user.Password
 	data, err = json.Marshal(user)
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 	buf = bytes.NewBuffer(data)
 	req, err = http.NewRequest("POST", "/change_profile", buf)
@@ -459,28 +447,26 @@ func TestSignInConflict(t *testing.T) {
 	err := database.Connect()
 	if err != nil {
 		helpers.LogMsg("Connection error: ", err)
-		t.Fatal(err)
+		t.Error(err)
 	}
 	defer database.Disconnect()
 	user, err := GetUserFromJSON("testuser.json")
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 	data, err := json.Marshal(user)
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 	buf := bytes.NewBuffer(data)
 	req, err := http.NewRequest("POST", "/signin", buf)
 	w := httptest.NewRecorder()
 	handler := http.HandlerFunc(SignIn)
-	fmt.Println("1")
 	handler.ServeHTTP(w, req)
 	expectedStatus := http.StatusOK
 	if w.Code != expectedStatus {
 		t.Error(w.Code)
 	}
-	fmt.Println(w.HeaderMap["Set-Cookie"])
 	var ss []string
 
 	s := w.HeaderMap["Set-Cookie"][0]
@@ -506,7 +492,7 @@ func TestSignInConflict(t *testing.T) {
 	user.Password = time.Now().Format("20060102150405") + user.Password
 	data, err = json.Marshal(user)
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 	buf = bytes.NewBuffer(data)
 	req, err = http.NewRequest("POST", "/change_profile", buf)
@@ -524,25 +510,24 @@ func TestUnauthorized(t *testing.T) {
 	err := database.Connect()
 	if err != nil {
 		helpers.LogMsg("Connection error: ", err)
-		t.Fatal(err)
+		t.Error(err)
 	}
 	defer database.Disconnect()
 	user, err := GetUserFromJSON("wronguser.json")
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 	user.Login = time.Now().Format("20060102150405") + user.Login + "2"
 	user.Email = time.Now().Format("20060102150405") + user.Email + "2"
 	user.Password = time.Now().Format("20060102150405") + user.Password + "2"
 	data, err := json.Marshal(user)
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 	buf := bytes.NewBuffer(data)
 	req, err := http.NewRequest("POST", "/signup", buf)
 	w := httptest.NewRecorder()
 	handler := http.HandlerFunc(SignUp)
-	fmt.Println("1")
 	handler.ServeHTTP(w, req)
 	expectedStatus := http.StatusOK
 	if w.Code != expectedStatus {
@@ -554,7 +539,7 @@ func TestUnauthorized(t *testing.T) {
 	user.Password = time.Now().Format("20060102150405") + user.Password
 	data, err = json.Marshal(user)
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 	buf = bytes.NewBuffer(data)
 	req, err = http.NewRequest("POST", "/change_profile", buf)
@@ -582,14 +567,14 @@ func TestUploadImageUnauthorized(t *testing.T) {
 	err := database.Connect()
 	if err != nil {
 		helpers.LogMsg("Connection error: ", err)
-		t.Fatal(err)
+		t.Error(err)
 	}
 	defer database.Disconnect()
 
 	req, err := http.NewRequest("POST", "/upload", nil)
 
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 	w := httptest.NewRecorder()
 	handler := http.HandlerFunc(UploadImage)
@@ -604,17 +589,16 @@ func TestUploadImageInternalServerError(t *testing.T) {
 	err := database.Connect()
 	if err != nil {
 		helpers.LogMsg("Connection error: ", err)
-		t.Fatal(err)
+		t.Error(err)
 	}
 	defer database.Disconnect()
 	user, err := GetUserFromJSON("testuser.json")
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
-	fmt.Println(user)
 	data, err := json.Marshal(user)
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 	buf := bytes.NewBuffer(data)
 	req, err := http.NewRequest("POST", "/login", buf)
@@ -647,7 +631,7 @@ func TestUploadImageInternalServerError(t *testing.T) {
 	}
 
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 	req, err = http.NewRequest("POST", "/change_profile", nil)
 	w = httptest.NewRecorder()

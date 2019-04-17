@@ -2,10 +2,8 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
 	"time"
 
-	//"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -14,14 +12,12 @@ import (
 	"2019_1_undefined_penguins/internal/pkg/models"
 
 	"github.com/dgrijalva/jwt-go"
-	//"github.com/satori/uuid"
 )
 
 var SECRET = []byte("myawesomesecret")
 
 func SignIn(w http.ResponseWriter, r *http.Request) {
 
-	fmt.Println(r.URL.Path)
 	if r.Method == "OPTIONS" {
 		return
 	}
@@ -47,9 +43,6 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println("6")
-
-	//TODO check why so long
 	if !helpers.CheckPasswordHash(user.Password, found.HashPassword) {
 		w.WriteHeader(http.StatusForbidden)
 		return
@@ -121,8 +114,6 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//newuser, _ := db.GetUserByEmail(user.Email)
-
 	ttl := 3600 * time.Second
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
@@ -144,7 +135,6 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 		Expires:  time.Now().Add(60 * time.Hour),
 		HttpOnly: true,
 	}
-	fmt.Println(cookie.Expires)
 	user.Password = ""
 	user.Picture = "http://localhost:8081/data/Default.png"
 	bytes, err := json.Marshal(user)

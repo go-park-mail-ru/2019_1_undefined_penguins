@@ -13,7 +13,8 @@ func TestServerFail(t *testing.T) {
 	}
 	err := StartApp(params)
 	if err == nil {
-		t.Fatal(err)
+		t.Error(err)
+
 	}
 
 }

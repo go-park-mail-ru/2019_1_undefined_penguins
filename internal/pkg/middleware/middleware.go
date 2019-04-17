@@ -1,13 +1,11 @@
 package middleware
 
 import (
-	"fmt"
 	"net/http"
 
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 )
 
-//TODO check
 func CORSMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		origin := r.Header.Get("Origin")
@@ -24,7 +22,6 @@ func CORSMiddleware(next http.Handler) http.Handler {
 
 func LoggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		//log.Println(r.Method + r.RequestURI)
 		helpers.LogMsg(r.Method + r.RequestURI)
 		next.ServeHTTP(w, r)
 	})
@@ -34,7 +31,6 @@ func PanicMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if err := recover(); err != nil {
-				fmt.Println(err)
 				helpers.LogMsg("Recovered panic: ", err)
 				http.Error(w, "Server error", 500)
 			}
@@ -43,7 +39,6 @@ func PanicMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-//TODO check
 func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.RequestURI != "/me" {
