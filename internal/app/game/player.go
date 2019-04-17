@@ -3,7 +3,6 @@ package game
 import (
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 	"fmt"
-
 	"github.com/gorilla/websocket"
 )
 
@@ -54,6 +53,7 @@ func (p *Player) Listen() {
 }
 
 func (p *Player) SendState(state *RoomState) {
+	//TODO: send to front
 	if state != nil {
 		p.out <- &Message{"STATE", state}
 	}

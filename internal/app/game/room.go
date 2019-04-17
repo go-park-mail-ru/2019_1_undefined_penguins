@@ -65,15 +65,16 @@ func (r *Room) Run() {
 			helpers.LogMsg("Player " + player.ID + " joined")
 			player.SendMessage(&Message{"CONNECTED", nil})
 		case <-r.ticker.C:
+			//msg := <-player.in
+			//switch msg.Payload {
+			//case "SHOT":
+			//	ShotPlayer(r.state.Players[msg.Type], &r.state.Objects)
+			//case "ROTATE":
+			//	RotatePlayer(r.state.Players[msg.Type])
+			//}
+			//helpers.LogMsg("sfw:", msg)
+
 			for _, player := range r.Players {
-				msg := <-player.in
-				switch msg.Payload {
-				case "SHOT":
-					ShotPlayer(r.state.Players[msg.Type], &r.state.Objects)
-				case "ROTATE":
-					RotatePlayer(r.state.Players[msg.Type])
-				}
-				helpers.LogMsg("sfw:", msg)
 				player.SendState(r.state)
 			}
 		}
