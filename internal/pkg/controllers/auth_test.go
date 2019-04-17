@@ -567,6 +567,17 @@ func TestUnauthorized(t *testing.T) {
 	}
 }
 
+func TestHome(t *testing.T) {
+	req, _ := http.NewRequest("GET", "/", nil)
+	w := httptest.NewRecorder()
+	handler := http.HandlerFunc(RootHandler)
+	handler.ServeHTTP(w, req)
+	expectedStatus := http.StatusOK
+	if w.Code != expectedStatus {
+		t.Error(w.Code)
+	}
+}
+
 func TestUploadImageUnauthorized(t *testing.T) {
 	err := database.Connect()
 	if err != nil {
@@ -609,13 +620,11 @@ func TestUploadImageInternalServerError(t *testing.T) {
 	req, err := http.NewRequest("POST", "/login", buf)
 	w := httptest.NewRecorder()
 	handler := http.HandlerFunc(SignIn)
-	fmt.Println("1")
 	handler.ServeHTTP(w, req)
 	expectedStatus := http.StatusOK
 	if w.Code != expectedStatus {
 		t.Error(w.Code)
 	}
-	fmt.Println(w.HeaderMap["Set-Cookie"])
 	var ss []string
 
 	s := w.HeaderMap["Set-Cookie"][0]
