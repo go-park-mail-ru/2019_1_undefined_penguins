@@ -643,3 +643,20 @@ func TestUploadImageInternalServerError(t *testing.T) {
 		t.Error(w.Code)
 	}
 }
+
+func TestStartWS(t *testing.T) {
+	err := database.Connect()
+	if err != nil {
+		helpers.LogMsg("Connection error: ", err)
+		t.Error(err)
+	}
+	defer database.Disconnect()
+	req, err := http.NewRequest("POST", "/ws", nil)
+	w := httptest.NewRecorder()
+	handler := http.HandlerFunc(StartWS)
+	handler.ServeHTTP(w, req)
+	expectedStatus := http.StatusUnauthorized
+	if w.Code != expectedStatus {
+		t.Error(w.Code)
+	}
+}

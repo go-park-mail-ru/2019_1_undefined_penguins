@@ -192,3 +192,23 @@ func TestNewRecord(t *testing.T) {
 		t.Error("Неверно записан рекорд")
 	}
 }
+
+// func TestUpdateByEmail(t *testing.T) {
+// 	err := Connect()
+// 	if err != nil {
+// 		helpers.LogMsg("Connection error: ", err)
+// 		t.Error(err)
+// 	}
+// 	defer Disconnect()
+
+// 	var user models.User
+// 	user.Login = time.Now().Format("20060102150405") + "loginn"
+// 	user.Email = time.Now().Format("20060102150405") + "@pochta.ru"
+// 	user.Password = time.Now().Format("20060102150405") + "password"
+// 	err = CreateUser(&user)
+// 	found, err := GetUserByEmail(user.Email)
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+
+// }
