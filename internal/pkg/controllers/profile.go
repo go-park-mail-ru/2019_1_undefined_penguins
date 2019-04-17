@@ -3,8 +3,6 @@ package controllers
 import (
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 	"encoding/json"
-	"fmt"
-
 	"io"
 	"os"
 	"path/filepath"
@@ -19,20 +17,20 @@ import (
 
 	"github.com/jackc/pgx"
 
-	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/dgrijalva/jwt-go"
 )
 
 func Me(w http.ResponseWriter, r *http.Request) {
-	cookie, err := r.Cookie("sessionid")
-	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
+	cookie, _ := r.Cookie("sessionid")
+	//if err != nil {
+	//	w.WriteHeader(http.StatusUnauthorized)
+	//	return
+	//}
 
 	token, err := jwt.Parse(cookie.Value, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
-		}
+		//if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+		//	return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+		//}
 
 		return SECRET, nil
 	})
@@ -63,15 +61,15 @@ func Me(w http.ResponseWriter, r *http.Request) {
 
 func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("sessionid")
-	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
+	//if err != nil {
+	//	w.WriteHeader(http.StatusUnauthorized)
+	//	return
+	//}
 
 	token, err := jwt.Parse(cookie.Value, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
-		}
+		//if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+		//	return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+		//}
 
 		return SECRET, nil
 	})
@@ -125,15 +123,15 @@ func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 
 func UploadImage(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("sessionid")
-	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
+	//if err != nil {
+	//	w.WriteHeader(http.StatusUnauthorized)
+	//	return
+	//}
 
 	token, err := jwt.Parse(cookie.Value, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
-		}
+		//if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+		//	return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+		//}
 
 		return SECRET, nil
 	})

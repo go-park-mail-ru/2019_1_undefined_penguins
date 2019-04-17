@@ -1,10 +1,15 @@
 package middleware
 
 import (
+	"fmt"
+	"github.com/dgrijalva/jwt-go"
 	"net/http"
 
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 )
+
+var SECRET = []byte("myawesomesecret")
+
 
 func CORSMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -55,6 +60,19 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
-		next.ServeHTTP(w, r)
+
+		token, err := jwt.Parse(cookie.Value, func(token *jwt.Token) (interface{}, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				w.WriteHeader(http.StatusForbidden)
+				return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+			}
+			return SECRET, nil
+		})
+
+		if _, ok := token.Claims.(jwt.MapClaims); !(ok && token.Valid) {
+			w.WriteHeader(http.StatusForbidden)
+			return
+		}
+			next.ServeHTTP(w, r)
 	})
 }
