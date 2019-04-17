@@ -14,9 +14,6 @@ VALUES ($1, $2, $3)
 RETURNING id, login, score`
 
 func CreateUser(newUser *models.User) error {
-	fmt.Println("user", newUser)
-	fmt.Println("login", newUser.Login)
-	fmt.Println("pass", newUser.Password)
 
 	if connection == nil {
 		return pgx.ErrDeadConn
@@ -164,7 +161,7 @@ func AddGame(email string) error {
 }
 
 func NewRecord(email string, record int) error {
-	_, err := Exec(iterateGame, email, record)
+	_, err := Exec(newPersonalRecord, email, record)
 	if err != nil {
 		helpers.LogMsg(err)
 		return err

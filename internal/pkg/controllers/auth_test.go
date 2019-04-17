@@ -59,7 +59,6 @@ func TestLogIn(t *testing.T) {
 	req, err := http.NewRequest("POST", "/login", buf)
 	w := httptest.NewRecorder()
 	handler := http.HandlerFunc(SignIn)
-	fmt.Println("1")
 	handler.ServeHTTP(w, req)
 	expectedStatus := http.StatusOK
 	if w.Code != expectedStatus {

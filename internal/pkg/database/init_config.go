@@ -31,13 +31,16 @@ func initConfig() error {
 
 	file, err := os.Open(dir + "/configs/database.json")
 	if err != nil {
-		dir = strings.Replace(dir, "/internal/pkg/controllers", "", -1)
-		file, err = os.Open(dir + "/configs/database.json")
+		dirRep := strings.Replace(dir, "/internal/pkg/controllers", "", -1)
+		file, err = os.Open(dirRep + "/configs/testbase.json")
 		if err != nil {
-			h.LogMsg("Open directory error: ", err)
-			return err
+			dirRep = strings.Replace(dir, "/internal/pkg/database", "", -1)
+			file, err = os.Open(dirRep + "/configs/testbase.json")
+			if err != nil {
+				h.LogMsg("Open directory error: ", err)
+				return err
+			}
 		}
-
 	}
 
 	body, _ := ioutil.ReadAll(file)

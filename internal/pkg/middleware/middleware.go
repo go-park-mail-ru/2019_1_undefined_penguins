@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 
-
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 )
 
@@ -52,8 +51,6 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			return
 		}
 		cookie, err := r.Cookie("sessionid")
-
-
 
 		if err != nil || cookie.Value == "" {
 			w.WriteHeader(http.StatusUnauthorized)

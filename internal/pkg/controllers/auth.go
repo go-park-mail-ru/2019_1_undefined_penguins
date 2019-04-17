@@ -173,3 +173,7 @@ func SignOut(w http.ResponseWriter, r *http.Request) {
 	helpers.DeleteCookie(&w, cookie)
 	w.WriteHeader(http.StatusOK)
 }
+
+func RootHandler(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("hello penguins"))
+}

@@ -21,10 +21,6 @@ type Params struct {
 	Port string
 }
 
-func RootHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("hello penguins"))
-}
-
 func StartApp(params Params) error {
 	err := db.Connect()
 	if err != nil {
@@ -39,7 +35,7 @@ func StartApp(params Params) error {
 	router.Use(mw.PanicMiddleware)
 	router.Use(mw.AuthMiddleware)
 
-	router.HandleFunc("/", RootHandler)
+	router.HandleFunc("/", c.RootHandler)
 	router.HandleFunc("/me", c.Me).Methods("GET", "OPTIONS")
 	router.HandleFunc("/leaders/{id:[0-9]+}", c.GetLeaderboardPage).Methods("GET", "OPTIONS")
 	router.HandleFunc("/signup", c.SignUp).Methods("POST", "OPTIONS")
