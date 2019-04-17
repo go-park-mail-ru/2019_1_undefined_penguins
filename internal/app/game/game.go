@@ -14,6 +14,7 @@ type Game struct {
 
 func NewGame(maxRooms uint) *Game {
 	return &Game{
+		MaxRooms: maxRooms,
 		register: make(chan *Player),
 	}
 }
@@ -33,6 +34,7 @@ LOOP:
 			}
 		}
 
+		//если все комнаты заняты - делой новую
 		room := NewRoom(2)
 		g.AddRoom(room)
 		go room.Run()

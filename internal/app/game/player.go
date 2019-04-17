@@ -47,10 +47,8 @@ func (p *Player) Listen() {
 		case message := <-p.out:
 			p.conn.WriteJSON(message)
 		case message := <-p.in:
-			//if message.Payload != nil {
-				fmt.Printf("income: %#v", message)
-				fmt.Println("")
-			//}
+			fmt.Printf("income: %#v", message)
+			fmt.Println("")
 		}
 	}
 }
