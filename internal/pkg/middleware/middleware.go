@@ -64,6 +64,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		token, err := jwt.Parse(cookie.Value, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				w.WriteHeader(http.StatusForbidden)
+				helpers.DeleteCookie(&w, cookie)
 				return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 			}
 			return SECRET, nil
@@ -71,6 +72,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 
 		if _, ok := token.Claims.(jwt.MapClaims); !(ok && token.Valid) {
 			w.WriteHeader(http.StatusForbidden)
+			helpers.DeleteCookie(&w, cookie)
 			return
 		}
 			next.ServeHTTP(w, r)
