@@ -47,7 +47,7 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
-	ttl := 3600 * time.Second
+	ttl := time.Hour
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"userID":    found.ID,
@@ -65,7 +65,7 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 	cookie := &http.Cookie{
 		Name:     "sessionid",
 		Value:    str,
-		Expires:  time.Now().Add(60 * time.Hour),
+		Expires:  time.Now().Add(time.Hour),
 		HttpOnly: true,
 	}
 
@@ -111,7 +111,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ttl := 3600 * time.Second
+	ttl := time.Hour
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"userID":    user.ID,
@@ -129,7 +129,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	cookie := &http.Cookie{
 		Name:     "sessionid",
 		Value:    str,
-		Expires:  time.Now().Add(60 * time.Hour),
+		Expires:  time.Now().Add(time.Hour),
 		HttpOnly: true,
 	}
 	user.Password = ""

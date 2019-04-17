@@ -29,8 +29,8 @@ func StartApp(params Params) error {
 	defer db.Disconnect()
 	router := mux.NewRouter()
 
-	router.Use(mw.CORSMiddleware)
 	router.Use(mw.PanicMiddleware)
+	router.Use(mw.CORSMiddleware)
 	router.Use(mw.AuthMiddleware)
 
 	router.HandleFunc("/", c.RootHandler)
@@ -47,11 +47,6 @@ func StartApp(params Params) error {
 	go func() {
 		fileserver.Start()
 	}()
-
-	//fmt.Println("Game started at " + "8082")
-	//go func() {
-	//	game.Start()
-	//}()
 
 	return http.ListenAndServe(":"+params.Port, handlers.LoggingHandler(os.Stdout, router))
 }
