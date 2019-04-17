@@ -11,10 +11,6 @@ import (
 )
 
 func GetLeaderboardPage(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "OPTIONS" {
-		return
-	}
-
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
 

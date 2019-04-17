@@ -18,9 +18,9 @@ var SECRET = []byte("myawesomesecret")
 
 func SignIn(w http.ResponseWriter, r *http.Request) {
 
-	if r.Method == "OPTIONS" {
-		return
-	}
+
+	fmt.Println(r.URL.Path)
+
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -81,9 +81,6 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 }
 
 func SignUp(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "OPTIONS" {
-		return
-	}
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		helpers.LogMsg(err)
@@ -149,9 +146,6 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 }
 
 func SignOut(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "OPTIONS" {
-		return
-	}
 	cookie, err := r.Cookie("sessionid")
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
