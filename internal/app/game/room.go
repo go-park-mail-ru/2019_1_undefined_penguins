@@ -46,7 +46,7 @@ func NewRoom(MaxPlayers uint) *Room {
 		Players:    make(map[string]*Player),
 		register:   make(chan *Player),
 		unregister: make(chan *Player),
-		ticker:     time.NewTicker(10 * time.Millisecond),
+		ticker:     time.NewTicker(1 * time.Second),
 		state: &RoomState{
 			Players: make(map[string]*PlayerState),
 		},
@@ -76,7 +76,7 @@ func (r *Room) Run() {
 		//		}
 		//	}
 		case <-r.ticker.C:
-			go ProcessGame()
+			ProcessGame()
 			go HandleCommand(r)
 		}
 	}
