@@ -36,10 +36,11 @@ type Room struct {
 	unregister chan *Player
 	ticker     *time.Ticker
 	state      *RoomState
+
+	broadcast chan *Message
 }
 
 func NewRoom(MaxPlayers uint) *Room {
-
 	return &Room{
 		MaxPlayers: MaxPlayers,
 		Players:    make(map[string]*Player),
@@ -49,6 +50,7 @@ func NewRoom(MaxPlayers uint) *Room {
 		state: &RoomState{
 			Players: make(map[string]*PlayerState),
 		},
+		broadcast: make(chan *Message),
 	}
 }
 
@@ -64,19 +66,18 @@ func (r *Room) Run() {
 			r.Players[player.ID] = player
 			helpers.LogMsg("Player " + player.ID + " joined")
 			player.SendMessage(&Message{"CONNECTED", nil})
-		case <-r.ticker.C:
-			//msg := <-player.in
-			//switch msg.Payload {
-			//case "SHOT":
-			//	ShotPlayer(r.state.Players[msg.Type], &r.state.Objects)
-			//case "ROTATE":
-			//	RotatePlayer(r.state.Players[msg.Type])
-			//}
-			//helpers.LogMsg("sfw:", msg)
-
+		case message := <- r.broadcast:
 			for _, player := range r.Players {
-				player.SendState(r.state)
+				select {
+				case player.out <- message:
+				default:
+					close(player.out)
+				}
 			}
+		case <-r.ticker.C:
+			//for _, player := range r.Players {
+			//	player.SendMessage(<-player.out)
+			//}
 		}
 	}
 }

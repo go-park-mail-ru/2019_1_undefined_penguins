@@ -31,6 +31,7 @@ func StartWS(w http.ResponseWriter, r *http.Request) {
 	helpers.LogMsg("Connected to client")
 
 	player := game.NewPlayer(conn, cookie.Value)
+	//go player.Write()
 	go player.Listen()
 	game.PingGame.AddPlayer(player)
 }
