@@ -46,7 +46,7 @@ func NewRoom(MaxPlayers uint) *Room {
 		Players:    make(map[string]*Player),
 		register:   make(chan *Player),
 		unregister: make(chan *Player),
-		ticker:     time.NewTicker(1 * time.Second),
+		ticker:     time.NewTicker(10 * time.Millisecond),
 		state: &RoomState{
 			Players: make(map[string]*PlayerState),
 		},
@@ -66,18 +66,18 @@ func (r *Room) Run() {
 			r.Players[player.ID] = player
 			helpers.LogMsg("Player " + player.ID + " joined")
 			player.SendMessage(&Message{"CONNECTED", nil})
-		case message := <- r.broadcast:
-			for _, player := range r.Players {
-				select {
-				case player.out <- message:
-				default:
-					close(player.out)
-				}
-			}
+		//case message := <- r.broadcast:
+		//	for _, player := range r.Players {
+		//		select {
+		//		case player.out <- message:
+		//
+		//		default:
+		//			close(player.out)
+		//		}
+		//	}
 		case <-r.ticker.C:
-			//for _, player := range r.Players {
-			//	player.SendMessage(<-player.out)
-			//}
+			go ProcessGame()
+			go HandleCommand(r)
 		}
 	}
 }

@@ -50,3 +50,20 @@ func CreateBullet(r *Room) BulletState {
 		Alpha: 0,
 	}
 }
+
+func ProcessGame() {
+
+}
+
+func HandleCommand(r *Room) {
+	if message, ok := <-r.broadcast; ok {
+		//
+		for _, player := range r.Players {
+			select {
+			case player.out <- message:
+			default:
+				close(player.out)
+			}
+		}
+	}
+}
