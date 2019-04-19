@@ -50,6 +50,7 @@ type Room struct {
 	state      *RoomState
 
 	broadcast chan *Message
+	finish chan *Message
 }
 
 func NewRoom(MaxPlayers uint) *Room {
@@ -65,6 +66,7 @@ func NewRoom(MaxPlayers uint) *Room {
 			Radious: 250,
 		},
 		broadcast: make(chan *Message),
+		finish: make(chan *Message),
 	}
 }
 
@@ -93,6 +95,9 @@ func (r *Room) Run() {
 		case <-r.ticker.C:
 			ProcessGameSingle(r)
 			//HandleCommand(r, message)
+		case <- r.finish:
+			FinishGame(r)
+			return
 		}
 	}
 }

@@ -94,6 +94,8 @@ func ProcessGameSingle(r *Room) {
 		for t, _ := range r.state.Players {
 				r.Players[t].out <- &Message{penguin.ID, "WIN"}
 		}
+
+		r.finish <- &Message{penguin.ID, "WIN"}
 		return
 	}
 
@@ -170,4 +172,11 @@ func HandleCommand(r *Room, msg *Message) {
 		//	}
 		//}
 	//}
+}
+
+func FinishGame(r *Room) {
+	for _, player := range r.Players {
+		message := &Message{player.ID, "GAME FINISHED"}
+		player.conn.WriteJSON(message)
+	}
 }
