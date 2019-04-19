@@ -86,7 +86,15 @@ func ProcessGameSingle(r *Room) {
 		if r.state.Fishes[i].Eaten == false {
 			break
 		}
-			//you win
+			//you win???????
+			// условие победы должно быть len(r.state.Fishes) == 0
+			// но при этом, если рыбу съели, ее надо удалять. А еще здесь будет гг, потому что мы выделяем память сразу на 24 рыбы. Не надо так(
+			//вопрос: как из функции game() понять, что мы победили и куда передать сообщение ??
+
+		for t, _ := range r.state.Players {
+				r.Players[t].out <- &Message{penguin.ID, "WIN"}
+		}
+		return
 	}
 
 	if penguin.ClockwiseDirection {
@@ -109,7 +117,7 @@ func degreesToRadians(degrees float64) float64 {
 func GameInit(r *Room) {
 	fishCount := 24
 	for i := 0; i < fishCount; i++ {
-		Alpha := float64((360/len(r.state.Fishes))*i)
+		Alpha := float64((360/24)*i)
 		alphaRad := degreesToRadians(Alpha)
 		X := int(math.Floor(float64(r.state.Radious) + math.Sin(alphaRad)*float64(r.state.Radious)))
 		Y := int(math.Floor(float64(r.state.Radious) - math.Cos(alphaRad)*float64(r.state.Radious)))

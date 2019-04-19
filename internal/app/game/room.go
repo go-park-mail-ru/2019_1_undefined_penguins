@@ -71,7 +71,7 @@ func NewRoom(MaxPlayers uint) *Room {
 func (r *Room) Run() {
 	helpers.LogMsg("Room loop started")
 	r.state.Bullet = CreateBullet(r)
-
+	GameInit(r)
 	for {
 		select {
 		case player := <-r.unregister:
@@ -91,7 +91,7 @@ func (r *Room) Run() {
 			}
 			HandleCommand(r, message)
 		case <-r.ticker.C:
-			//ProcessGameSingle(r)
+			ProcessGameSingle(r)
 			//HandleCommand(r, message)
 		}
 	}
