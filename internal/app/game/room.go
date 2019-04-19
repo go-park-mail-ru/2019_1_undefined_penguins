@@ -13,17 +13,29 @@ type PlayerState struct {
 	X, Y               int
 	Alpha              float64
 	Score              int
+	//penguin("GOOD") or gun("BAD")
+	Type string
 }
 
 type BulletState struct {
 	ID    string
 	X, Y  int
 	Alpha float64
+	Radious int
+}
+
+type FishState struct {
+	ID int
+	X, Y int
+	Alpha float64
+	Eaten bool
 }
 
 type RoomState struct {
-	Players     map[string]*PlayerState
-	Objects     BulletState
+	Players map[string]*PlayerState
+	Bullet  *BulletState
+	Fishes 	map[int]*FishState
+	Radious int
 	CurrentTime time.Time
 }
 
@@ -49,6 +61,8 @@ func NewRoom(MaxPlayers uint) *Room {
 		ticker:     time.NewTicker(1 * time.Second),
 		state: &RoomState{
 			Players: make(map[string]*PlayerState),
+			Fishes: make(map[int]*FishState, 24),
+			Radious: 250,
 		},
 		broadcast: make(chan *Message),
 	}
@@ -56,7 +70,7 @@ func NewRoom(MaxPlayers uint) *Room {
 
 func (r *Room) Run() {
 	helpers.LogMsg("Room loop started")
-	r.state.Objects = CreateBullet(r)
+	r.state.Bullet = CreateBullet(r)
 	for {
 		select {
 		case player := <-r.unregister:
@@ -76,8 +90,8 @@ func (r *Room) Run() {
 		//		}
 		//	}
 		case <-r.ticker.C:
-			ProcessGame()
-			go HandleCommand(r)
+			//ProcessGame()
+			HandleCommand(r)
 		}
 	}
 }
@@ -90,6 +104,9 @@ func (r *Room) AddPlayer(player *Player) {
 		Alpha:              0,
 		ClockwiseDirection: true,
 		Shoted:             false,
+		Score:				0,
+		//TODO it is for single (ПНС)
+		Type: 				"GOOD",
 	}
 	r.state.Players[player.ID] = ps
 	player.room = r
