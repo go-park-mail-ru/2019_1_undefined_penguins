@@ -1,6 +1,7 @@
 package game
 
 import (
+	"2019_1_undefined_penguins/internal/pkg/helpers"
 	"math"
 )
 
@@ -82,17 +83,16 @@ func ProcessGameSingle(r *Room) {
 		}
 	}
 
+	count := 0
 	for i := 0; i < fishCount; i++ {
 		if r.state.Fishes[i].Eaten == false {
-			break
+			count ++
 		}
-			//you win???????
-			// условие победы должно быть len(r.state.Fishes) == 0
-			// но при этом, если рыбу съели, ее надо удалять. А еще здесь будет гг, потому что мы выделяем память сразу на 24 рыбы. Не надо так(
-			//вопрос: как из функции game() понять, что мы победили и куда передать сообщение ??
+	}
 
+	if count == 0 {
 		for t, _ := range r.state.Players {
-				r.Players[t].out <- &Message{penguin.ID, "WIN"}
+			r.Players[t].out <- &Message{penguin.ID, "WIN"}
 		}
 
 		r.finish <- &Message{penguin.ID, "WIN"}
@@ -151,15 +151,24 @@ func HandleCommand(r *Room, msg *Message) {
 				for t, player := range r.state.Players {
 					if player.Shoted {
 						r.Players[t].out <- &Message{msg.Type, "KILLED"}
+						message := &Message{player.ID, "GAME FINISHED"}
+						r.Players[t].SendMessage(message)
+						delete(r.Players, player.ID)
+						helpers.LogMsg("Player " + player.ID + " was removed from room")
 					} else {
 						r.Players[t].out <- &Message{msg.Type, "WIN"}
+						message := &Message{player.ID, "GAME FINISHED"}
+						r.Players[t].SendMessage(message)
+						delete(r.Players, player.ID)
+						helpers.LogMsg("Player " + player.ID + " was removed from room")
+
 					}
 				}
 				//r.broadcast <- &Message{msg.Type, "KILLED"}
 				//}
 			case "ROTATE":
 				RotatePlayer(r.state.Players[msg.Type])
-				r.Players[msg.Type].out <- &Message{msg.Type, "KILLED"}
+				r.Players[msg.Type].out <- &Message{msg.Type, "ROTATED"}
 		}
 		//for _, player := range r.Players {
 		//	select {
@@ -177,6 +186,9 @@ func HandleCommand(r *Room, msg *Message) {
 func FinishGame(r *Room) {
 	for _, player := range r.Players {
 		message := &Message{player.ID, "GAME FINISHED"}
-		player.conn.WriteJSON(message)
+		player.SendMessage(message)
+		delete(r.Players, player.ID)
+		helpers.LogMsg("Player " + player.ID + " was removed from room")
+		//r.RemovePlayer(player)
 	}
 }
