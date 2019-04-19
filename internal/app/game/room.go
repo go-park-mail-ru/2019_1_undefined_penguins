@@ -71,6 +71,7 @@ func NewRoom(MaxPlayers uint) *Room {
 func (r *Room) Run() {
 	helpers.LogMsg("Room loop started")
 	r.state.Bullet = CreateBullet(r)
+
 	for {
 		select {
 		case player := <-r.unregister:
@@ -80,18 +81,18 @@ func (r *Room) Run() {
 			r.Players[player.ID] = player
 			helpers.LogMsg("Player " + player.ID + " joined")
 			player.SendMessage(&Message{"CONNECTED", nil})
-		//case message := <- r.broadcast:
-		//	for _, player := range r.Players {
-		//		select {
-		//		case player.out <- message:
-		//
-		//		default:
-		//			close(player.out)
-		//		}
-		//	}
+		case message := <- r.broadcast:
+			for _, player := range r.Players {
+				select {
+				case player.out <- message:
+				default:
+					close(player.out)
+				}
+			}
+			HandleCommand(r, message)
 		case <-r.ticker.C:
-			//ProcessGame()
-			HandleCommand(r)
+			//ProcessGameSingle(r)
+			//HandleCommand(r, message)
 		}
 	}
 }

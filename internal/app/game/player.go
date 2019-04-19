@@ -50,6 +50,7 @@ func (p *Player) Listen() {
 			p.conn.WriteJSON(message)
 		//case message := <-p.in:
 			fmt.Printf("income: %#v", message)
+			fmt.Println("")
 		}
 	}
 }

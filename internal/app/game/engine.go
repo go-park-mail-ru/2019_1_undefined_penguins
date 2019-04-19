@@ -133,24 +133,33 @@ func GameInit(r *Room) {
 	}
 }
 
-func HandleCommand(r *Room) {
-	if message, ok := <-r.broadcast; ok {
-		switch message.Payload {
+func HandleCommand(r *Room, msg *Message) {
+	//if message, ok := <-r.broadcast; ok {
+		switch msg.Payload {
 			case "SHOT":
-				ShotPlayer(r.state.Players[message.Type], r.state.Bullet)
+				ShotPlayer(r.state.Players[msg.Type], r.state.Bullet)
+				for t, player := range r.state.Players {
+					if player.Shoted {
+						r.Players[t].out <- &Message{msg.Type, "KILLED"}
+					} else {
+						r.Players[t].out <- &Message{msg.Type, "WIN"}
+					}
+				}
+				//r.broadcast <- &Message{msg.Type, "KILLED"}
 				//}
 			case "ROTATE":
-				RotatePlayer(r.state.Players[message.Type])
+				RotatePlayer(r.state.Players[msg.Type])
+				r.Players[msg.Type].out <- &Message{msg.Type, "KILLED"}
 		}
-		for _, player := range r.Players {
-			select {
-			case player.out <- message:
-				//if r.state.Players[message.Type].Shoted {
-				//	r.Players[message.Type].out	<- &Message{message.Type, "KILLED"}
-				//}
-			default:
-				close(player.out)
-			}
-		}
-	}
+		//for _, player := range r.Players {
+		//	select {
+		//	case player.out <- message:
+		//		//if r.state.Players[message.Type].Shoted {
+		//		//	r.Players[message.Type].out	<- &Message{message.Type, "KILLED"}
+		//		//}
+		//	default:
+		//		close(player.out)
+		//	}
+		//}
+	//}
 }
