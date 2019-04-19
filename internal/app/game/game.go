@@ -5,6 +5,16 @@ import (
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 )
 
+var PingGame *Game
+
+func InitGame() *Game {
+	g := &Game{
+		MaxRooms: 10,
+		register: make(chan *Player),
+	}
+	return g
+}
+
 type Game struct {
 	MaxRooms uint
 	rooms []*Room
@@ -20,7 +30,7 @@ func NewGame(maxRooms uint) *Game {
 }
 
 func (g *Game) Run()  {
-	helpers.LogMsg("Main loop started")
+	//helpers.LogMsg("Main loop started")
 
 //TODO remove goto metka by reversing condition
 LOOP:
@@ -44,7 +54,7 @@ LOOP:
 }
 
 func (g *Game) AddPlayer(player *Player)  {
-	helpers.LogMsg("Player " + player.ID + "queued to add")
+	helpers.LogMsg("Player " + player.ID + " queued to add")
 	g.register <- player
 }
 

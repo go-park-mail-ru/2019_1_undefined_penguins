@@ -9,10 +9,9 @@ import (
 )
 
 func StartWS(w http.ResponseWriter, r *http.Request) {
-	pingGame := game.NewGame(10)
-	go pingGame.Run()
+	//pingGame := game.NewGame(10)
+	//go pingGame.Run()
 
-	//http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 	upgrader := &websocket.Upgrader{}
 
 	cookie, err := r.Cookie("sessionid")
@@ -32,14 +31,7 @@ func StartWS(w http.ResponseWriter, r *http.Request) {
 	helpers.LogMsg("Connected to client")
 
 	player := game.NewPlayer(conn, cookie.Value)
+	//go player.Write()
 	go player.Listen()
-	pingGame.AddPlayer(player)
-	//})
-
-	// fmt.Println("Started game")
-
-	//http.ListenAndServe(":8082", nil)
-	//if err != nil {
-	//	helpers.LogMsg("Cannot start server: ", err)
-	//}
+	game.PingGame.AddPlayer(player)
 }
