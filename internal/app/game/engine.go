@@ -95,8 +95,6 @@ func ProcessGameSingle(r *Room) {
 
 			message := &Message{r.Players[t].ID, "GAME FINISHED"}
 			r.Players[t].SendMessage(message)
-			//delete(r.Players, r.Players[t].ID)
-			//helpers.LogMsg("Player " + r.Players[t].ID + " was removed from room")
 		}
 
 		r.finish <- &Message{penguin.ID, "WIN"}
@@ -131,13 +129,6 @@ func GameInit(r *Room) {
 		r.state.Fishes[i] = &FishState{i, X,Y,Alpha, false}
 	}
 
-	//for i, fish := range r.state.Fishes {
-	//	fish.Alpha = float64((360/len(r.state.Fishes))*i)
-	//	alphaRad := degreesToRadians(fish.Alpha)
-	//	fish.X = int(math.Floor(float64(r.state.Radious) + math.Sin(alphaRad)*float64(r.state.Radious)))
-	//	fish.Y = int(math.Floor(float64(r.state.Radious) - math.Cos(alphaRad)*float64(r.state.Radious)))
-	//}
-
 	for _, player := range r.state.Players {
 		if player.Type == "GOOD" {
 			player.Alpha = math.Floor(ownRandom*360)
@@ -149,7 +140,6 @@ func GameInit(r *Room) {
 }
 
 func HandleCommand(r *Room, msg *Message) {
-	//if message, ok := <-r.broadcast; ok {
 		switch msg.Payload {
 			case "SHOT":
 				ShotPlayer(r.state.Players[msg.Type], r.state.Bullet)
@@ -158,41 +148,17 @@ func HandleCommand(r *Room, msg *Message) {
 						r.Players[t].out <- &Message{msg.Type, "KILLED"}
 						message := &Message{player.ID, "GAME FINISHED"}
 						r.Players[t].SendMessage(message)
-						//delete(r.Players, player.ID)
-						//helpers.LogMsg("Player " + player.ID + " was removed from room")
-					} else {
-						r.Players[t].out <- &Message{msg.Type, "WIN"}
-						message := &Message{player.ID, "GAME FINISHED"}
-						r.Players[t].SendMessage(message)
-						//delete(r.Players, player.ID)
-						//helpers.LogMsg("Player " + player.ID + " was removed from room")
-
 					}
 				}
-				//r.broadcast <- &Message{msg.Type, "KILLED"}
-				//}
 			case "ROTATE":
 				RotatePlayer(r.state.Players[msg.Type])
 				r.Players[msg.Type].out <- &Message{msg.Type, "ROTATED"}
 		}
-		//for _, player := range r.Players {
-		//	select {
-		//	case player.out <- message:
-		//		//if r.state.Players[message.Type].Shoted {
-		//		//	r.Players[message.Type].out	<- &Message{message.Type, "KILLED"}
-		//		//}
-		//	default:
-		//		close(player.out)
-		//	}
-		//}
-	//}
 }
 
 func FinishGame(r *Room) {
 	for _, player := range r.Players {
 		message := &Message{player.ID, "GAME FINISHED"}
 		player.SendMessage(message)
-		//delete(r.Players, player.ID)
-		//helpers.LogMsg("Player " + player.ID + " was removed from room")
-	}
+		}
 }
