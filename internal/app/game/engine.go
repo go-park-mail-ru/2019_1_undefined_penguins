@@ -1,7 +1,6 @@
 package game
 
 import (
-	"2019_1_undefined_penguins/internal/pkg/helpers"
 	"math"
 )
 
@@ -93,9 +92,15 @@ func ProcessGameSingle(r *Room) {
 	if count == 0 {
 		for t, _ := range r.state.Players {
 			r.Players[t].out <- &Message{penguin.ID, "WIN"}
+
+			message := &Message{r.Players[t].ID, "GAME FINISHED"}
+			r.Players[t].SendMessage(message)
+			//delete(r.Players, r.Players[t].ID)
+			//helpers.LogMsg("Player " + r.Players[t].ID + " was removed from room")
 		}
 
 		r.finish <- &Message{penguin.ID, "WIN"}
+
 		return
 	}
 
@@ -153,14 +158,14 @@ func HandleCommand(r *Room, msg *Message) {
 						r.Players[t].out <- &Message{msg.Type, "KILLED"}
 						message := &Message{player.ID, "GAME FINISHED"}
 						r.Players[t].SendMessage(message)
-						delete(r.Players, player.ID)
-						helpers.LogMsg("Player " + player.ID + " was removed from room")
+						//delete(r.Players, player.ID)
+						//helpers.LogMsg("Player " + player.ID + " was removed from room")
 					} else {
 						r.Players[t].out <- &Message{msg.Type, "WIN"}
 						message := &Message{player.ID, "GAME FINISHED"}
 						r.Players[t].SendMessage(message)
-						delete(r.Players, player.ID)
-						helpers.LogMsg("Player " + player.ID + " was removed from room")
+						//delete(r.Players, player.ID)
+						//helpers.LogMsg("Player " + player.ID + " was removed from room")
 
 					}
 				}
@@ -187,8 +192,7 @@ func FinishGame(r *Room) {
 	for _, player := range r.Players {
 		message := &Message{player.ID, "GAME FINISHED"}
 		player.SendMessage(message)
-		delete(r.Players, player.ID)
-		helpers.LogMsg("Player " + player.ID + " was removed from room")
-		//r.RemovePlayer(player)
+		//delete(r.Players, player.ID)
+		//helpers.LogMsg("Player " + player.ID + " was removed from room")
 	}
 }
