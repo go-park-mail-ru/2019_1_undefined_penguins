@@ -9,9 +9,6 @@ import (
 )
 
 func StartWS(w http.ResponseWriter, r *http.Request) {
-	//pingGame := game.NewGame(10)
-	//go pingGame.Run()
-
 	upgrader := &websocket.Upgrader{}
 
 	// cookie, err := r.Cookie("sessionid")

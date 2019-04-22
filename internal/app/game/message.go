@@ -2,7 +2,12 @@ package game
 
 type Message struct {
 	Type string `json:"type"`
-	Payload interface{} `json:"payload,omitempty"`
+	Payload PayloadMessage `json:"payload,omitempty"`
+}
+
+type PayloadMessage struct {
+	Player string `json:"player"`
+	Command string `json:"command"`
 }
 
 type IncomeMessage struct {
