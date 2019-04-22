@@ -82,7 +82,7 @@ func (r *Room) Run() {
 		case player := <-r.register:
 			r.Players[player.ID] = player
 			helpers.LogMsg("Player " + player.ID + " joined")
-			player.SendMessage(&Message{"CONNECTED", nil})
+			player.SendMessage(&Message{"SINGLE", PayloadMessage{}})
 		case message := <- r.broadcast:
 			for _, player := range r.Players {
 				select {
