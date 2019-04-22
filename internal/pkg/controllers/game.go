@@ -22,7 +22,7 @@ func StartWS(w http.ResponseWriter, r *http.Request) {
 	// }
 
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
-	conn, err := upgrader.Upgrade(w, r, http.Header{"Upgrade": []string{"websocket"}})
+	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		helpers.LogMsg("Connection error: ", err)
 		w.WriteHeader(http.StatusInternalServerError)
