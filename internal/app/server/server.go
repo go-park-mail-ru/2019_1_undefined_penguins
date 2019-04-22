@@ -33,6 +33,7 @@ func StartApp(params Params) error {
 	game.PingGame = game.InitGame()
 	go game.PingGame.Run()
 	router := mux.NewRouter()
+	gameRouter := router.PathPrefix("/game").Subrouter()
 
 	router.Use(mw.PanicMiddleware)
 	router.Use(mw.CORSMiddleware)
@@ -46,7 +47,7 @@ func StartApp(params Params) error {
 	router.HandleFunc("/signout", c.SignOut).Methods("GET", "OPTIONS")
 	router.HandleFunc("/change_profile", c.ChangeProfile).Methods("PUT", "OPTIONS")
 	router.HandleFunc("/upload", c.UploadImage).Methods("POST")
-	router.HandleFunc("/ws", c.StartWS)
+	gameRouter.HandleFunc("/ws", c.StartWS)
 
 
 	helpers.LogMsg("Server started at " + params.Port)
