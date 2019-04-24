@@ -13,7 +13,6 @@ var upgrader = websocket.Upgrader{
 }
 
 // serveWs handles websocket requests from the peer.
-//ЭТО ВРЕМЕННО Я ЭТО СОТРУ ЭТО ЧТОБЫ ПРОСТО ХТМЛКУ ЗАГРУЗИТЬ ПРОВЕРИТЬ, ЧЕСНА ЧЕСНА СОТРУУУУ
 func ServeWsChat(w http.ResponseWriter, r *http.Request) {
 
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }

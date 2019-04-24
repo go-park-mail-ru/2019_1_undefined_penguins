@@ -68,6 +68,8 @@ func StartApp(params Params) error {
 	return http.ListenAndServe(":"+params.Port, handlers.LoggingHandler(os.Stdout, router))
 }
 
+
+//ЭТО ВРЕМЕННО Я ЭТО СОТРУ ЭТО ЧТОБЫ ПРОСТО ХТМЛКУ ЗАГРУЗИТЬ ПРОВЕРИТЬ, ЧЕСНА ЧЕСНА СОТРУУУУ
 func serveHome(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.URL)
 	if r.URL.Path != "/" {
