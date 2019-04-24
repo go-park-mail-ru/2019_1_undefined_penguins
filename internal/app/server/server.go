@@ -1,8 +1,10 @@
 package server
 
 import (
+	"2019_1_undefined_penguins/internal/app/chat"
 	"2019_1_undefined_penguins/internal/app/game"
 	"2019_1_undefined_penguins/internal/pkg/fileserver"
+	"log"
 	"net/http"
 	"os"
 
@@ -32,8 +34,14 @@ func StartApp(params Params) error {
 	//to local package in local parametr (will be tested)
 	game.PingGame = game.InitGame()
 	go game.PingGame.Run()
+
+
+	chat.PingHub = chat.InitHub()
+	go chat.PingHub.Run()
+
 	router := mux.NewRouter()
 	gameRouter := router.PathPrefix("/game").Subrouter()
+	chatRouter := router.PathPrefix("/chat").Subrouter()
 
 	router.Use(mw.PanicMiddleware)
 	router.Use(mw.CORSMiddleware)
@@ -48,6 +56,8 @@ func StartApp(params Params) error {
 	router.HandleFunc("/change_profile", c.ChangeProfile).Methods("PUT", "OPTIONS")
 	router.HandleFunc("/upload", c.UploadImage).Methods("POST")
 	gameRouter.HandleFunc("/ws", c.StartWS)
+	chatRouter.HandleFunc("/ws", c.ServeWsChat)
+	chatRouter.HandleFunc("/", serveHome)
 
 
 	helpers.LogMsg("Server started at " + params.Port)
@@ -56,4 +66,17 @@ func StartApp(params Params) error {
 	}()
 
 	return http.ListenAndServe(":"+params.Port, handlers.LoggingHandler(os.Stdout, router))
+}
+
+func serveHome(w http.ResponseWriter, r *http.Request) {
+	log.Println(r.URL)
+	if r.URL.Path != "/" {
+		http.Error(w, "Not found", http.StatusNotFound)
+		return
+	}
+	if r.Method != "GET" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	http.ServeFile(w, r, "home.html")
 }
