@@ -114,6 +114,25 @@ func GetUserByID(id uint) (*models.User, error) {
 	return &user, nil
 }
 
+///
+const selectByLogin = `
+SELECT users.id, login, email, hashpassword, score, name, games
+FROM users, pictures
+WHERE users.login = $1
+AND users.picture = pictures.id`
+
+func GetUserByLogin(login string) (*models.User, error) {
+	var user models.User
+	err := connection.QueryRow(selectByLogin, login).Scan(&user.ID, &user.Login, &user.Email, &user.HashPassword, &user.Score, &user.Picture, &user.Games)
+	if err != nil {
+		helpers.LogMsg(err)
+		return nil, err
+	}
+	user.Picture = "http://localhost:8081/data/" + user.Picture
+	return &user, nil
+}
+///
+
 const getLeadersPage = `
 SELECT login, score, email
 FROM users

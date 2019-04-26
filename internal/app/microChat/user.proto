@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package microChat;
+
+message User {
+    string login = 1;
+}
+
+service UserChecker {
+    rpc Check (User) returns (User) {}
+}

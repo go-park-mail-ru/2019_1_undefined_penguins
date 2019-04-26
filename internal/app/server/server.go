@@ -3,8 +3,8 @@ package server
 import (
 	"2019_1_undefined_penguins/internal/app/chat"
 	"2019_1_undefined_penguins/internal/app/game"
+	"2019_1_undefined_penguins/internal/app/microChat"
 	"2019_1_undefined_penguins/internal/pkg/fileserver"
-	"log"
 	"net/http"
 	"os"
 
@@ -41,7 +41,7 @@ func StartApp(params Params) error {
 
 	router := mux.NewRouter()
 	gameRouter := router.PathPrefix("/game").Subrouter()
-	chatRouter := router.PathPrefix("/chat").Subrouter()
+	//chatRouter := router.PathPrefix("/chat").Subrouter()
 
 	router.Use(mw.PanicMiddleware)
 	router.Use(mw.CORSMiddleware)
@@ -56,8 +56,8 @@ func StartApp(params Params) error {
 	router.HandleFunc("/change_profile", c.ChangeProfile).Methods("PUT", "OPTIONS")
 	router.HandleFunc("/upload", c.UploadImage).Methods("POST")
 	gameRouter.HandleFunc("/ws", c.StartWS)
-	chatRouter.HandleFunc("/ws", c.ServeWsChat)
-	chatRouter.HandleFunc("/", serveHome)
+	//chatRouter.HandleFunc("/ws", c.ServeWsChat)
+	//chatRouter.HandleFunc("/", serveHome)
 
 
 	helpers.LogMsg("Server started at " + params.Port)
@@ -65,20 +65,24 @@ func StartApp(params Params) error {
 		fileserver.Start()
 	}()
 
+	go func() {
+		microChat.Start()
+	}()
+
 	return http.ListenAndServe(":"+params.Port, handlers.LoggingHandler(os.Stdout, router))
 }
 
 
 //ЭТО ВРЕМЕННО Я ЭТО СОТРУ ЭТО ЧТОБЫ ПРОСТО ХТМЛКУ ЗАГРУЗИТЬ ПРОВЕРИТЬ, ЧЕСНА ЧЕСНА СОТРУУУУ
-func serveHome(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.URL)
-	if r.URL.Path != "/" {
-		http.Error(w, "Not found", http.StatusNotFound)
-		return
-	}
-	if r.Method != "GET" {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-	http.ServeFile(w, r, "home.html")
-}
+//func serveHome(w http.ResponseWriter, r *http.Request) {
+//	log.Println(r.URL)
+//	if r.URL.Path != "/" {
+//		http.Error(w, "Not found", http.StatusNotFound)
+//		return
+//	}
+//	if r.Method != "GET" {
+//		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+//		return
+//	}
+//	http.ServeFile(w, r, "home.html")
+//}
