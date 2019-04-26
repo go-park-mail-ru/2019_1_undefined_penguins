@@ -3,6 +3,7 @@ package controllers
 import (
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 	"encoding/json"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -31,6 +32,7 @@ func Me(w http.ResponseWriter, r *http.Request) {
 
 	temp := claims["userID"]
 	mytemp := uint(temp.(float64))
+	fmt.Println("fuckit")
 
 	user, err := db.GetUserByID(mytemp)
 	if user == nil {

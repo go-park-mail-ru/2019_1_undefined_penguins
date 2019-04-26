@@ -1,10 +1,12 @@
 package database
 
 import (
+	"database/sql"
+
 	"github.com/jackc/pgx"
 )
 
-func Query(sql string, args ...interface{}) (*pgx.Rows, error) {
+func Query(sql string, args ...interface{}) (*sql.Rows, error) {
 	if connection == nil {
 		return nil, pgx.ErrDeadConn
 	}
@@ -18,24 +20,24 @@ func Query(sql string, args ...interface{}) (*pgx.Rows, error) {
 	return rows, err
 }
 
-func Exec(sql string, args ...interface{}) (commandTag pgx.CommandTag, err error) {
-	if connection == nil {
-		return "", pgx.ErrDeadConn
-	}
+func Exec(sql string, args ...interface{}) (commandTag sql.Result, err error) {
+	// if connection == nil {
+	// 	return "", nil
+	// }
 
 	tx, err := connection.Begin()
-	if err != nil {
-		return "", err
-	}
+	// if err != nil {
+	// 	return "", err
+	// }
 	defer tx.Rollback()
 
 	tag, err := tx.Exec(sql, args...)
 	if err != nil {
-		return "", err
+		return tag, err
 	}
 	err = tx.Commit()
 	if err != nil {
-		return "", err
+		return tag, err
 	}
 
 	return tag, nil

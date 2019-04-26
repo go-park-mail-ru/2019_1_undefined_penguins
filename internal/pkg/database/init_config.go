@@ -1,18 +1,14 @@
 package database
 
 import (
-	"encoding/json"
-	"io/ioutil"
-	"strings"
-
-	"os"
-
-	h "2019_1_undefined_penguins/internal/pkg/helpers"
+	"2019_1_undefined_penguins/internal/pkg/helpers"
+	sq "database/sql"
 
 	"github.com/jackc/pgx"
+	_ "github.com/lib/pq"
 )
 
-var connection *pgx.ConnPool = nil
+var connection *sq.DB = nil
 
 var connectionConfig pgx.ConnConfig
 var connectionPoolConfig = pgx.ConnPoolConfig{
@@ -21,35 +17,40 @@ var connectionPoolConfig = pgx.ConnPoolConfig{
 
 func initConfig() error {
 
-	dir, err := os.Getwd()
+	// dir, err := os.Getwd()
+	// if err != nil {
+	// 	h.LogMsg("Getting directory error: ", err)
+	// 	return err
+
+	// }
+
+	// file, err := os.Open(dir + "/configs/database.json")
+	// if err != nil {
+	// 	h.LogMsg("Init parse DB error: ", err)
+	// 	return err
+	// }
+
+	// body, _ := ioutil.ReadAll(file)
+	// err = json.Unmarshal(body, &connectionConfig)
+	// if err != nil {
+	// 	h.LogMsg("Init parse DB error: ", err)
+	// 	return err
+	// }
+
+	const psqlURI = "postgresql://iamfrommoscow@localhost:5432/penguins?sslmode=disable"
+	// connectionConfig, err := pgx.ParseURI(psqlURI)
+	// if err != nil {
+	// 	h.LogMsg("Parsing error: ", err)
+	// 	return err
+
+	// }
+	var err error
+	connection, err = sq.Open("postgres", psqlURI)
 	if err != nil {
-		h.LogMsg("Getting directory error: ", err)
+		helpers.LogMsg("Can't connect to db: ", err)
 		return err
-
 	}
-
-	file, err := os.Open(dir + "/configs/database.json")
-	if err != nil {
-		dirRep := strings.Replace(dir, "/internal/pkg/controllers", "", -1)
-		file, err = os.Open(dirRep + "/configs/testbase.json")
-		if err != nil {
-			dirRep = strings.Replace(dir, "/internal/pkg/database", "", -1)
-			file, err = os.Open(dirRep + "/configs/testbase.json")
-			if err != nil {
-				h.LogMsg("Open directory error: ", err)
-				return err
-			}
-		}
-	}
-
-	body, _ := ioutil.ReadAll(file)
-	err = json.Unmarshal(body, &connectionConfig)
-	if err != nil {
-		h.LogMsg("Init parse DB error: ", err)
-		return err
-	}
-
-	connectionPoolConfig.ConnConfig = connectionConfig
+	// connectionPoolConfig.ConnConfig = connectionConfig
 	return nil
 }
 
@@ -61,11 +62,11 @@ func Connect() error {
 	if err != nil {
 		return err
 	}
-	connection, err = pgx.NewConnPool(connectionPoolConfig)
-	if err != nil {
-		h.LogMsg("Connect DB error: " + err.Error())
-		return err
-	}
+	// connection, err = pgx.NewConnPool(connectionPoolConfig)
+	// if err != nil {
+	// 	h.LogMsg("Connect DB error: " + err.Error())
+	// 	return err
+	// }
 	return nil
 }
 

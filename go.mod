@@ -10,6 +10,7 @@ require (
 	github.com/gorilla/websocket v1.4.0
 	github.com/jackc/pgx v3.3.0+incompatible
 	github.com/kr/pretty v0.1.0 // indirect
+	github.com/lib/pq v1.1.0
 	github.com/mattn/go-colorable v0.1.1 // indirect
 	github.com/mattn/go-isatty v0.0.7 // indirect
 	github.com/pkg/errors v0.8.1 // indirect

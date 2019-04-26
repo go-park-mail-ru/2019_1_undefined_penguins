@@ -104,8 +104,11 @@ WHERE users.id = $1
 AND users.picture = pictures.id`
 
 func GetUserByID(id uint) (*models.User, error) {
-	var user models.User
-	err := connection.QueryRow(selectByID, id).Scan(&user.ID, &user.Login, &user.Email, &user.HashPassword, &user.Score, &user.Picture, &user.Games)
+	user := models.User{}
+	row := connection.QueryRow(selectByID, id)
+
+	err = row.Scan(&user.ID, &user.Login, &user.Email, &user.HashPassword, &user.Score, &user.Picture, &user.Games)
+
 	if err != nil {
 		helpers.LogMsg(err)
 		return nil, err
