@@ -48,7 +48,7 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"userID":    found.ID,
 		"userEmail": user.Email,
-		"userLogin": user.Login,
+		"userLogin": found.Login,
 		"exp":       time.Now().UTC().Add(ttl).Unix(),
 	})
 
