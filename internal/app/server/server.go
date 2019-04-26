@@ -64,6 +64,11 @@ func StartApp(params Params) error {
 	go func() {
 		fileserver.Start()
 	}()
+	//for {
+	//	//fmt.Println(s)
+	//	conn.ReadJSON(&s)
+	//	conn.WriteJSON("ddsc")
+	//}
 
 	go func() {
 		microChat.Start()
