@@ -4,6 +4,7 @@ package microChat;
 
 message User {
     string login = 1;
+    uint64 ID = 2;
 }
 
 service UserChecker {
