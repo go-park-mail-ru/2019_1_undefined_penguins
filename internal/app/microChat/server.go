@@ -16,6 +16,6 @@ func Start() {
 
 	RegisterUserCheckerServer(serverGrpc, NewUserManager())
 
-	helpers.LogMsg("starting ChatSserver at 8083")
+	helpers.LogMsg("starting ChatServer at 8083")
 	serverGrpc.Serve(lis)
 }

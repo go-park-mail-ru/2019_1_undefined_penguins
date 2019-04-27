@@ -64,11 +64,6 @@ func StartApp(params Params) error {
 	go func() {
 		fileserver.Start()
 	}()
-	//for {
-	//	//fmt.Println(s)
-	//	conn.ReadJSON(&s)
-	//	conn.WriteJSON("ddsc")
-	//}
 
 	go func() {
 		microChat.Start()
@@ -76,18 +71,3 @@ func StartApp(params Params) error {
 
 	return http.ListenAndServe(":"+params.Port, handlers.LoggingHandler(os.Stdout, router))
 }
-
-
-//ЭТО ВРЕМЕННО Я ЭТО СОТРУ ЭТО ЧТОБЫ ПРОСТО ХТМЛКУ ЗАГРУЗИТЬ ПРОВЕРИТЬ, ЧЕСНА ЧЕСНА СОТРУУУУ
-//func serveHome(w http.ResponseWriter, r *http.Request) {
-//	log.Println(r.URL)
-//	if r.URL.Path != "/" {
-//		http.Error(w, "Not found", http.StatusNotFound)
-//		return
-//	}
-//	if r.Method != "GET" {
-//		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-//		return
-//	}
-//	http.ServeFile(w, r, "home.html")
-//}
