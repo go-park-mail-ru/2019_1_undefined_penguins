@@ -3,7 +3,6 @@ package controllers
 import (
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 	"encoding/json"
-	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -15,8 +14,6 @@ import (
 	"2019_1_undefined_penguins/internal/pkg/database"
 	db "2019_1_undefined_penguins/internal/pkg/database"
 	"2019_1_undefined_penguins/internal/pkg/models"
-
-	"github.com/jackc/pgx"
 
 	"github.com/dgrijalva/jwt-go"
 )
@@ -32,7 +29,6 @@ func Me(w http.ResponseWriter, r *http.Request) {
 
 	temp := claims["userID"]
 	mytemp := uint(temp.(float64))
-	fmt.Println("fuckit")
 
 	user, err := db.GetUserByID(mytemp)
 	if user == nil {
@@ -74,17 +70,9 @@ func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 	mytemp := uint(temp.(float64))
 	user, err = db.UpdateUserByID(user, mytemp)
 	if err != nil {
-		switch errPgx := err.(pgx.PgError); errPgx.Code {
-		case "23505":
-			helpers.LogMsg(errPgx)
-			w.WriteHeader(http.StatusConflict)
-			return
-		default:
-			helpers.LogMsg(errPgx)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-
+		helpers.LogMsg(err)
+		w.WriteHeader(http.StatusConflict)
+		return
 	}
 
 	bytes, err := json.Marshal(user)

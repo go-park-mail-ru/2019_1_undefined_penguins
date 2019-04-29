@@ -21,14 +21,8 @@ func Query(sql string, args ...interface{}) (*sql.Rows, error) {
 }
 
 func Exec(sql string, args ...interface{}) (commandTag sql.Result, err error) {
-	// if connection == nil {
-	// 	return "", nil
-	// }
 
 	tx, err := connection.Begin()
-	// if err != nil {
-	// 	return "", err
-	// }
 	defer tx.Rollback()
 
 	tag, err := tx.Exec(sql, args...)

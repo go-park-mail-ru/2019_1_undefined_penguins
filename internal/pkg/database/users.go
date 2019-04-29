@@ -124,7 +124,6 @@ func GetLeaders(id int) ([]models.User, error) {
 	var users []models.User
 	rows, err := Query(getLeadersPage, (id-1)*3)
 	if err != nil {
-		helpers.LogMsg(err)
 		return users, err
 	}
 	defer rows.Close()

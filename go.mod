@@ -1,6 +1,7 @@
 module 2019_1_undefined_penguins
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.3.3
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/fatih/color v1.7.0 // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
