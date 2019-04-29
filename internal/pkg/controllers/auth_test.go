@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/gorilla/mux"
 )
 
 func GetUserFromJSON(fileName string) (*models.User, error) {
@@ -289,9 +290,145 @@ func TestMe(t *testing.T) {
 	w = httptest.NewRecorder()
 	handler = http.HandlerFunc(ChangeProfile)
 	req.AddCookie(cookie)
+	handler.ServeHTTP(w, req)
+	expectedStatus = http.StatusConflict
+	if w.Code != expectedStatus {
+		t.Error(w.Code)
+	}
+
+	rows = sqlmock.NewRows([]string{"games", "name", "score"}).
+		AddRow(10, "name", 5).
+		RowError(1, fmt.Errorf("error"))
+	mock.ExpectQuery("UPDATE").WillReturnRows(rows)
+	data, err = json.Marshal(user)
+	if err != nil {
+		t.Error(err)
+	}
+	buf = bytes.NewBuffer(data)
+	req, err = http.NewRequest("POST", "/update", buf)
+	w = httptest.NewRecorder()
+	handler = http.HandlerFunc(ChangeProfile)
+	req.AddCookie(cookie)
+	handler.ServeHTTP(w, req)
+	expectedStatus = http.StatusOK
+	if w.Code != expectedStatus {
+		t.Error(w.Code)
+	}
+
+	req, err = http.NewRequest("GET", "/signout", nil)
+	w = httptest.NewRecorder()
+	handler = http.HandlerFunc(SignOut)
+	req.AddCookie(cookie)
 
 	handler.ServeHTTP(w, req)
 	expectedStatus = http.StatusOK
+	if w.Code != expectedStatus {
+		t.Error(w.Code)
+	}
+
+	newReq, err := http.NewRequest("GET", "/signout", nil)
+	w = httptest.NewRecorder()
+	handler = http.HandlerFunc(SignOut)
+
+	handler.ServeHTTP(w, newReq)
+	expectedStatus = http.StatusNotFound
+	if w.Code != expectedStatus {
+		t.Error(w.Code)
+	}
+}
+
+func TestLeaderboard(t *testing.T) {
+	router := mux.NewRouter()
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	defer db.Close()
+	dab.SetMock(db)
+	rows := sqlmock.NewRows([]string{"login", "score"}).
+		AddRow("login", "one").
+		RowError(1, fmt.Errorf("error"))
+	mock.ExpectBegin()
+	mock.ExpectQuery("SELECT").WillReturnRows(rows)
+	mock.ExpectCommit()
+
+	router.HandleFunc("/leaders/{id:[0-9]+}", GetLeaderboardPage).Methods("GET")
+	go func() {
+		err := http.ListenAndServe(":8086", router)
+		t.Error(err)
+	}()
+	_, err = http.Get("http://127.0.0.1:8086/leaders/1")
+	if err != nil {
+		t.Error(err)
+	}
+	mock.ExpectBegin()
+	mock.ExpectQuery("SELECT").WillReturnRows(rows).WillReturnError(fmt.Errorf("some error"))
+	mock.ExpectRollback()
+	_, err = http.Get("http://127.0.0.1:8086/leaders/jnj")
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestUpdateImage(t *testing.T) {
+	var user models.User
+	user.Login = time.Now().Format("20060102150405") + user.Login
+	user.Email = time.Now().Format("20060102150405") + user.Email
+	user.Password = "password"
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	defer db.Close()
+	dab.SetMock(db)
+	rows := sqlmock.NewRows([]string{"id", "login", "score"}).
+		AddRow(1, "login", 10).
+		RowError(1, fmt.Errorf("error"))
+	mock.ExpectQuery("SELECT").WillReturnError(fmt.Errorf("some error"))
+	mock.ExpectQuery("INSERT").WillReturnRows(rows)
+	data, err := json.Marshal(user)
+	if err != nil {
+		t.Error(err)
+	}
+	buf := bytes.NewBuffer(data)
+	req, err := http.NewRequest("POST", "/signup", buf)
+	w := httptest.NewRecorder()
+	handler := http.HandlerFunc(SignUp)
+	handler.ServeHTTP(w, req)
+	expectedStatus := http.StatusOK
+	if w.Code != expectedStatus {
+		t.Error(w.Code)
+	}
+
+	var ss []string
+
+	s := w.HeaderMap["Set-Cookie"][0]
+
+	ss = strings.Split(s, ";")
+
+	cookieInfo := strings.Split(ss[0], "=")
+	cookieExpires := strings.Split(ss[1], "=")
+	timeStampString := cookieExpires[1]
+	layOut := "Mon, 2 Jan 2006 15:04:05 GMT"
+	timeStamp, err := time.Parse(layOut, timeStampString)
+	if err != nil {
+		t.Error(err)
+	}
+	cookie := &http.Cookie{
+		Name:     cookieInfo[0],
+		Value:    cookieInfo[1],
+		Expires:  timeStamp,
+		HttpOnly: true,
+	}
+	req, err = http.NewRequest("POST", "/upload", buf)
+	w = httptest.NewRecorder()
+	handler = http.HandlerFunc(UploadImage)
+	req.AddCookie(cookie)
+	mock.ExpectQuery("SELECT").WillReturnError(fmt.Errorf("some error"))
+
+	handler.ServeHTTP(w, req)
+
+	expectedStatus = http.StatusNotFound
 	if w.Code != expectedStatus {
 		t.Error(w.Code)
 	}
