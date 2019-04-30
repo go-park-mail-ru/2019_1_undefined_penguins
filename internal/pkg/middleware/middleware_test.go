@@ -43,10 +43,6 @@ func TestMid(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	_, err = http.Get("http://127.0.0.1:8085/me")
-	if err != nil {
-		t.Error(err)
-	}
 	req, err := http.NewRequest("GET", "http://127.0.0.1:8085/me", nil)
 	cookie := http.Cookie{Name: "sessionid", Value: "cookie_value"}
 	req.AddCookie(&cookie)
