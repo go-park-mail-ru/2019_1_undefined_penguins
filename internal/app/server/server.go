@@ -40,7 +40,7 @@ func StartApp(params Params) error {
 	router.HandleFunc("/signup", c.SignUp).Methods("POST", "OPTIONS")
 	router.HandleFunc("/login", c.SignIn).Methods("POST", "OPTIONS")
 	router.HandleFunc("/signout", c.SignOut).Methods("GET", "OPTIONS")
-	router.HandleFunc("/change_profile", c.ChangeProfile).Methods("PUT", "OPTIONS")
+	router.HandleFunc("/me", c.ChangeProfile).Methods("PUT")
 	router.HandleFunc("/upload", c.UploadImage).Methods("POST")
 	router.HandleFunc("/ws", c.StartWS)
 
