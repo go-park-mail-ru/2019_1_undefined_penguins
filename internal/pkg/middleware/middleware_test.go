@@ -1,11 +1,11 @@
 package middleware
 
 import (
+	"fmt"
+	"github.com/gorilla/mux"
 	"net/http"
 	"testing"
 	"time"
-
-	"github.com/gorilla/mux"
 )
 
 func RootTestHandler(w http.ResponseWriter, r *http.Request) {
@@ -19,6 +19,14 @@ func PanicTestHandler(w http.ResponseWriter, r *http.Request) {
 	panic(err)
 }
 
+func StartServer(port string, router *mux.Router) {
+	go func() {
+		err := http.ListenAndServe(port, router)
+		fmt.Println("er: ", err)
+		fmt.Println("ended")
+	}()
+}
+
 func TestMid(t *testing.T) {
 	router := mux.NewRouter()
 
@@ -28,21 +36,8 @@ func TestMid(t *testing.T) {
 	router.HandleFunc("/", RootTestHandler).Methods("GET")
 	router.HandleFunc("/me", RootTestHandler).Methods("GET", "OPTIONS")
 	router.HandleFunc("/panic", PanicTestHandler).Methods("GET")
-	go func() {
-		http.ListenAndServe(":8085", router)
-	}()
-	_, err := http.Get("http://127.0.0.1:8085/")
-	if err != nil {
-		t.Error(err)
-	}
-	_, err = http.Get("http://127.0.0.1:8085/panic")
-	if err != nil {
-		t.Error(err)
-	}
-	_, err = http.Get("http://127.0.0.1:8085/me")
-	if err != nil {
-		t.Error(err)
-	}
+	StartServer(":8085", router)
+
 	req, err := http.NewRequest("GET", "http://127.0.0.1:8085/me", nil)
 	cookie := http.Cookie{Name: "sessionid", Value: "cookie_value"}
 	req.AddCookie(&cookie)
@@ -56,4 +51,5 @@ func TestMid(t *testing.T) {
 
 	req, err = http.NewRequest("OPTIONS", "http://127.0.0.1:8085/me", nil)
 	_, err = client.Do(req)
+	fmt.Println(err)
 }
