@@ -30,3 +30,17 @@ func GetLeaderboardPage(w http.ResponseWriter, r *http.Request) {
 		w.Write(respBody)
 	}
 }
+
+func GetLeaderboardInfo(w http.ResponseWriter, r *http.Request) {
+	info, err := db.UsersCount()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	if respBody, err := json.Marshal(info); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	} else {
+		w.WriteHeader(http.StatusOK)
+		w.Write(respBody)
+	}
+}

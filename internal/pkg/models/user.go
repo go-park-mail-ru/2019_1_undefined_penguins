@@ -26,3 +26,8 @@ func init() {
 func ReturnCountOfSessions() int {
 	return len(Sessions)
 }
+
+type LeadersInfo struct {
+	Count       uint `json:"count"`
+	UsersOnPage uint `json:"usersOnPage"`
+}
