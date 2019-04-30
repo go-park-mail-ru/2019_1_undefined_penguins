@@ -10,10 +10,13 @@ func TestPasswords(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	// fmt.Println(hash)
 	result := CheckPasswordHash(password, hash)
 	if !result {
 		t.Error("hashing is not equal")
 	}
 
+}
+
+func TestLogs(t *testing.T) {
+	LogMsg("hello world")
 }

@@ -51,5 +51,11 @@ func TestMid(t *testing.T) {
 
 	req, err = http.NewRequest("OPTIONS", "http://127.0.0.1:8085/me", nil)
 	_, err = client.Do(req)
-	fmt.Println(err)
+
+	req, err = http.NewRequest("GET", "http://127.0.0.1:8085/panic", nil)
+	_, err = client.Do(req)
+	if err != nil {
+		t.Error(nil)
+	}
+
 }

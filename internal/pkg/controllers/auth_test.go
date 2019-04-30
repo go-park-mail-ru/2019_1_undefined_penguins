@@ -336,7 +336,7 @@ func TestMe(t *testing.T) {
 	}
 }
 
-func TestUpdateImage(t *testing.T) {
+func TestUpdateImageAndLeaders(t *testing.T) {
 	var user models.User
 	user.Login = time.Now().Format("20060102150405") + user.Login
 	user.Email = time.Now().Format("20060102150405") + user.Email
@@ -398,4 +398,55 @@ func TestUpdateImage(t *testing.T) {
 	if w.Code != expectedStatus {
 		t.Error(w.Code)
 	}
+
+	req, _ = http.NewRequest("GET", "/leaders", nil)
+	handler = http.HandlerFunc(GetLeaderboardPage)
+	handler.ServeHTTP(w, req)
+	expectedStatus = http.StatusNotFound
+	if w.Code != expectedStatus {
+		t.Error(w.Code)
+	}
+
+	rows = sqlmock.NewRows([]string{"login", "score"}).
+		AddRow("login", 10).
+		RowError(1, fmt.Errorf("error"))
+	mock.ExpectBegin()
+	mock.ExpectQuery("SELECT").WillReturnRows(rows)
+	mock.ExpectCommit()
+	handler = http.HandlerFunc(GetLeaderboardPage)
+	w = httptest.NewRecorder()
+	handler.ServeHTTP(w, req)
+	expectedStatus = http.StatusOK
+	if w.Code != expectedStatus {
+		t.Error(w.Code)
+	}
 }
+
+// func TestLeaderboard(t *testing.T) {
+// 	req, _ := http.NewRequest("GET", "/leaders", nil)
+// 	w := httptest.NewRecorder()
+// 	handler := http.HandlerFunc(GetLeaderboardPage)
+// 	handler.ServeHTTP(w, req)
+// 	expectedStatus := http.StatusNotFound
+// 	if w.Code != expectedStatus {
+// 		t.Error(w.Code)
+// 	}
+// 	db, mock, err := sqlmock.New()
+// 	if err != nil {
+// 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+// 	}
+// 	defer db.Close()
+// 	dab.SetMock(db)
+// 	rows := sqlmock.NewRows([]string{"login", "score"}).
+// 		AddRow("login", 10).
+// 		RowError(1, fmt.Errorf("error"))
+// 	mock.ExpectBegin()
+// 	mock.ExpectQuery("SELECT").WillReturnRows(rows)
+// 	mock.ExpectCommit()
+// 	handler.ServeHTTP(w, req)
+// 	expectedStatus = http.StatusOK
+// 	if w.Code != expectedStatus {
+// 		t.Error(w.Code)
+// 	}
+
+// }
