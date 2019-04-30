@@ -38,7 +38,5 @@ func Start() error {
 	helpers.LogMsg("Started game")
 
 	return http.ListenAndServe(":8082", nil)
-	//if err != nil {
-	//	helpers.LogMsg("Cannot start server: ", err)
-	//}
+
 }
