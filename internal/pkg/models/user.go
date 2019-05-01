@@ -6,7 +6,6 @@ type User struct {
 	Email        string `json:"email"`
 	Password     string `json:"password,omitempty"`
 	HashPassword string `json:"-"`
-	LastVisit    string `json:"lastVisit"`
 	Score        uint   `json:"score"`
 	Picture      string `json:"avatarUrl"`
 	Games        uint   `json:"count"`
