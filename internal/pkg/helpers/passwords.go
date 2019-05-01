@@ -1,8 +1,8 @@
 package helpers
 
 import (
-	"encoding/base64"
 	"crypto/sha256"
+	"encoding/base64"
 )
 
 func HashPassword(password string) string {
