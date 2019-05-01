@@ -129,7 +129,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 	}
 	user.Password = ""
-	user.Picture = "http://localhost:8081/data/Default.png"
+	user.Picture = db.ImagesAddress + "Default.png"
 	bytes, err := json.Marshal(user)
 
 	if err != nil {

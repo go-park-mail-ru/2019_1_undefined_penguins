@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"os"
+	"strconv"
 
 	"github.com/jackc/pgx"
 	_ "github.com/lib/pq"
@@ -18,6 +19,8 @@ var connectionConfig pgx.ConnConfig
 var connectionPoolConfig = pgx.ConnPoolConfig{
 	MaxConnections: 8,
 }
+
+const ImagesAddress = "http://localhost:8081/data/"
 
 func initConfig() error {
 	dir, err := os.Getwd()
@@ -41,12 +44,13 @@ func initConfig() error {
 	if len(connectionConfig.Password) > 0 {
 		psqlURI += ":" + connectionConfig.Password
 	}
-	psqlURI += "@" + connectionConfig.Host + ":" + connectionConfig.Host + "/" + connectionConfig.Database + "?sslmode=disable"
+	psqlURI += "@" + connectionConfig.Host + ":" + strconv.Itoa(int(connectionConfig.Port)) + "/" + connectionConfig.Database + "?sslmode=disable"
 	connection, err = sq.Open("postgres", psqlURI)
 	if err != nil {
 		helpers.LogMsg("Can't connect to db: ", err)
 		return err
 	}
+	helpers.LogMsg("db", psqlURI)
 	return nil
 }
 
