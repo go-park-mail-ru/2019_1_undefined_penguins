@@ -21,11 +21,10 @@ func GetLeaderboardPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	users, _ := db.GetLeaders(id)
-	if len(users) == 0 {
-
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
+	//if len(users) == 0 {
+	//	w.WriteHeader(http.StatusNotFound)
+	//	return
+	//}
 	if respBody, err := json.Marshal(users); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	} else {

@@ -145,7 +145,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 func SignOut(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("sessionid")
 	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
+		w.WriteHeader(http.StatusUnauthorized)
 		w.Write([]byte("You are not authorized"))
 		return
 	}

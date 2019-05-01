@@ -34,7 +34,7 @@ func Me(w http.ResponseWriter, r *http.Request) {
 
 	user, err := db.GetUserByID(mytemp)
 	if user == nil {
-		w.WriteHeader(http.StatusNotFound)
+		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 	bytes, err := json.Marshal(user)
