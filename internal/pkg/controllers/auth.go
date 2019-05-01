@@ -17,7 +17,6 @@ import (
 var SECRET = []byte("myawesomesecret")
 
 func SignIn(w http.ResponseWriter, r *http.Request) {
-
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -92,8 +91,10 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	found, _ := db.GetUserByEmail(user.Email)
-	if found != nil {
+	foundByEmail, _ := db.GetUserByEmail(user.Email)
+	foundByLogin, _ := db.GetUserByLogin(user.Login)
+
+	if foundByEmail != nil || foundByLogin != nil{
 		w.WriteHeader(http.StatusConflict)
 		return
 	}
