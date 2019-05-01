@@ -1,15 +1,17 @@
 package helpers
 
 import (
-	"golang.org/x/crypto/bcrypt"
+	"encoding/base64"
+	"crypto/sha256"
 )
 
-func HashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 8)
-	return string(bytes), err
+func HashPassword(password string) string {
+	hasher := sha256.New224()
+	hasher.Write([]byte(password))
+	result := base64.URLEncoding.EncodeToString(hasher.Sum(nil))
+	return string(result)
 }
 
 func CheckPasswordHash(password, hash string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-	return err == nil
+	return HashPassword(password) == hash
 }

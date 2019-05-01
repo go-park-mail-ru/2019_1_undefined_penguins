@@ -99,7 +99,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user.HashPassword, err = helpers.HashPassword(user.Password)
+	user.HashPassword = helpers.HashPassword(user.Password)
 
 	err = db.CreateUser(&user)
 	if err != nil {
