@@ -13,17 +13,29 @@ type PlayerState struct {
 	X, Y               int
 	Alpha              float64
 	Score              int
+	//penguin("GOOD") or gun("BAD")
+	Type string
 }
 
 type BulletState struct {
 	ID    string
 	X, Y  int
 	Alpha float64
+	Radious int
+}
+
+type FishState struct {
+	ID int
+	X, Y int
+	Alpha float64
+	Eaten bool
 }
 
 type RoomState struct {
-	Players     map[string]*PlayerState
-	Objects     BulletState
+	Players map[string]*PlayerState
+	Bullet  *BulletState
+	Fishes 	map[int]*FishState
+	Radious int
 	CurrentTime time.Time
 }
 
@@ -36,25 +48,32 @@ type Room struct {
 	unregister chan *Player
 	ticker     *time.Ticker
 	state      *RoomState
+
+	broadcast chan *Message
+	finish chan *Message
 }
 
 func NewRoom(MaxPlayers uint) *Room {
-
 	return &Room{
 		MaxPlayers: MaxPlayers,
 		Players:    make(map[string]*Player),
 		register:   make(chan *Player),
 		unregister: make(chan *Player),
-		ticker:     time.NewTicker(1 * time.Second),
+		ticker:     time.NewTicker(50 * time.Millisecond),
 		state: &RoomState{
 			Players: make(map[string]*PlayerState),
+			Fishes: make(map[int]*FishState, 24),
+			Radious: 250,
 		},
+		broadcast: make(chan *Message),
+		finish: make(chan *Message),
 	}
 }
 
 func (r *Room) Run() {
 	helpers.LogMsg("Room loop started")
-	r.state.Objects = CreateBullet(r)
+	r.state.Bullet = CreateBullet(r)
+	GameInit(r)
 	for {
 		select {
 		case player := <-r.unregister:
@@ -63,19 +82,20 @@ func (r *Room) Run() {
 		case player := <-r.register:
 			r.Players[player.ID] = player
 			helpers.LogMsg("Player " + player.ID + " joined")
-			player.SendMessage(&Message{"CONNECTED", nil})
-		case <-r.ticker.C:
+			player.SendMessage(&Message{"SINGLE", PayloadMessage{}})
+		case message := <- r.broadcast:
 			for _, player := range r.Players {
-				msg := <-player.in
-				switch msg.Payload {
-				case "SHOT":
-					ShotPlayer(r.state.Players[msg.Type], &r.state.Objects)
-				case "ROTATE":
-					RotatePlayer(r.state.Players[msg.Type])
+				select {
+				case player.out <- message:
+				default:
+					close(player.out)
 				}
-				helpers.LogMsg("sfw:", msg)
-				player.SendState(r.state)
 			}
+			HandleCommand(r, message)
+		case <-r.ticker.C:
+			ProcessGameSingle(r)
+		case <- r.finish:
+			FinishGame(r)
 		}
 	}
 }
@@ -88,6 +108,9 @@ func (r *Room) AddPlayer(player *Player) {
 		Alpha:              0,
 		ClockwiseDirection: true,
 		Shoted:             false,
+		Score:				0,
+		//TODO it is for single (ПНС)
+		Type: 				"GOOD",
 	}
 	r.state.Players[player.ID] = ps
 	player.room = r

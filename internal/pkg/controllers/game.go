@@ -9,20 +9,17 @@ import (
 )
 
 func StartWS(w http.ResponseWriter, r *http.Request) {
-	pingGame := game.NewGame(10)
-	go pingGame.Run()
-
-	//http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 	upgrader := &websocket.Upgrader{}
 
-	cookie, err := r.Cookie("sessionid")
-	if err != nil {
-		helpers.LogMsg("Not authorized")
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
+	// cookie, err := r.Cookie("sessionid")
+	// if err != nil {
+	// 	helpers.LogMsg("Not authorized")
+	// 	w.WriteHeader(http.StatusUnauthorized)
+	// 	return
+	// }
+
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
-	conn, err := upgrader.Upgrade(w, r, http.Header{"Upgrade": []string{"websocket"}})
+	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		helpers.LogMsg("Connection error: ", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -31,15 +28,9 @@ func StartWS(w http.ResponseWriter, r *http.Request) {
 
 	helpers.LogMsg("Connected to client")
 
-	player := game.NewPlayer(conn, cookie.Value)
+	//TODO remove hardcore, get from front player value
+	player := game.NewPlayer(conn, "player1")
+	//go player.Write()
 	go player.Listen()
-	pingGame.AddPlayer(player)
-	//})
-
-	// fmt.Println("Started game")
-
-	//http.ListenAndServe(":8082", nil)
-	//if err != nil {
-	//	helpers.LogMsg("Cannot start server: ", err)
-	//}
+	game.PingGame.AddPlayer(player)
 }
