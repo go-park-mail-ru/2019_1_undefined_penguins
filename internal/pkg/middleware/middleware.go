@@ -2,14 +2,14 @@ package middleware
 
 import (
 	"fmt"
-	"github.com/dgrijalva/jwt-go"
 	"net/http"
+
+	"github.com/dgrijalva/jwt-go"
 
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 )
 
 var SECRET = []byte("myawesomesecret")
-
 
 func CORSMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -25,13 +25,6 @@ func CORSMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		next.ServeHTTP(w, r)
-	})
-}
-
-func LoggingMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		helpers.LogMsg(r.Method + r.RequestURI)
 		next.ServeHTTP(w, r)
 	})
 }
@@ -75,6 +68,6 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			helpers.DeleteCookie(&w, cookie)
 			return
 		}
-			next.ServeHTTP(w, r)
+		next.ServeHTTP(w, r)
 	})
 }

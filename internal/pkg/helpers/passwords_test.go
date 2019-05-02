@@ -1,6 +1,8 @@
 package helpers
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestPasswords(t *testing.T) {
 	password := "password"
@@ -13,4 +15,8 @@ func TestPasswords(t *testing.T) {
 		t.Error("hashing is not equal")
 	}
 
+}
+
+func TestLogs(t *testing.T) {
+	LogMsg("hello world")
 }

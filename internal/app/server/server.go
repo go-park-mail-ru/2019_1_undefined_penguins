@@ -42,10 +42,11 @@ func StartApp(params Params) error {
 	router.HandleFunc("/", c.RootHandler)
 	router.HandleFunc("/me", c.Me).Methods("GET", "OPTIONS")
 	router.HandleFunc("/leaders/{id:[0-9]+}", c.GetLeaderboardPage).Methods("GET", "OPTIONS")
+	router.HandleFunc("/leaders/info", c.GetLeaderboardInfo).Methods("GET", "OPTIONS")
 	router.HandleFunc("/signup", c.SignUp).Methods("POST", "OPTIONS")
 	router.HandleFunc("/login", c.SignIn).Methods("POST", "OPTIONS")
 	router.HandleFunc("/signout", c.SignOut).Methods("GET", "OPTIONS")
-	router.HandleFunc("/change_profile", c.ChangeProfile).Methods("PUT", "OPTIONS")
+	router.HandleFunc("/me", c.ChangeProfile).Methods("PUT")
 	router.HandleFunc("/upload", c.UploadImage).Methods("POST")
 	gameRouter.HandleFunc("/ws", c.StartWS)
 
