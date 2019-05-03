@@ -43,7 +43,7 @@ type Room struct {
 	ID         string
 	MaxPlayers uint
 	Players    map[string]*Player
-	mu         *sync.Mutex
+	mu         sync.Mutex
 	register   chan *Player
 	unregister chan *Player
 	ticker     *time.Ticker
@@ -67,6 +67,7 @@ func NewRoom(MaxPlayers uint) *Room {
 		},
 		broadcast: make(chan *Message),
 		finish: make(chan *Message),
+		//mu: sync.Mutex{},
 	}
 }
 

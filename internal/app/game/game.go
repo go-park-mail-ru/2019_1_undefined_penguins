@@ -1,6 +1,7 @@
 package game
 
 import (
+	"fmt"
 	"sync"
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 )
@@ -60,4 +61,9 @@ func (g *Game) AddPlayer(player *Player)  {
 
 func (g *Game) AddRoom(room *Room)  {
 	g.rooms = append(g.rooms, room)
+}
+
+func (g *Game) RoomsCount() int {
+	fmt.Println(len(g.rooms))
+	return len(g.rooms)
 }

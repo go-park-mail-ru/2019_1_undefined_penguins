@@ -8,7 +8,7 @@ import (
 )
 
 func Start() error {
-	pingGame := NewGame(10)
+	pingGame := NewGame(3)
 	go pingGame.Run()
 
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {

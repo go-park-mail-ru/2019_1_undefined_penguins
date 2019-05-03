@@ -12,6 +12,14 @@ func StartWS(w http.ResponseWriter, r *http.Request) {
 	//pingGame := game.NewGame(10)
 	//go pingGame.Run()
 
+	if game.PingGame.RoomsCount() >= 10 {
+		//TODO check response on the client side
+		helpers.LogMsg("Too many clients")
+		w.WriteHeader(http.StatusTooManyRequests)
+		w.Write([]byte("Too many clients"))
+		return
+	}
+
 	upgrader := &websocket.Upgrader{}
 
 	cookie, err := r.Cookie("sessionid")
