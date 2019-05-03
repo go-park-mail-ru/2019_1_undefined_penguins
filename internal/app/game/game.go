@@ -68,5 +68,7 @@ func (g *Game) AddRoom(room *Room)  {
 
 func (g *Game) RoomsCount() int {
 	fmt.Println(len(g.rooms))
+	g.mu.RLock()
+	defer g.mu.RUnlock()
 	return len(g.rooms)
 }
