@@ -80,7 +80,9 @@ func (r *Room) Run() {
 			delete(r.Players, player.ID)
 			helpers.LogMsg("Player " + player.ID + " was removed from room")
 		case player := <-r.register:
+			r.mu.Lock()
 			r.Players[player.ID] = player
+			r.mu.Unlock()
 			helpers.LogMsg("Player " + player.ID + " joined")
 			player.SendMessage(&Message{"CONNECTED", nil})
 		case message := <- r.broadcast:
@@ -112,7 +114,9 @@ func (r *Room) AddPlayer(player *Player) {
 		//TODO it is for single (ПНС)
 		Type: 				"GOOD",
 	}
+	r.mu.Lock()
 	r.state.Players[player.ID] = ps
+	r.mu.Unlock()
 	player.room = r
 	r.register <- player
 }
