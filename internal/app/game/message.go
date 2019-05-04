@@ -1,6 +1,7 @@
 package game
 
 //from back to front
+//(это я генерю и шлю)
 type OutcomeMessage struct {
 	Type string `json:"type"`
 	Payload OutPayloadMessage `json:"payload"`
@@ -29,6 +30,7 @@ type BulletMessage struct {
 }
 
 //from front to back
+//(это я ТОЛЬКО парсю и никогда не шлю)
 type IncomeMessage struct {
 	Type string `json:"type"`
 	Payload InPayloadMessage `json:"payload,omitempty"`
@@ -37,4 +39,5 @@ type IncomeMessage struct {
 type InPayloadMessage struct {
 	Name string `json:"name"`
 	Command string `json:"command"`
+	Mode string `json:"mode"`
 }

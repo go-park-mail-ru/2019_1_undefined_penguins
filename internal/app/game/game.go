@@ -1,24 +1,31 @@
 package game
 
 import (
+	"2019_1_undefined_penguins/internal/pkg/helpers"
 	"fmt"
 	"sync"
-	"2019_1_undefined_penguins/internal/pkg/helpers"
 )
 
 var PingGame *Game
 
-func InitGame() *Game {
-	g := &Game{
-		MaxRooms: 10,
-		register: make(chan *Player),
-	}
-	return g
+const (
+	SINGLE = "SINGLE"
+	MULTI = "MULTI"
+
+	WAIT = "SIGNAL_TO_WAIT_OPPONENT"
+	START = "SIGNAL_START_THE_GAME"
+	FINISH = "SIGNAL_FINISH_GAME"
+	STATE = "SIGNAL_NEW_GAME_STATE"
+)
+
+func InitGame(maxRooms uint) *Game {
+	return NewGame(maxRooms)
 }
 
 type Game struct {
 	MaxRooms uint
-	rooms []*Room
+	roomsSingle []*RoomSingle
+	roomsMulti []*RoomMulti
 	//mu *sync.Mutex
 	mu sync.RWMutex
 	register chan *Player
@@ -32,27 +39,72 @@ func NewGame(maxRooms uint) *Game {
 }
 
 func (g *Game) Run()  {
-	//helpers.LogMsg("Main loop started")
-
-//TODO remove goto metka by reversing condition
 LOOP:
 	for {
 		player := <-g.register
 
-		for _, room := range g.rooms {
-			if len(room.Players) < int(room.MaxPlayers) {
-				room.AddPlayer(player)
-				continue LOOP
+		switch player.GameMode {
+		case SINGLE:
+			//start roomSingle
+			for _, room := range g.roomsSingle {
+				if room.Player == nil {
+					g.mu.Lock()
+					room.AddPlayer(player)
+					g.mu.Unlock()
+					continue LOOP
+				}
 			}
+
+			//если все комнаты заняты - делой новую
+			room := NewRoomSingle(1)
+			g.mu.Lock()
+			g.AddToRoomSingle(room)
+			g.mu.Unlock()
+
+			go room.Run()
+
+			g.mu.Lock()
+			room.AddPlayer(player)
+			g.mu.Unlock()
+
+		case MULTI:
+			//start roomMulty
+			for _, room := range g.roomsMulti {
+				if len(room.Players) < int(room.MaxPlayers) {
+					g.mu.Lock()
+					room.AddPlayer(player)
+					g.mu.Unlock()
+					continue LOOP
+				}
+			}
+
+			//если все комнаты заняты - делой новую
+			room := NewRoomMulti(2)
+			g.mu.Lock()
+			g.AddToRoomMulti(room)
+			g.mu.Unlock()
+
+			go room.Run()
+
+			g.mu.Lock()
+			room.AddPlayer(player)
+			g.mu.Unlock()
+		default:
+			fmt.Println("Empty")
 		}
-
-		//если все комнаты заняты - делой новую
-		room := NewRoom(2)
-		g.AddRoom(room)
-		go room.Run()
-
-		room.AddPlayer(player)
 	}
+}
+
+func (g *Game) AddToRoomSingle(room *RoomSingle) {
+	g.mu.Lock()
+	g.roomsSingle = append(g.roomsSingle, room)
+	g.mu.Unlock()
+}
+
+func (g *Game) AddToRoomMulti(room *RoomMulti) {
+	g.mu.Lock()
+	g.roomsMulti = append(g.roomsMulti, room)
+	g.mu.Unlock()
 }
 
 func (g *Game) AddPlayer(player *Player)  {
@@ -60,15 +112,9 @@ func (g *Game) AddPlayer(player *Player)  {
 	g.register <- player
 }
 
-func (g *Game) AddRoom(room *Room)  {
-	g.mu.Lock()
-	g.rooms = append(g.rooms, room)
-	g.mu.Unlock()
-}
 
 func (g *Game) RoomsCount() int {
-	fmt.Println(len(g.rooms))
 	g.mu.RLock()
 	defer g.mu.RUnlock()
-	return len(g.rooms)
+	return len(g.roomsSingle) + len(g.roomsMulti)
 }

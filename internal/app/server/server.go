@@ -30,8 +30,9 @@ func StartApp(params Params) error {
 	defer db.Disconnect()
 
 	//to local package in local parametr (will be tested)
-	game.PingGame = game.InitGame()
+	game.PingGame = game.InitGame(10)
 	go game.PingGame.Run()
+
 	router := mux.NewRouter()
 	gameRouter := router.PathPrefix("/game").Subrouter()
 
