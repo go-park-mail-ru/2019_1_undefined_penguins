@@ -1,8 +1,10 @@
 package game
 
 import (
+	"2019_1_undefined_penguins/internal/pkg/helpers"
 	"fmt"
 	"github.com/gorilla/websocket"
+	"log"
 )
 
 type Player struct {
@@ -33,16 +35,15 @@ func (p *Player) Listen() {
 			message := &IncomeMessage{}
 			err := p.conn.ReadJSON(message)
 			fmt.Println("ReadJSON error: ", err)
-			//if websocket.IsUnexpectedCloseError(err) {
-			//	helpers.LogMsg("Player " + p.ID + " disconnected")
-			//	return
-			//}
-			////message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-			//
-			//if err != nil {
-			//	helpers.LogMsg("Cannot read json: ", err)
-			//	continue
-			//}
+			if websocket.IsUnexpectedCloseError(err) {
+				p.RemovePlayerFromRoom()
+				helpers.LogMsg("Player " + p.ID +" disconnected")
+				return
+			}
+			if err != nil {
+				log.Printf("Cannot read json")
+				continue
+			}
 			p.in <- message
 		}
 	}()
@@ -54,17 +55,18 @@ func (p *Player) Listen() {
 			//оработать, посчитать
 			fmt.Printf("Front says: %#v", message)
 			fmt.Println("")
-
-			//стартовая инициализация, производится строго вначале один раз
-			if message.Payload.Mode != "" {
-				p.GameMode = message.Payload.Mode
-				p.ID = message.Payload.Name
-				PingGame.AddPlayer(p)
-			}
-
-			//обработка пришедшей команды
-			if message.Payload.Command != "" {
-				//process command
+			switch message.Type {
+				case NEWPLAYER:
+					//стартовая инициализация, производится строго вначале один раз
+					if message.Payload.Mode != "" {
+						p.GameMode = message.Payload.Mode
+						p.ID = message.Payload.Name
+						PingGame.AddPlayer(p)
+					}
+				case NEWCOMMAND:
+						//process command
+				default:
+					fmt.Println("Default in Player.Listen() - in")
 			}
 
 		case message := <-p.out:
@@ -72,15 +74,11 @@ func (p *Player) Listen() {
 			//шлем всем фронтам текущее состояние
 			//switch message.Type {
 			//	case START:
-			//		_ = p.conn.WriteJSON(message)
 			//	case WAIT:
-			//		_ = p.conn.WriteJSON(message)
 			//	case FINISH:
-			//		_ = p.conn.WriteJSON(message)
 			//	case STATE:
-			//		_ = p.conn.WriteJSON(message)
 			//	default:
-			//		fmt.Println("Default in Player.Listen()")
+			//		fmt.Println("Default in Player.Listen() - out")
 			//}
 			_ = p.conn.WriteJSON(message)
 			//if p.GameMode != "" {
@@ -91,6 +89,15 @@ func (p *Player) Listen() {
 			//	}
 			//}
 		}
+	}
+}
+
+func (p *Player) RemovePlayerFromRoom() {
+	if p.roomSingle != nil {
+		p.roomSingle.RemovePlayer(p)
+	}
+	if p.roomMulti != nil {
+		p.roomMulti.RemovePlayer(p)
 	}
 }
 

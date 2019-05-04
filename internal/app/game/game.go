@@ -16,6 +16,9 @@ const (
 	START = "SIGNAL_START_THE_GAME"
 	FINISH = "SIGNAL_FINISH_GAME"
 	STATE = "SIGNAL_NEW_GAME_STATE"
+
+	NEWPLAYER = "newPlayer"
+	NEWCOMMAND = "newCommand"
 )
 
 func InitGame(maxRooms uint) *Game {

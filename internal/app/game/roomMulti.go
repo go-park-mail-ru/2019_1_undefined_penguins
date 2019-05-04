@@ -87,6 +87,6 @@ func (r *RoomMulti) AddPlayer(player *Player) {
 	r.register <- player
 }
 
-//func (r *RoomSingle) RemovePlayer(player *Player) {
-//	r.unregister <- player
-//}
+func (r *RoomMulti) RemovePlayer(player *Player) {
+	r.unregister <- player
+}

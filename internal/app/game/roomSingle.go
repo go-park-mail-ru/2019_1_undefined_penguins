@@ -2,7 +2,6 @@ package game
 
 import (
 	"2019_1_undefined_penguins/internal/pkg/helpers"
-	"fmt"
 	"sync"
 	"time"
 )
@@ -51,22 +50,7 @@ func (r *RoomSingle) Run() {
 			r.Player = player
 			r.mu.Unlock()
 			helpers.LogMsg("Player " + player.ID + " joined")
-			//r.broadcast <- &OutcomeMessage{Type:START}
-			//r.Player.SendMessageSingle(&OutcomeMessage{Type:START})
-			////
-			//_, ok := <- r.broadcast
-			fmt.Println("")
 			r.Player.out <- &OutcomeMessage{Type:START}
-		//case message, ok := <- r.broadcast:
-		//	fmt.Println(ok)
-			//if ok {
-			//	select {
-			//	r.Player.out <- message
-				//default:
-				//	close(r.Player.out)
-				//}
-			//}
-			//HandleCommand(r, message)
 		case <-r.ticker.C:
 			//ProcessGameSingle(r)
 		case player := <- r.finish:
@@ -92,6 +76,6 @@ func (r *RoomSingle) AddPlayer(player *Player) {
 	r.register <- player
 }
 
-//func (r *RoomSingle) RemovePlayer(player *Player) {
-//	r.unregister <- player
-//}
+func (r *RoomSingle) RemovePlayer(player *Player) {
+	r.unregister <- player
+}
