@@ -17,10 +17,10 @@ type Player struct {
 	GameMode string
 }
 
-func NewPlayer(conn *websocket.Conn, id string) *Player {
+func NewPlayer(conn *websocket.Conn) *Player {
 	return &Player{
 		conn: conn,
-		ID:   id,
+		//ID:   id,
 		in:   make(chan *IncomeMessage),
 		out:  make(chan *OutcomeMessage, 1),
 		roomMulti: nil,
