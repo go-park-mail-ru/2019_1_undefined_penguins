@@ -85,7 +85,7 @@ func (r *Room) Run() {
 			r.Players[player.ID] = player
 			r.mu.Unlock()
 			helpers.LogMsg("Player " + player.ID + " joined")
-			player.SendMessage(&Message{"CONNECTED", nil})
+			player.SendMessage(&Message{"SINGLE", PayloadMessage{}})
 		case message := <- r.broadcast:
 			for _, player := range r.Players {
 				select {

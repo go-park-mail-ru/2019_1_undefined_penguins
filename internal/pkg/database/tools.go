@@ -3,12 +3,12 @@ package database
 import (
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 	"2019_1_undefined_penguins/internal/pkg/models"
-
-	"github.com/jackc/pgx"
+	"database/sql"
 )
 
-func RowsToUsers(rows *pgx.Rows) []models.User {
+func RowsToUsers(rows *sql.Rows) []models.User {
 	users := []models.User{}
+	defer rows.Close()
 	for rows.Next() {
 		entry := models.User{}
 		if err := rows.Scan(&entry.Login, &entry.Score, &entry.Email); err == nil {

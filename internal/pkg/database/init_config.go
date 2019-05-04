@@ -1,18 +1,19 @@
 package database
 
 import (
+	"2019_1_undefined_penguins/internal/pkg/helpers"
+	h "2019_1_undefined_penguins/internal/pkg/helpers"
+	sq "database/sql"
 	"encoding/json"
 	"io/ioutil"
-	"strings"
-
 	"os"
-
-	h "2019_1_undefined_penguins/internal/pkg/helpers"
+	"strconv"
 
 	"github.com/jackc/pgx"
+	_ "github.com/lib/pq"
 )
 
-var connection *pgx.ConnPool = nil
+var connection *sq.DB = nil
 
 var connectionConfig pgx.ConnConfig
 var connectionPoolConfig = pgx.ConnPoolConfig{
@@ -20,37 +21,39 @@ var connectionPoolConfig = pgx.ConnPoolConfig{
 }
 
 func initConfig() error {
-
 	dir, err := os.Getwd()
 	if err != nil {
 		h.LogMsg("Getting directory error: ", err)
 		return err
 
 	}
-
 	file, err := os.Open(dir + "/configs/database.json")
 	if err != nil {
-		dirRep := strings.Replace(dir, "/internal/pkg/controllers", "", -1)
-		file, err = os.Open(dirRep + "/configs/testbase.json")
-		if err != nil {
-			dirRep = strings.Replace(dir, "/internal/pkg/database", "", -1)
-			file, err = os.Open(dirRep + "/configs/testbase.json")
-			if err != nil {
-				h.LogMsg("Open directory error: ", err)
-				return err
-			}
-		}
+		h.LogMsg("Init parse DB error: ", err)
+		return err
 	}
-
 	body, _ := ioutil.ReadAll(file)
 	err = json.Unmarshal(body, &connectionConfig)
 	if err != nil {
 		h.LogMsg("Init parse DB error: ", err)
 		return err
 	}
-
-	connectionPoolConfig.ConnConfig = connectionConfig
+	psqlURI := "postgresql://" + connectionConfig.User
+	if len(connectionConfig.Password) > 0 {
+		psqlURI += ":" + connectionConfig.Password
+	}
+	psqlURI += "@" + connectionConfig.Host + ":" + strconv.Itoa(int(connectionConfig.Port)) + "/" + connectionConfig.Database + "?sslmode=disable"
+	connection, err = sq.Open("postgres", psqlURI)
+	if err != nil {
+		helpers.LogMsg("Can't connect to db: ", err)
+		return err
+	}
+	helpers.LogMsg("db", psqlURI)
 	return nil
+}
+
+func SetMock(databaseMock *sq.DB) {
+	connection = databaseMock
 }
 
 func Connect() error {
@@ -59,11 +62,6 @@ func Connect() error {
 	}
 	err := initConfig()
 	if err != nil {
-		return err
-	}
-	connection, err = pgx.NewConnPool(connectionPoolConfig)
-	if err != nil {
-		h.LogMsg("Connect DB error: " + err.Error())
 		return err
 	}
 	return nil

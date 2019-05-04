@@ -6,7 +6,6 @@ type User struct {
 	Email        string `json:"email"`
 	Password     string `json:"password,omitempty"`
 	HashPassword string `json:"-"`
-	LastVisit    string `json:"lastVisit"`
 	Score        uint   `json:"score"`
 	Picture      string `json:"avatarUrl"`
 	Games        uint   `json:"count"`
@@ -25,4 +24,9 @@ func init() {
 
 func ReturnCountOfSessions() int {
 	return len(Sessions)
+}
+
+type LeadersInfo struct {
+	Count       uint `json:"count"`
+	UsersOnPage uint `json:"usersOnPage"`
 }

@@ -58,7 +58,8 @@ func (p *Player) Listen() {
 func (p *Player) SendState(state *RoomState) {
 	//TODO: send to front
 	if state != nil {
-		p.out <- &Message{"STATE", state}
+		//TODO create norm state
+		p.out <- &Message{"SINGLE", PayloadMessage{"STATE", "SOME-STATE"}}
 	}
 }
 
