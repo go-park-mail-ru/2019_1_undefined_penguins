@@ -20,6 +20,7 @@ func StartWS(w http.ResponseWriter, r *http.Request) {
 
 	upgrader := &websocket.Upgrader{}
 
+	//check for multi in micro!!!!!
 
 	//cookie, err := r.Cookie("sessionid")
 	//if err != nil {
