@@ -2,6 +2,7 @@ package game
 
 import (
 	"2019_1_undefined_penguins/internal/pkg/helpers"
+	"fmt"
 	"sync"
 	"time"
 )
@@ -51,8 +52,9 @@ func (r *RoomMulti) Run() {
 			r.Players[player.ID] = player
 			r.mu.Unlock()
 			helpers.LogMsg("Player " + player.ID + " joined")
-			player.out <- &OutcomeMessage{Type:START}
+			//r.broadcast <- &OutcomeMessage{Type:START}
 		case message := <- r.broadcast:
+			fmt.Println("IN BROADCAST")
 			for _, player := range r.Players {
 				select {
 				case player.out <- message:

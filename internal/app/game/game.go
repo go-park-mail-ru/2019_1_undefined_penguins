@@ -78,6 +78,8 @@ LOOP:
 				if len(room.Players) < int(room.MaxPlayers) {
 					g.mu.Lock()
 					room.AddPlayer(player)
+					//player.out <- &OutcomeMessage{Type:START}
+					room.broadcast <- &OutcomeMessage{Type:START}
 					g.mu.Unlock()
 					continue LOOP
 				}
@@ -93,6 +95,7 @@ LOOP:
 
 			g.mu.Lock()
 			room.AddPlayer(player)
+			player.out <- &OutcomeMessage{Type:WAIT}
 			g.mu.Unlock()
 		default:
 			fmt.Println("Empty")
@@ -105,9 +108,7 @@ func (g *Game) AddToRoomSingle(room *RoomSingle) {
 }
 
 func (g *Game) AddToRoomMulti(room *RoomMulti) {
-	g.mu.Lock()
 	g.roomsMulti = append(g.roomsMulti, room)
-	g.mu.Unlock()
 }
 
 func (g *Game) AddPlayer(player *Player)  {
