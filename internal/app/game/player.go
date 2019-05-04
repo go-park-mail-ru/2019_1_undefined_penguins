@@ -20,7 +20,7 @@ func NewPlayer(conn *websocket.Conn, id string) *Player {
 		conn: conn,
 		ID:   id,
 		in:   make(chan *IncomeMessage),
-		out:  make(chan *OutcomeMessage),
+		out:  make(chan *OutcomeMessage, 1),
 		roomMulti: nil,
 		roomSingle: nil,
 	}
@@ -32,7 +32,17 @@ func (p *Player) Listen() {
 			//слушаем фронт
 			message := &IncomeMessage{}
 			err := p.conn.ReadJSON(message)
-			fmt.Println(err)
+			fmt.Println("ReadJSON error: ", err)
+			//if websocket.IsUnexpectedCloseError(err) {
+			//	helpers.LogMsg("Player " + p.ID + " disconnected")
+			//	return
+			//}
+			////message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
+			//
+			//if err != nil {
+			//	helpers.LogMsg("Cannot read json: ", err)
+			//	continue
+			//}
 			p.in <- message
 		}
 	}()
@@ -44,20 +54,12 @@ func (p *Player) Listen() {
 			//оработать, посчитать
 			fmt.Printf("Front says: %#v", message)
 			fmt.Println("")
-			//if websocket.IsUnexpectedCloseError(err) {
-			//	helpers.LogMsg("Player " + p.ID + " disconnected")
-			//	return
-			//}
-			////message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-			//
-			//if err != nil {
-			//	helpers.LogMsg("Cannot read json: ", err)
-			//	continue
-			//}
+
 			//стартовая инициализация, производится строго вначале один раз
 			if message.Payload.Mode != "" {
 				p.GameMode = message.Payload.Mode
 				p.ID = message.Payload.Name
+				PingGame.AddPlayer(p)
 			}
 
 			//обработка пришедшей команды
@@ -65,20 +67,29 @@ func (p *Player) Listen() {
 				//process command
 			}
 
-	//		p.out <- &OutcomeMessage{"<3", OutPayloadMessage{}}
-
 		case message := <-p.out:
 			fmt.Printf("Back says: %#v", message)
-			_ = p.conn.WriteJSON(message)
 			//шлем всем фронтам текущее состояние
-			if p.GameMode != "" {
-				if p.roomSingle != nil {
-					p.roomSingle.broadcast <- message
-				} else {
-					p.roomMulti.broadcast <- message
-				}
-
-			}
+			//switch message.Type {
+			//	case START:
+			//		_ = p.conn.WriteJSON(message)
+			//	case WAIT:
+			//		_ = p.conn.WriteJSON(message)
+			//	case FINISH:
+			//		_ = p.conn.WriteJSON(message)
+			//	case STATE:
+			//		_ = p.conn.WriteJSON(message)
+			//	default:
+			//		fmt.Println("Default in Player.Listen()")
+			//}
+			_ = p.conn.WriteJSON(message)
+			//if p.GameMode != "" {
+			//	if p.roomSingle != nil {
+			//		p.roomSingle.broadcast <- message
+			//	} else {
+			//		p.roomMulti.broadcast <- message
+			//	}
+			//}
 		}
 	}
 }
@@ -91,6 +102,6 @@ func (p *Player) Listen() {
 //	}
 //}
 //
-//func (p *Player) SendMessage(message *Message) {
-//	p.out <- message
+//func (p *Player) SendMessageSingle(message *OutcomeMessage) {
+//	p.roomSingle.broadcast <- message
 //}

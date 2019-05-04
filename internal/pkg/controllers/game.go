@@ -40,5 +40,4 @@ func StartWS(w http.ResponseWriter, r *http.Request) {
 	//TODO remove hardcore, get from front player value
 	player := game.NewPlayer(conn, cookie.Value)
 	go player.Listen()
-	game.PingGame.AddPlayer(player)
 }

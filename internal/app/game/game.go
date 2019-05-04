@@ -41,7 +41,9 @@ func NewGame(maxRooms uint) *Game {
 func (g *Game) Run()  {
 LOOP:
 	for {
-		player := <-g.register
+		player, _ := <-g.register
+		//fmt.Println("register ch is ", ok)
+		//fmt.Println("State is "+ player.GameMode)
 
 		switch player.GameMode {
 		case SINGLE:
@@ -96,9 +98,7 @@ LOOP:
 }
 
 func (g *Game) AddToRoomSingle(room *RoomSingle) {
-	g.mu.Lock()
 	g.roomsSingle = append(g.roomsSingle, room)
-	g.mu.Unlock()
 }
 
 func (g *Game) AddToRoomMulti(room *RoomMulti) {

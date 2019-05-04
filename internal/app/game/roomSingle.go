@@ -2,6 +2,7 @@ package game
 
 import (
 	"2019_1_undefined_penguins/internal/pkg/helpers"
+	"fmt"
 	"sync"
 	"time"
 )
@@ -31,7 +32,7 @@ func NewRoomSingle(MaxPlayers uint) *RoomSingle {
 			Penguin: new(PenguinState),
 			Fishes: make(map[int]*FishState, 24),
 		},
-		broadcast: make(chan *OutcomeMessage),
+		broadcast: make(chan *OutcomeMessage, 1),
 		finish: make(chan *Player),
 	}
 }
@@ -50,13 +51,21 @@ func (r *RoomSingle) Run() {
 			r.Player = player
 			r.mu.Unlock()
 			helpers.LogMsg("Player " + player.ID + " joined")
-			player.out <- &OutcomeMessage{Type:START}
-		case message := <- r.broadcast:
-				select {
-				case r.Player.out <- message:
-				default:
-					close(r.Player.out)
-				}
+			//r.broadcast <- &OutcomeMessage{Type:START}
+			//r.Player.SendMessageSingle(&OutcomeMessage{Type:START})
+			////
+			//_, ok := <- r.broadcast
+			fmt.Println("")
+			r.Player.out <- &OutcomeMessage{Type:START}
+		//case message, ok := <- r.broadcast:
+		//	fmt.Println(ok)
+			//if ok {
+			//	select {
+			//	r.Player.out <- message
+				//default:
+				//	close(r.Player.out)
+				//}
+			//}
 			//HandleCommand(r, message)
 		case <-r.ticker.C:
 			//ProcessGameSingle(r)
