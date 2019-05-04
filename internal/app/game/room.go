@@ -43,7 +43,7 @@ type Room struct {
 	ID         string
 	MaxPlayers uint
 	Players    map[string]*Player
-	mu         *sync.Mutex
+	mu         sync.Mutex
 	register   chan *Player
 	unregister chan *Player
 	ticker     *time.Ticker
@@ -67,6 +67,7 @@ func NewRoom(MaxPlayers uint) *Room {
 		},
 		broadcast: make(chan *Message),
 		finish: make(chan *Message),
+		//mu: sync.Mutex{},
 	}
 }
 
@@ -80,9 +81,11 @@ func (r *Room) Run() {
 			delete(r.Players, player.ID)
 			helpers.LogMsg("Player " + player.ID + " was removed from room")
 		case player := <-r.register:
+			r.mu.Lock()
 			r.Players[player.ID] = player
+			r.mu.Unlock()
 			helpers.LogMsg("Player " + player.ID + " joined")
-			player.SendMessage(&Message{"CONNECTED", nil})
+			player.SendMessage(&Message{"SINGLE", PayloadMessage{}})
 		case message := <- r.broadcast:
 			for _, player := range r.Players {
 				select {
@@ -112,7 +115,9 @@ func (r *Room) AddPlayer(player *Player) {
 		//TODO it is for single (ПНС)
 		Type: 				"GOOD",
 	}
+	r.mu.Lock()
 	r.state.Players[player.ID] = ps
+	r.mu.Unlock()
 	player.room = r
 	r.register <- player
 }

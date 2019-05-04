@@ -3,3 +3,5 @@
 configs/
 static/
 .vscode/
+coverage.out
+c.out

@@ -91,13 +91,13 @@ func ProcessGameSingle(r *Room) {
 
 	if count == 0 {
 		for t, _ := range r.state.Players {
-			r.Players[t].out <- &Message{penguin.ID, "WIN"}
+			r.Players[t].out <- &Message{"SINGLE", PayloadMessage{penguin.ID, "WIN"}}
 
-			message := &Message{r.Players[t].ID, "GAME FINISHED"}
+			message := &Message{"SINGLE", PayloadMessage{r.Players[t].ID, "GAME FINISHED"}}
 			r.Players[t].SendMessage(message)
 		}
 
-		r.finish <- &Message{penguin.ID, "WIN"}
+		r.finish <- &Message{"SINGLE", PayloadMessage{penguin.ID, "WIN"}}
 
 		return
 	}
@@ -140,25 +140,25 @@ func GameInit(r *Room) {
 }
 
 func HandleCommand(r *Room, msg *Message) {
-		switch msg.Payload {
+		switch msg.Payload.Command {
 			case "SHOT":
 				ShotPlayer(r.state.Players[msg.Type], r.state.Bullet)
 				for t, player := range r.state.Players {
 					if player.Shoted {
-						r.Players[t].out <- &Message{msg.Type, "KILLED"}
-						message := &Message{player.ID, "GAME FINISHED"}
+						r.Players[t].out <- &Message{"SINGLE", PayloadMessage{msg.Type, "KILLED"}}
+						message := &Message{"SINGLE", PayloadMessage{player.ID, "GAME FINISHED"}}
 						r.Players[t].SendMessage(message)
 					}
 				}
 			case "ROTATE":
 				RotatePlayer(r.state.Players[msg.Type])
-				r.Players[msg.Type].out <- &Message{msg.Type, "ROTATED"}
+				r.Players[msg.Type].out <- &Message{"SINGLE", PayloadMessage{msg.Type, "ROTATED"}}
 		}
 }
 
 func FinishGame(r *Room) {
 	for _, player := range r.Players {
-		message := &Message{player.ID, "GAME FINISHED"}
+		message := &Message{"SINGLE", PayloadMessage{player.ID, "GAME FINISHED"}}
 		player.SendMessage(message)
 		}
 }

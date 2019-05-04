@@ -15,8 +15,6 @@ import (
 	db "2019_1_undefined_penguins/internal/pkg/database"
 	"2019_1_undefined_penguins/internal/pkg/models"
 
-	"github.com/jackc/pgx"
-
 	"github.com/dgrijalva/jwt-go"
 )
 
@@ -34,7 +32,7 @@ func Me(w http.ResponseWriter, r *http.Request) {
 
 	user, err := db.GetUserByID(mytemp)
 	if user == nil {
-		w.WriteHeader(http.StatusNotFound)
+		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 	bytes, err := json.Marshal(user)
@@ -72,17 +70,9 @@ func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 	mytemp := uint(temp.(float64))
 	user, err = db.UpdateUserByID(user, mytemp)
 	if err != nil {
-		switch errPgx := err.(pgx.PgError); errPgx.Code {
-		case "23505":
-			helpers.LogMsg(errPgx)
-			w.WriteHeader(http.StatusConflict)
-			return
-		default:
-			helpers.LogMsg(errPgx)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-
+		helpers.LogMsg(err)
+		w.WriteHeader(http.StatusConflict)
+		return
 	}
 
 	bytes, err := json.Marshal(user)

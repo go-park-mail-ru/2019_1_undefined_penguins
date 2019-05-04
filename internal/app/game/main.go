@@ -8,7 +8,7 @@ import (
 )
 
 func Start() error {
-	pingGame := NewGame(10)
+	pingGame := NewGame(3)
 	go pingGame.Run()
 
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
@@ -38,7 +38,5 @@ func Start() error {
 	helpers.LogMsg("Started game")
 
 	return http.ListenAndServe(":8082", nil)
-	//if err != nil {
-	//	helpers.LogMsg("Cannot start server: ", err)
-	//}
+
 }
