@@ -1,6 +1,7 @@
 package game
 
 import (
+	"fmt"
 	"sync"
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 )
@@ -18,7 +19,8 @@ func InitGame() *Game {
 type Game struct {
 	MaxRooms uint
 	rooms []*Room
-	mu *sync.Mutex
+	//mu *sync.Mutex
+	mu sync.RWMutex
 	register chan *Player
 }
 
@@ -59,5 +61,14 @@ func (g *Game) AddPlayer(player *Player)  {
 }
 
 func (g *Game) AddRoom(room *Room)  {
+	g.mu.Lock()
 	g.rooms = append(g.rooms, room)
+	g.mu.Unlock()
+}
+
+func (g *Game) RoomsCount() int {
+	fmt.Println(len(g.rooms))
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+	return len(g.rooms)
 }

@@ -17,7 +17,6 @@ import (
 var SECRET = []byte("myawesomesecret")
 
 func SignIn(w http.ResponseWriter, r *http.Request) {
-
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -92,13 +91,15 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	found, _ := db.GetUserByEmail(user.Email)
-	if found != nil {
+	foundByEmail, _ := db.GetUserByEmail(user.Email)
+	foundByLogin, _ := db.GetUserByLogin(user.Login)
+
+	if foundByEmail != nil || foundByLogin != nil{
 		w.WriteHeader(http.StatusConflict)
 		return
 	}
 
-	user.HashPassword, err = helpers.HashPassword(user.Password)
+	user.HashPassword = helpers.HashPassword(user.Password)
 
 	err = db.CreateUser(&user)
 	if err != nil {
@@ -144,7 +145,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 func SignOut(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("sessionid")
 	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
+		w.WriteHeader(http.StatusUnauthorized)
 		w.Write([]byte("You are not authorized"))
 		return
 	}
