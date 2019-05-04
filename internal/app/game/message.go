@@ -9,7 +9,7 @@ type OutcomeMessage struct {
 
 type OutPayloadMessage struct {
 	Penguin PenguinMessage `json:"penguin"`
-	Gun GunMessage `json:"bullet"`
+	Gun GunMessage `json:"gun"`
 }
 
 type PenguinMessage struct {

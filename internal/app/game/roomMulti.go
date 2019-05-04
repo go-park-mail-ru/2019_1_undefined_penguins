@@ -64,7 +64,7 @@ func (r *RoomMulti) Run() {
 			}
 			//HandleCommand(r, message)
 		case <-r.ticker.C:
-			//ProcessGameSingle(r)
+			//ProcessGameMulti(r)
 		case player := <- r.finish:
 			helpers.LogMsg("Player " + player.ID + " finished game")
 			player.out <- &OutcomeMessage{Type:FINISH}
@@ -92,3 +92,5 @@ func (r *RoomMulti) AddPlayer(player *Player) {
 func (r *RoomMulti) RemovePlayer(player *Player) {
 	r.unregister <- player
 }
+
+//func (r *RoomMulti)
