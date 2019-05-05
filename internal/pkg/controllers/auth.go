@@ -1,7 +1,11 @@
 package controllers
 
 import (
+	"2019_1_undefined_penguins/internal/app/auth"
 	"encoding/json"
+	"fmt"
+	"golang.org/x/net/context"
+	"google.golang.org/grpc"
 	"time"
 
 	"io/ioutil"
@@ -24,47 +28,41 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 	}
 
 	defer r.Body.Close()
-	var user models.User
+
+	//var user models.User
+	var user *auth.User
 	err = json.Unmarshal(body, &user)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	found, _ := db.GetUserByEmail(user.Email)
-
-	if found == nil {
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
-
-	if !helpers.CheckPasswordHash(user.Password, found.HashPassword) {
-		w.WriteHeader(http.StatusForbidden)
-		return
-	}
-	ttl := time.Hour
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"userID":    found.ID,
-		"userEmail": user.Email,
-		"exp":       time.Now().UTC().Add(ttl).Unix(),
-	})
-
-	str, err := token.SignedString(SECRET)
+	grcpConn, err := grpc.Dial(
+		"127.0.0.1:8083",
+		grpc.WithInsecure(),
+	)
 	if err != nil {
-		w.WriteHeader(http.StatusForbidden)
-		w.Write([]byte("=(" + err.Error()))
+		helpers.LogMsg("Can`t connect to grpc")
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	defer grcpConn.Close()
+
+	authManager := auth.NewAuthCheckerClient(grcpConn)
+	ctx := context.Background()
+	token, err := authManager.CreateUser(ctx, user)
+
+	fmt.Println(err)
 
 	cookie := &http.Cookie{
 		Name:     "sessionid",
-		Value:    str,
+		Value:    token.Token,
 		Expires:  time.Now().Add(time.Hour),
 		HttpOnly: true,
 	}
 
-	bytes, err := json.Marshal(found)
+	user, _ = authManager.GetUser(ctx, token)
+	bytes, err := json.Marshal(user)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

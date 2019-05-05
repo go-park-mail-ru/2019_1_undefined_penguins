@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+// protoc --go_out=plugins=grpc:. *.proto
+
+package auth;
+
+message User {
+    uint64 ID = 1;
+    string login = 2;
+    string email = 3;
+    string password = 4;
+    string hashPassword = 5;
+    uint64 score = 6;
+    string picture = 7;
+    uint64 games = 8;
+}
+
+message JWT {
+    string token = 1;
+}
+
+message Nothing {}
+
+service AuthChecker {
+    rpc CreateUser (User) returns (JWT) {}
+    rpc GetUser (JWT) returns (User) {}
+    rpc DeleteUser (JWT) returns (Nothing) {}
+}
