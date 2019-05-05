@@ -15,6 +15,7 @@ type Player struct {
 	roomSingle *RoomSingle
 	roomMulti *RoomMulti
 	GameMode string
+	Type string
 }
 
 func NewPlayer(conn *websocket.Conn) *Player {
@@ -25,6 +26,7 @@ func NewPlayer(conn *websocket.Conn) *Player {
 		out:  make(chan *OutcomeMessage, 1),
 		roomMulti: nil,
 		roomSingle: nil,
+		Type: "penguin",
 	}
 }
 

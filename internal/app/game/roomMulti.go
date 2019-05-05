@@ -3,6 +3,7 @@ package game
 import (
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 	"fmt"
+	"math/rand"
 	"sync"
 	"time"
 )
@@ -93,4 +94,16 @@ func (r *RoomMulti) RemovePlayer(player *Player) {
 	r.unregister <- player
 }
 
-//func (r *RoomMulti)
+func (r *RoomMulti) SelectPlayersRoles() {
+	//TODO make it random
+	for _, player := range r.Players {
+		digit := rand.Intn(1)
+		if digit == 0 {
+			player.Type = "penguin"
+		}
+
+		if digit != 0 {
+			player.Type = "gun"
+		}
+	}
+}

@@ -80,6 +80,9 @@ LOOP:
 					room.AddPlayer(player)
 					//player.out <- &OutcomeMessage{Type:START}
 					room.broadcast <- &OutcomeMessage{Type:START}
+					room.SelectPlayersRoles()
+					fmt.Println("PLAYERS")
+					fmt.Println(room.Players)
 					g.mu.Unlock()
 					continue LOOP
 				}
