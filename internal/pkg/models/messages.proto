@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 // protoc --go_out=plugins=grpc:. *.proto
+// ls *.pb.go | xargs -n1 -IX bash -c "sed -e '/uint64/ s/,omitempty//' X > X.tmp && mv X{.tmp,}"
 
 package models;
 

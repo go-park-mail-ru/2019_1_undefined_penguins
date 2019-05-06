@@ -23,14 +23,14 @@ var _ = math.Inf
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
 type UserProto struct {
-	ID                   uint64   `protobuf:"varint,1,opt,name=ID,json=iD,proto3" json:"ID,omitempty"`
+	ID                   uint64   `protobuf:"varint,1,opt,name=ID,json=iD,proto3" json:"ID"`
 	Login                string   `protobuf:"bytes,2,opt,name=login,proto3" json:"login,omitempty"`
 	Email                string   `protobuf:"bytes,3,opt,name=email,proto3" json:"email,omitempty"`
 	Password             string   `protobuf:"bytes,4,opt,name=password,proto3" json:"password,omitempty"`
 	HashPassword         string   `protobuf:"bytes,5,opt,name=hashPassword,proto3" json:"hashPassword,omitempty"`
-	Score                uint64   `protobuf:"varint,6,opt,name=score,proto3" json:"score,omitempty"`
+	Score                uint64   `protobuf:"varint,6,opt,name=score,proto3" json:"score"`
 	Picture              string   `protobuf:"bytes,7,opt,name=picture,proto3" json:"picture,omitempty"`
-	Games                uint64   `protobuf:"varint,8,opt,name=games,proto3" json:"games,omitempty"`
+	Games                uint64   `protobuf:"varint,8,opt,name=games,proto3" json:"games"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
