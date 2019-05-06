@@ -3,7 +3,6 @@ package database
 import (
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 	"2019_1_undefined_penguins/internal/pkg/models"
-	"strconv"
 
 	"github.com/jackc/pgx"
 )
@@ -20,7 +19,6 @@ func CreateUser(newUser *models.User) error {
 	}
 
 	if err := connection.QueryRow(insertUser, newUser.Email, newUser.Login, newUser.HashPassword).Scan(&newUser.ID, &newUser.Login, &newUser.Score); err != nil {
-
 		helpers.LogMsg(err)
 		return err
 	}
@@ -45,7 +43,7 @@ func UpdateUser(user models.User, oldEmail string) (models.User, error) {
 		helpers.LogMsg(err)
 		return user, err
 	}
-	user.Picture = "http://localhost:8081/data/" + user.Picture
+	user.Picture = ImagesAddress + user.Picture
 	return user, nil
 }
 
@@ -66,7 +64,7 @@ func UpdateUserByID(user models.User, id uint) (models.User, error) {
 		helpers.LogMsg(err)
 		return user, err
 	}
-	user.Picture = "http://localhost:8081/data/" + user.Picture
+	user.Picture = ImagesAddress + user.Picture
 	return user, nil
 }
 
@@ -95,7 +93,7 @@ func GetUserByEmail(email string) (*models.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	user.Picture = "http://localhost:8081/data/" + user.Picture
+	user.Picture = ImagesAddress + user.Picture
 	return &user, nil
 }
 
@@ -112,36 +110,15 @@ func GetUserByID(id uint) (*models.User, error) {
 		helpers.LogMsg(err)
 		return nil, err
 	}
-	user.Picture = "http://localhost:8081/data/" + user.Picture
+	user.Picture = ImagesAddress + user.Picture
 	return &user, nil
 }
 
-
-const selectByLogin = `
-SELECT users.id, login, email, hashpassword, score, name, games
-FROM users, pictures
-WHERE users.login = $1
-AND users.picture = pictures.id`
-
-func GetUserByLogin(login string) (*models.User, error) {
-	var user models.User
-	err := connection.QueryRow(selectByLogin, login).Scan(&user.ID, &user.Login, &user.Email, &user.HashPassword, &user.Score, &user.Picture, &user.Games)
-	if err != nil {
-		helpers.LogMsg(err)
-		return nil, err
-	}
-	user.Picture = "http://localhost:8081/data/" + user.Picture
-	return &user, nil
-}
-
-
-const usersPerPage = 3
-
-var getLeadersPage = `
+const getLeadersPage = `
 SELECT login, score, email
 FROM users
 ORDER BY score DESC
-LIMIT ` + strconv.Itoa(usersPerPage) + ` OFFSET $1`
+LIMIT 3 OFFSET $1`
 
 func GetLeaders(id int) ([]models.User, error) {
 	var users []models.User
@@ -150,23 +127,10 @@ func GetLeaders(id int) ([]models.User, error) {
 		helpers.LogMsg(err)
 		return users, err
 	}
+	defer rows.Close()
 
 	users = RowsToUsers(rows)
 	return users, nil
-}
-
-const selectUsersCount = `
-SELECT COUNT(*) from users;`
-
-func UsersCount() (models.LeadersInfo, error) {
-	var info models.LeadersInfo
-	err := connection.QueryRow(selectUsersCount).Scan(&info.Count)
-	if err != nil {
-		helpers.LogMsg(err)
-		return info, err
-	}
-	info.UsersOnPage = usersPerPage
-	return info, nil
 }
 
 const iterateGame = `

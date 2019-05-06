@@ -17,6 +17,8 @@ var connectionPoolConfig = pgx.ConnPoolConfig{
 	MaxConnections: 8,
 }
 
+var ImagesAddress string
+
 func initConfig() error {
 	viper.AddConfigPath("./configs")
 	viper.SetConfigName("config")
@@ -41,6 +43,8 @@ func initConfig() error {
 		helpers.LogMsg("Can't connect to db: ", err)
 		return err
 	}
+	viper.SetConfigName("fileserver")
+	ImagesAddress = viper.GetString("address"),
 	return nil
 }
 
