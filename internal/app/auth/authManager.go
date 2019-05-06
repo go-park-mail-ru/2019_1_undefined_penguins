@@ -16,22 +16,22 @@ var SECRET = []byte("myawesomesecret")
 
 type AuthManager struct {
 	mu       sync.RWMutex
-	token 	 *JWT
-	user     *User
+	token 	 *models.JWT
+	user     *models.User
 }
 
 func NewAuthManager() *AuthManager {
 	return &AuthManager{
 		mu:       sync.RWMutex{},
-		token:    new(JWT),
-		user:     new(User),
+		token:    new(models.JWT),
+		user:     new(models.User),
 	}
 }
 
 
 //TODO check error returns
 
-func (am *AuthManager) LoginUser(ctx context.Context, user *User) (*JWT, error) {
+func (am *AuthManager) LoginUser(ctx context.Context, user *models.UserProto) (*models.JWT, error) {
 	found, _ := db.GetUserByEmail(user.Email)
 
 	if found == nil {
@@ -60,7 +60,7 @@ func (am *AuthManager) LoginUser(ctx context.Context, user *User) (*JWT, error) 
 	return am.token, nil
 }
 
-func (am *AuthManager) RegisterUser(ctx context.Context, user *User) (*JWT, error) {
+func (am *AuthManager) RegisterUser(ctx context.Context, user *models.UserProto) (*models.JWT, error) {
 	foundByEmail, _ := db.GetUserByEmail(user.Email)
 	foundByLogin, _ := db.GetUserByLogin(user.Login)
 
@@ -70,7 +70,7 @@ func (am *AuthManager) RegisterUser(ctx context.Context, user *User) (*JWT, erro
 
 	user.HashPassword = helpers.HashPassword(user.Password)
 
-	err := db.CreateUser(protoToModel(user))
+	err := db.CreateUser(helpers.ProtoToModel(user))
 	if err != nil {
 		helpers.LogMsg(err)
 		return nil, status.Errorf(codes.Internal, "Server error")
@@ -94,7 +94,7 @@ func (am *AuthManager) RegisterUser(ctx context.Context, user *User) (*JWT, erro
 	return am.token, nil
 }
 
-func (am *AuthManager) GetUser(ctx context.Context, token *JWT) (*User, error) {
+func (am *AuthManager) GetUser(ctx context.Context, token *models.JWT) (*models.UserProto, error) {
 	t, _ := jwt.Parse(token.Token, func(token *jwt.Token) (interface{}, error) {
 		return SECRET, nil
 	})
@@ -108,42 +108,15 @@ func (am *AuthManager) GetUser(ctx context.Context, token *JWT) (*User, error) {
 	if user == nil {
 		return nil, status.Errorf(codes.Unknown, "Unauthorized")
 	}
-	return modelToProto(user), nil
+	return helpers.ModelToProto(user), nil
 }
 
-func (am *AuthManager) ChangeUser(ctx context.Context, user *User) (*Nothing, error) {
-	return &Nothing{}, nil
+func (am *AuthManager) ChangeUser(ctx context.Context, user *models.UserProto) (*models.Nothing, error) {
+	return &models.Nothing{}, nil
 }
 
 //TODO DeleteUser() is needed?
-func (am *AuthManager) DeleteUser(ctx context.Context, token *JWT) (*Nothing, error) {
-	return &Nothing{}, nil
+func (am *AuthManager) DeleteUser(ctx context.Context, token *models.JWT) (*models.Nothing, error) {
+	return &models.Nothing{}, nil
 }
 
-
-//TODO maybe one structure?
-func modelToProto(user *models.User) *User {
-	return &User{
-		ID: uint64(user.ID),
-		Login: user.Login,
-		Email: user.Email,
-		Password: user.Password,
-		HashPassword: user.HashPassword,
-		Score: uint64(user.Score),
-		Picture: user.Picture,
-		Games: uint64(user.Games),
-	}
-}
-
-func protoToModel(user *User) *models.User {
-	return &models.User{
-		ID: uint(user.ID),
-		Login: user.Login,
-		Email: user.Email,
-		Password: user.Password,
-		HashPassword: user.HashPassword,
-		Score: uint(user.Score),
-		Picture: user.Picture,
-		Games: uint(user.Games),
-	}
-}

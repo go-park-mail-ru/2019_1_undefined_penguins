@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"2019_1_undefined_penguins/internal/app/auth"
+	"2019_1_undefined_penguins/internal/pkg/models"
 	"encoding/json"
 	"fmt"
 	"golang.org/x/net/context"
@@ -29,7 +29,7 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	//var user models.User
-	var user *auth.User
+	var user *models.UserProto
 	err = json.Unmarshal(body, &user)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -47,7 +47,7 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 	}
 	defer grcpConn.Close()
 
-	authManager := auth.NewAuthCheckerClient(grcpConn)
+	authManager := models.NewAuthCheckerClient(grcpConn)
 	ctx := context.Background()
 	token, err := authManager.LoginUser(ctx, user)
 
@@ -78,7 +78,7 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user, _ = authManager.GetUser(ctx, token)
-	bytes, err := json.Marshal(user)
+	bytes, err := json.Marshal(helpers.ProtoToModel(user))
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -99,7 +99,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	//var user models.User
-	var user *auth.User
+	var user *models.UserProto
 	err = json.Unmarshal(body, &user)
 
 	if err != nil {
@@ -119,7 +119,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 	defer grcpConn.Close()
 
-	authManager := auth.NewAuthCheckerClient(grcpConn)
+	authManager := models.NewAuthCheckerClient(grcpConn)
 	ctx := context.Background()
 	token, err := authManager.RegisterUser(ctx, user)
 
@@ -157,7 +157,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 
 	user.Password = ""
 	user.Picture = "http://localhost:8081/data/Default.png"
-	bytes, err := json.Marshal(user)
+	bytes, err := json.Marshal(helpers.ProtoToModel(user))
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

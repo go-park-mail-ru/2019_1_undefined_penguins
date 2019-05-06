@@ -2,6 +2,8 @@ package auth
 
 import (
 	"2019_1_undefined_penguins/internal/pkg/helpers"
+	"2019_1_undefined_penguins/internal/pkg/models"
+
 	//"log"
 	"net"
 
@@ -16,7 +18,7 @@ func Start() error {
 
 	server := grpc.NewServer()
 
-	RegisterAuthCheckerServer(server, NewAuthManager())
+	models.RegisterAuthCheckerServer(server, NewAuthManager())
 
 	helpers.LogMsg("AuthServer started at :8083")
 	return server.Serve(lis)
