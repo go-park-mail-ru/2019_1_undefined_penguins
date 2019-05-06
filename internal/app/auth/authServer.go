@@ -1,6 +1,7 @@
 package auth
 
 import (
+	db "2019_1_undefined_penguins/internal/pkg/database"
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 	"2019_1_undefined_penguins/internal/pkg/models"
 
@@ -20,6 +21,13 @@ func Start() error {
 
 	models.RegisterAuthCheckerServer(server, NewAuthManager())
 
-	helpers.LogMsg("AuthServer started at :8083")
+	err = db.Connect()
+	if err != nil {
+		helpers.LogMsg("Connection error: ", err)
+		return err
+	}
+	defer db.Disconnect()
+
+	helpers.LogMsg("AuthServer started at 8083")
 	return server.Serve(lis)
 }

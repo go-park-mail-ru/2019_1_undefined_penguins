@@ -48,7 +48,7 @@ func initConfig() error {
 		helpers.LogMsg("Can't connect to db: ", err)
 		return err
 	}
-	helpers.LogMsg("db", psqlURI)
+	//helpers.LogMsg("db", psqlURI)
 	return nil
 }
 

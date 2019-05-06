@@ -59,7 +59,7 @@ WHERE u.id = $1
 AND u.picture = p.id
 RETURNING games, name, score`
 
-func UpdateUserByID(user models.User, id uint) (models.User, error) {
+func UpdateUserByID(user *models.User, id uint) (*models.User, error) {
 	user.Password = ""
 	err := connection.QueryRow(updateUserByID, id, user.Login, user.Email).Scan(&user.Score, &user.Picture, &user.Games)
 	if err != nil {

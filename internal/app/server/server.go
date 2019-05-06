@@ -10,8 +10,6 @@ import (
 	"github.com/gorilla/mux"
 
 	c "2019_1_undefined_penguins/internal/pkg/controllers"
-	db "2019_1_undefined_penguins/internal/pkg/database"
-
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 	mw "2019_1_undefined_penguins/internal/pkg/middleware"
 
@@ -23,13 +21,6 @@ type Params struct {
 }
 
 func StartApp(params Params) error {
-	err := db.Connect()
-	if err != nil {
-		helpers.LogMsg("Connection error: ", err)
-		return err
-	}
-	defer db.Disconnect()
-
 	//to local package in local parametr (will be tested)
 	game.PingGame = game.InitGame(10)
 	go game.PingGame.Run()

@@ -4,10 +4,13 @@ import (
 	db "2019_1_undefined_penguins/internal/pkg/database"
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 	"2019_1_undefined_penguins/internal/pkg/models"
+	//"encoding/json"
 	"github.com/dgrijalva/jwt-go"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	//"io/ioutil"
+	//"net/http"
 	"sync"
 	"time"
 )
@@ -112,6 +115,10 @@ func (am *AuthManager) GetUser(ctx context.Context, token *models.JWT) (*models.
 }
 
 func (am *AuthManager) ChangeUser(ctx context.Context, user *models.UserProto) (*models.Nothing, error) {
+	_, err := db.UpdateUserByID(helpers.ProtoToModel(user), uint(user.ID))
+	if err != nil {
+		return nil, status.Errorf(codes.AlreadyExists, "Such user already exists")
+	}
 	return &models.Nothing{}, nil
 }
 
