@@ -44,7 +44,11 @@ func initConfig() error {
 		return err
 	}
 	viper.SetConfigName("fileserver")
-	ImagesAddress = viper.GetString("address"),
+	if err := viper.ReadInConfig(); err != nil {
+		helpers.LogMsg("Can't find images address: ", err)
+		return err
+	}
+	ImagesAddress = viper.GetString("address")
 	return nil
 }
 

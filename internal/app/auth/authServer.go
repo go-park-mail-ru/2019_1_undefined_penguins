@@ -7,11 +7,21 @@ import (
 	//"log"
 	"net"
 
+	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 )
 
 func Start() error {
-	lis, err := net.Listen("tcp", ":8083")
+
+	viper.AddConfigPath("./configs")
+	viper.SetConfigName("auth")
+	var port string
+	if err := viper.ReadInConfig(); err != nil {
+		port = ":8083"
+	} else {
+		port = ":" + viper.GetString("port")
+	}
+	lis, err := net.Listen("tcp", port)
 	if err != nil {
 		helpers.LogMsg("Can`t listen port ", err)
 	}
@@ -20,6 +30,6 @@ func Start() error {
 
 	models.RegisterAuthCheckerServer(server, NewAuthManager())
 
-	helpers.LogMsg("AuthServer started at :8083")
+	helpers.LogMsg("AuthServer started at " + port)
 	return server.Serve(lis)
 }
