@@ -22,7 +22,10 @@ message JWT {
 message Nothing {}
 
 service AuthChecker {
-    rpc CreateUser (User) returns (JWT) {}
+    rpc LoginUser (User) returns (JWT) {}
+    rpc RegisterUser (User) returns (JWT) {}
+    //GetUser() also checks JWT. If token if invalid, nil will be returned.
     rpc GetUser (JWT) returns (User) {}
+    rpc ChangeUser (User) returns (Nothing) {}
     rpc DeleteUser (JWT) returns (Nothing) {}
 }

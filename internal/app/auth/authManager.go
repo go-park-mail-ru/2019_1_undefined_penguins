@@ -28,7 +28,10 @@ func NewAuthManager() *AuthManager {
 	}
 }
 
-func (am *AuthManager) CreateUser(ctx context.Context, user *User) (*JWT, error) {
+
+//TODO check error returns
+
+func (am *AuthManager) LoginUser(ctx context.Context, user *User) (*JWT, error) {
 	found, _ := db.GetUserByEmail(user.Email)
 
 	if found == nil {
@@ -45,20 +48,52 @@ func (am *AuthManager) CreateUser(ctx context.Context, user *User) (*JWT, error)
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"userID":    found.ID,
 		"userEmail": user.Email,
+		"userLogin": user.Login,
 		"exp":       time.Now().UTC().Add(ttl).Unix(),
 	})
 
 	str, err := token.SignedString(SECRET)
 	if err != nil {
-		//w.WriteHeader(http.StatusForbidden)
-		//w.Write([]byte("=(" + err.Error()))
 		return nil, status.Errorf(codes.PermissionDenied, "Incorrect secret")
 	}
 	am.token.Token = str
 	return am.token, nil
 }
 
-//TODO
+func (am *AuthManager) RegisterUser(ctx context.Context, user *User) (*JWT, error) {
+	foundByEmail, _ := db.GetUserByEmail(user.Email)
+	foundByLogin, _ := db.GetUserByLogin(user.Login)
+
+	if foundByEmail != nil || foundByLogin != nil{
+		return nil, status.Errorf(codes.AlreadyExists, "Such user already exists")
+	}
+
+	user.HashPassword = helpers.HashPassword(user.Password)
+
+	err := db.CreateUser(protoToModel(user))
+	if err != nil {
+		helpers.LogMsg(err)
+		return nil, status.Errorf(codes.Internal, "Server error")
+	}
+
+	ttl := time.Hour
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"userID":    user.ID,
+		"userEmail": user.Email,
+		"userLogin": user.Login,
+		"exp":       time.Now().UTC().Add(ttl).Unix(),
+	})
+
+	str, err := token.SignedString(SECRET)
+	if err != nil {
+		return nil, status.Errorf(codes.PermissionDenied, "Incorrect secret")
+	}
+
+	am.token.Token = str
+	return am.token, nil
+}
+
 func (am *AuthManager) GetUser(ctx context.Context, token *JWT) (*User, error) {
 	t, _ := jwt.Parse(token.Token, func(token *jwt.Token) (interface{}, error) {
 		return SECRET, nil
@@ -76,11 +111,18 @@ func (am *AuthManager) GetUser(ctx context.Context, token *JWT) (*User, error) {
 	return modelToProto(user), nil
 }
 
+func (am *AuthManager) ChangeUser(ctx context.Context, user *User) (*Nothing, error) {
+	return &Nothing{}, nil
+}
+
+//TODO DeleteUser() is needed?
 func (am *AuthManager) DeleteUser(ctx context.Context, token *JWT) (*Nothing, error) {
 	return &Nothing{}, nil
 }
 
-func modelToProto (user *models.User) *User {
+
+//TODO maybe one structure?
+func modelToProto(user *models.User) *User {
 	return &User{
 		ID: uint64(user.ID),
 		Login: user.Login,
@@ -93,3 +135,15 @@ func modelToProto (user *models.User) *User {
 	}
 }
 
+func protoToModel(user *User) *models.User {
+	return &models.User{
+		ID: uint(user.ID),
+		Login: user.Login,
+		Email: user.Email,
+		Password: user.Password,
+		HashPassword: user.HashPassword,
+		Score: uint(user.Score),
+		Picture: user.Picture,
+		Games: uint(user.Games),
+	}
+}
