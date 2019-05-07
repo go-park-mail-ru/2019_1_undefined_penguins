@@ -12,14 +12,13 @@ func main() {
 	params := server.Params{Port: os.Getenv("PORT")}
 	viper.AddConfigPath("./configs")
 	viper.SetConfigName("config")
-	if err := viper.ReadInConfig(); err != nil {
-		params.Port = "8080"
-	} else {
+	if err := viper.ReadInConfig(); err == nil {
 		params.Port = viper.GetString("port")
+		err = server.StartApp(params)
+		if err != nil {
+			helpers.LogMsg("Server error: ", err)
+		}
 	}
 
-	err := server.StartApp(params)
-	if err != nil {
-		helpers.LogMsg("Server error: ", err)
-	}
+
 }

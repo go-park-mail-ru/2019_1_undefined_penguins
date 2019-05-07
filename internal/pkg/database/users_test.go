@@ -108,13 +108,13 @@ func TestCreateUser(t *testing.T) {
 		AddRow(10, "name", 5).
 		RowError(1, fmt.Errorf("error"))
 	mock.ExpectQuery("UPDATE").WillReturnRows(rows)
-	UpdateUserByID(user, 1)
+	UpdateUserByID(&user, 1)
 
 	rows = sqlmock.NewRows([]string{"games", "name", "score"}).
 		AddRow(10, "name", 5).
 		RowError(1, fmt.Errorf("error"))
 	mock.ExpectQuery("UPDATE").WillReturnError(fmt.Errorf("some error"))
-	UpdateUserByID(user, 1)
+	UpdateUserByID(&user, 1)
 
 	rows = sqlmock.NewRows([]string{"games", "name", "score"}).
 		AddRow(10, "name", 5).

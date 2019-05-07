@@ -1,27 +1,191 @@
 package controllers
 
 import (
-	// dab "2019_1_undefined_penguins/internal/pkg/database"
-	// "2019_1_undefined_penguins/internal/pkg/helpers"
-	// "2019_1_undefined_penguins/internal/pkg/models"
-	// "bytes"
-	// "encoding/json"
+	"2019_1_undefined_penguins/internal/pkg/models"
+	"bytes"
+	"encoding/json"
+	"strings"
+	"time"
+
 	// "fmt"
 	// "io/ioutil"
 	"net/http"
 	"net/http/httptest"
-	// "os"
-	// "strings"
-	"testing"
-	// "time"
 
+	// "os"
+
+	"testing"
+	// "google.golang.org/grpc"
 	// "github.com/DATA-DOG/go-sqlmock"
 )
 
-func TestRoot(t *testing.T)  {
+func TestRoot(t *testing.T) {
 	w := httptest.NewRecorder()
-	req, err := http.NewRequest("GET", "/", nil)
+	req, _ := http.NewRequest("GET", "/", nil)
 	handler := http.HandlerFunc(RootHandler)
+	handler.ServeHTTP(w, req)
+}
+
+func TestSignUp(t *testing.T) {
+	data, err := json.Marshal("hello")
+	if err != nil {
+		t.Error(err)
+	}
+	buf := bytes.NewBuffer(data)
+	req, err := http.NewRequest("POST", "/signup", buf)
+	w := httptest.NewRecorder()
+	handler := http.HandlerFunc(SignUp)
+	handler.ServeHTTP(w, req)
+	expectedStatus := http.StatusInternalServerError
+	if w.Code != expectedStatus {
+		t.Error(w.Code)
+	}
+}
+
+func TestSignInMeAndSignOut(t *testing.T) {
+	var user models.User
+	user.Email = "test@test.te"
+	user.Password = "testtest"
+	data, err := json.Marshal(user)
+	if err != nil {
+		t.Error(err)
+	}
+	buf := bytes.NewBuffer(data)
+	req, err := http.NewRequest("POST", "/signup", buf)
+	w := httptest.NewRecorder()
+	handler := http.HandlerFunc(SignUp)
+	handler.ServeHTTP(w, req)
+	expectedStatus := http.StatusConflict
+	if w.Code != expectedStatus {
+		t.Error(w.Code)
+	}
+
+	buf = bytes.NewBuffer(data)
+	req, err = http.NewRequest("POST", "/signin", buf)
+	w = httptest.NewRecorder()
+	handler = http.HandlerFunc(SignIn)
+	handler.ServeHTTP(w, req)
+	expectedStatus = http.StatusOK
+	if w.Code != expectedStatus {
+		t.Error(w.Code)
+	}
+
+	var ss []string
+	s := w.HeaderMap["Set-Cookie"][0]
+	ss = strings.Split(s, ";")
+	cookieInfo := strings.Split(ss[0], "=")
+	cookieExpires := strings.Split(ss[1], "=")
+	timeStampString := cookieExpires[1]
+	layOut := "Mon, 2 Jan 2006 15:04:05 GMT"
+	timeStamp, err := time.Parse(layOut, timeStampString)
+	if err != nil {
+		t.Error(err)
+	}
+	cookie := &http.Cookie{
+		Name:     cookieInfo[0],
+		Value:    cookieInfo[1],
+		Expires:  timeStamp,
+		HttpOnly: true,
+	}
+	req, err = http.NewRequest("POST", "/me", buf)
+	w = httptest.NewRecorder()
+	handler = http.HandlerFunc(Me)
+	req.AddCookie(cookie)
+	handler.ServeHTTP(w, req)
+	expectedStatus = http.StatusOK
+	if w.Code != expectedStatus {
+		t.Error(w.Code)
+	}
+	req, _ = http.NewRequest("GET", "/signout", nil)
+	req.AddCookie(cookie)
+	w = httptest.NewRecorder()
+	handler = http.HandlerFunc(SignOut)
+	handler.ServeHTTP(w, req)
+	expectedStatus = http.StatusOK
+	if w.Code != expectedStatus {
+		t.Error(w.Code)
+	}
+}
+
+func TestSignOut(t *testing.T) {
+
+	req, _ := http.NewRequest("GET", "/signout", nil)
+	w := httptest.NewRecorder()
+	handler := http.HandlerFunc(SignOut)
+	handler.ServeHTTP(w, req)
+	expectedStatus := 401
+	if w.Code != expectedStatus {
+		t.Error(w.Code)
+	}
+}
+
+func TestUpdateUser(t *testing.T) {
+	var user models.User
+	user.Email = "test@test.te"
+	user.Password = "testtest"
+	data, err := json.Marshal(user)
+	if err != nil {
+		t.Error(err)
+	}
+	buf := bytes.NewBuffer(data)
+	req, err := http.NewRequest("POST", "/signin", buf)
+	w := httptest.NewRecorder()
+	handler := http.HandlerFunc(SignIn)
+	handler.ServeHTTP(w, req)
+	expectedStatus := http.StatusOK
+	if w.Code != expectedStatus {
+		t.Error(w.Code)
+	}
+	var ss []string
+	s := w.HeaderMap["Set-Cookie"][0]
+	ss = strings.Split(s, ";")
+	cookieInfo := strings.Split(ss[0], "=")
+	cookieExpires := strings.Split(ss[1], "=")
+	timeStampString := cookieExpires[1]
+	layOut := "Mon, 2 Jan 2006 15:04:05 GMT"
+	timeStamp, err := time.Parse(layOut, timeStampString)
+	if err != nil {
+		t.Error(err)
+	}
+	cookie := &http.Cookie{
+		Name:     cookieInfo[0],
+		Value:    cookieInfo[1],
+		Expires:  timeStamp,
+		HttpOnly: true,
+	}
+	user.Email = "test@teste.te"
+	data, err = json.Marshal(user)
+	if err != nil {
+		t.Error(err)
+	}
+	buf = bytes.NewBuffer(data)
+	req, err = http.NewRequest("PUT", "/me", buf)
+	req.AddCookie(cookie)
+	w = httptest.NewRecorder()
+	handler = http.HandlerFunc(ChangeProfile)
+	handler.ServeHTTP(w, req)
+	expectedStatus = http.StatusOK
+	if w.Code != expectedStatus {
+		t.Error(w.Code)
+	}
+	user.Email = "test@test.te"
+	data, err = json.Marshal(user)
+	if err != nil {
+		t.Error(err)
+	}
+	buf = bytes.NewBuffer(data)
+	req, err = http.NewRequest("PUT", "/me", buf)
+	req.AddCookie(cookie)
+	w = httptest.NewRecorder()
+	handler = http.HandlerFunc(ChangeProfile)
+	handler.ServeHTTP(w, req)
+	expectedStatus = http.StatusOK
+	if w.Code != expectedStatus {
+		t.Error(w.Code)
+	}
+
+	handler = http.HandlerFunc(UploadImage)
+	req.AddCookie(cookie)
 	handler.ServeHTTP(w, req)
 }
 
@@ -428,4 +592,3 @@ func TestRoot(t *testing.T)  {
 // 		t.Error(w.Code)
 // 	}
 // }
-

@@ -1,7 +1,7 @@
 package server
 
 import (
-	"2019_1_undefined_penguins/internal/app/game"
+	// "2019_1_undefined_penguins/internal/app/game"
 	"2019_1_undefined_penguins/internal/pkg/fileserver"
 	"net/http"
 	"os"
@@ -20,12 +20,9 @@ type Params struct {
 }
 
 func StartApp(params Params) error {
-	//to local package in local parametr (will be tested)
-	game.PingGame = game.InitGame(10)
-	go game.PingGame.Run()
 
 	router := mux.NewRouter()
-	gameRouter := router.PathPrefix("/game").Subrouter()
+
 
 	router.Use(mw.PanicMiddleware)
 	router.Use(mw.CORSMiddleware)
@@ -40,17 +37,11 @@ func StartApp(params Params) error {
 	router.HandleFunc("/signout", c.SignOut).Methods("GET", "OPTIONS")
 	router.HandleFunc("/me", c.ChangeProfile).Methods("PUT")
 	router.HandleFunc("/upload", c.UploadImage).Methods("POST")
-	gameRouter.HandleFunc("/ws", c.StartWS)
-
 
 	helpers.LogMsg("Server started at " + params.Port)
 	go func() {
 		fileserver.Start()
 	}()
-	//
-	//go func() {
-	//	auth.Start()
-	//}()
 
 	return http.ListenAndServe(":"+params.Port, handlers.LoggingHandler(os.Stdout, router))
 }

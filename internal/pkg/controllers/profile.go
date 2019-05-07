@@ -5,21 +5,20 @@ import (
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 	"encoding/json"
 	"fmt"
-	"golang.org/x/net/context"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/status"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"time"
 
+	"golang.org/x/net/context"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/status"
+
 	"net/http"
 
-	"2019_1_undefined_penguins/internal/pkg/database"
 	//db "2019_1_undefined_penguins/internal/pkg/database"
 	"2019_1_undefined_penguins/internal/pkg/models"
-
 	//"github.com/dgrijalva/jwt-go"
 )
 
@@ -40,7 +39,7 @@ func Me(w http.ResponseWriter, r *http.Request) {
 	authManager := models.NewAuthCheckerClient(grcpConn)
 	ctx := context.Background()
 
-	user, err := authManager.GetUser(ctx, &models.JWT{Token:cookie.Value})
+	user, err := authManager.GetUser(ctx, &models.JWT{Token: cookie.Value})
 
 	fmt.Println(err)
 	if err != nil {
@@ -54,20 +53,7 @@ func Me(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	//token, err := jwt.Parse(cookie.Value, func(token *jwt.Token) (interface{}, error) {
-	//	return SECRET, nil
-	//})
-	//
-	//claims, _ := token.Claims.(jwt.MapClaims)
-	//
-	//temp := claims["userID"]
-	//mytemp := uint(temp.(float64))
-	//
-	//user, err := db.GetUserByID(mytemp)
-	//if user == nil {
-	//	w.WriteHeader(http.StatusUnauthorized)
-	//	return
-	//}
+
 	bytes, err := json.Marshal(user)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -90,13 +76,13 @@ func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer grcpConn.Close()
-
 	authManager := models.NewAuthCheckerClient(grcpConn)
 	ctx := context.Background()
 
-	user, err := authManager.GetUser(ctx, &models.JWT{Token:cookie.Value})
+	user, err := authManager.GetUser(ctx, &models.JWT{Token: cookie.Value})
 
 	fmt.Println(err)
+
 	if err != nil {
 		switch errGRPC, _ := status.FromError(err); errGRPC.Code() {
 		case 2:
@@ -108,33 +94,6 @@ func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	//token, err := jwt.Parse(cookie.Value, func(token *jwt.Token) (interface{}, error) {
-	//	return SECRET, nil
-	//})
-	//
-	//claims, _ := token.Claims.(jwt.MapClaims)
-	//body, err := ioutil.ReadAll(r.Body)
-	//if err != nil {
-	//	w.WriteHeader(http.StatusInternalServerError)
-	//	return
-	//}
-	//defer r.Body.Close()
-	//var user models.User
-	//err = json.Unmarshal(body, &user)
-	//
-	//if err != nil {
-	//	w.WriteHeader(http.StatusInternalServerError)
-	//	return
-	//}
-	//
-	//temp := claims["userID"]
-	//mytemp := uint(temp.(float64))
-	//user, err = db.UpdateUserByID(user, mytemp)
-	//if err != nil {
-	//	helpers.LogMsg(err)
-	//	w.WriteHeader(http.StatusConflict)
-	//	return
-	//}
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -193,7 +152,7 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 	authManager := models.NewAuthCheckerClient(grcpConn)
 	ctx := context.Background()
 
-	user, err := authManager.GetUser(ctx, &models.JWT{Token:cookie.Value})
+	user, err := authManager.GetUser(ctx, &models.JWT{Token: cookie.Value})
 
 	fmt.Println(err)
 	if err != nil {
@@ -249,7 +208,7 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	u := user
-	err = database.UpdateImage(u.Login, fileName)
+	// err = database.UpdateImage(u.Login, fileName)
 	if err != nil {
 		helpers.LogMsg("Ошибка при обновлении картинки в базе данных")
 

@@ -4,20 +4,18 @@ import (
 	"2019_1_undefined_penguins/internal/pkg/models"
 	"encoding/json"
 	"fmt"
+	"time"
+
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/status"
-	"time"
 
 	"io/ioutil"
 	"net/http"
 
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 	//"2019_1_undefined_penguins/internal/pkg/models"
-
 )
-
-var SECRET = []byte("myawesomesecret")
 
 func SignIn(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
