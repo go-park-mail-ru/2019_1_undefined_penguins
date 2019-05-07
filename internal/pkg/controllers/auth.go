@@ -29,7 +29,7 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	//var user models.User
-	var user *models.UserProto
+	var user *models.User
 	err = json.Unmarshal(body, &user)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -78,7 +78,7 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user, _ = authManager.GetUser(ctx, token)
-	bytes, err := json.Marshal(helpers.ProtoToModel(user))
+	bytes, err := json.Marshal(user)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -99,7 +99,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	//var user models.User
-	var user *models.UserProto
+	var user *models.User
 	err = json.Unmarshal(body, &user)
 
 	if err != nil {
@@ -157,7 +157,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 
 	user.Password = ""
 	user.Picture = "http://localhost:8081/data/Default.png"
-	bytes, err := json.Marshal(helpers.ProtoToModel(user))
+	bytes, err := json.Marshal(user)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

@@ -1,15 +1,15 @@
 package models
 
-type User struct {
-	ID           uint   `json:"-"`
-	Login        string `json:"login"`
-	Email        string `json:"email"`
-	Password     string `json:"password,omitempty"`
-	HashPassword string `json:"-"`
-	Score        uint   `json:"score"`
-	Picture      string `json:"avatarUrl"`
-	Games        uint   `json:"count"`
-}
+//type User struct {
+//	ID           uint   `json:"-"`
+//	Login        string `json:"login"`
+//	Email        string `json:"email"`
+//	Password     string `json:"password,omitempty"`
+//	HashPassword string `json:"-"`
+//	Score        uint   `json:"score"`
+//	Picture      string `json:"avatarUrl"`
+//	Games        uint   `json:"count"`
+//}
 
 type Session struct {
 	Email     string `json:"email"`

@@ -38,7 +38,7 @@ RETURNING games, name, score`
 
 func UpdateUser(user models.User, oldEmail string) (models.User, error) {
 	user.Password = ""
-	err := connection.QueryRow(updateUserByEmail, oldEmail, user.Login, user.Email).Scan(&user.Score, &user.Picture, &user.Games)
+	err := connection.QueryRow(updateUserByEmail, oldEmail, user.Login, user.Email).Scan(&user.Score, &user.Picture, &user.Count)
 	if err != nil {
 		helpers.LogMsg(err)
 		return user, err
@@ -57,9 +57,9 @@ WHERE u.id = $1
 AND u.picture = p.id
 RETURNING games, name, score`
 
-func UpdateUserByID(user models.User, id uint) (models.User, error) {
+func UpdateUserByID(user *models.User, id uint) (*models.User, error) {
 	user.Password = ""
-	err := connection.QueryRow(updateUserByID, id, user.Login, user.Email).Scan(&user.Score, &user.Picture, &user.Games)
+	err := connection.QueryRow(updateUserByID, id, user.Login, user.Email).Scan(&user.Score, &user.Picture, &user.Count)
 	if err != nil {
 		helpers.LogMsg(err)
 		return user, err
@@ -89,7 +89,7 @@ AND users.picture = pictures.id`
 
 func GetUserByEmail(email string) (*models.User, error) {
 	var user models.User
-	err := connection.QueryRow(selectByEmail, email).Scan(&user.ID, &user.Login, &user.Email, &user.HashPassword, &user.Score, &user.Picture, &user.Games)
+	err := connection.QueryRow(selectByEmail, email).Scan(&user.ID, &user.Login, &user.Email, &user.HashPassword, &user.Score, &user.Picture, &user.Count)
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +105,27 @@ AND users.picture = pictures.id`
 
 func GetUserByID(id uint) (*models.User, error) {
 	var user models.User
-	err := connection.QueryRow(selectByID, id).Scan(&user.ID, &user.Login, &user.Email, &user.HashPassword, &user.Score, &user.Picture, &user.Games)
+	err := connection.QueryRow(selectByID, id).Scan(&user.ID, &user.Login, &user.Email, &user.HashPassword, &user.Score, &user.Picture, &user.Count)
+	if err != nil {
+		helpers.LogMsg(err)
+		return nil, err
+	}
+	user.Picture = ImagesAddress + user.Picture
+	return &user, nil
+}
+
+
+const usersPerPage = 3
+
+const selectByLogin = `
+SELECT users.id, login, email, hashpassword, score, name, games
+FROM users, pictures
+WHERE users.login = $1
+AND users.picture = pictures.id`
+
+func GetUserByLogin(login string) (*models.User, error) {
+	var user models.User
+	err := connection.QueryRow(selectByLogin, login).Scan(&user.ID, &user.Login, &user.Email, &user.HashPassword, &user.Score, &user.Picture, &user.Count)
 	if err != nil {
 		helpers.LogMsg(err)
 		return nil, err
@@ -131,6 +151,20 @@ func GetLeaders(id int) ([]models.User, error) {
 
 	users = RowsToUsers(rows)
 	return users, nil
+}
+
+const selectUsersCount = `
+SELECT COUNT(*) from users;`
+
+func UsersCount() (models.LeadersInfo, error) {
+	var info models.LeadersInfo
+	err := connection.QueryRow(selectUsersCount).Scan(&info.Count)
+	if err != nil {
+		helpers.LogMsg(err)
+		return info, err
+	}
+	info.UsersOnPage = usersPerPage
+	return info, nil
 }
 
 const iterateGame = `

@@ -1,7 +1,6 @@
 package server
 
 import (
-	"2019_1_undefined_penguins/internal/app/auth"
 	"2019_1_undefined_penguins/internal/app/game"
 	"2019_1_undefined_penguins/internal/pkg/fileserver"
 	"net/http"
@@ -10,8 +9,6 @@ import (
 	"github.com/gorilla/mux"
 
 	c "2019_1_undefined_penguins/internal/pkg/controllers"
-	db "2019_1_undefined_penguins/internal/pkg/database"
-
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 	mw "2019_1_undefined_penguins/internal/pkg/middleware"
 
@@ -23,13 +20,6 @@ type Params struct {
 }
 
 func StartApp(params Params) error {
-	err := db.Connect()
-	if err != nil {
-		helpers.LogMsg("Connection error: ", err)
-		return err
-	}
-	defer db.Disconnect()
-
 	//to local package in local parametr (will be tested)
 	game.PingGame = game.InitGame(10)
 	go game.PingGame.Run()
@@ -57,10 +47,10 @@ func StartApp(params Params) error {
 	go func() {
 		fileserver.Start()
 	}()
-
-	go func() {
-		auth.Start()
-	}()
+	//
+	//go func() {
+	//	auth.Start()
+	//}()
 
 	return http.ListenAndServe(":"+params.Port, handlers.LoggingHandler(os.Stdout, router))
 }
