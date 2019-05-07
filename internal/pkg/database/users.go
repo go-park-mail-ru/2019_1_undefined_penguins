@@ -40,7 +40,7 @@ RETURNING games, name, score`
 
 func UpdateUser(user models.User, oldEmail string) (models.User, error) {
 	user.Password = ""
-	err := connection.QueryRow(updateUserByEmail, oldEmail, user.Login, user.Email).Scan(&user.Score, &user.Picture, &user.Games)
+	err := connection.QueryRow(updateUserByEmail, oldEmail, user.Login, user.Email).Scan(&user.Score, &user.Picture, &user.Count)
 	if err != nil {
 		helpers.LogMsg(err)
 		return user, err
@@ -61,7 +61,7 @@ RETURNING games, name, score`
 
 func UpdateUserByID(user *models.User, id uint) (*models.User, error) {
 	user.Password = ""
-	err := connection.QueryRow(updateUserByID, id, user.Login, user.Email).Scan(&user.Score, &user.Picture, &user.Games)
+	err := connection.QueryRow(updateUserByID, id, user.Login, user.Email).Scan(&user.Score, &user.Picture, &user.Count)
 	if err != nil {
 		helpers.LogMsg(err)
 		return user, err
@@ -91,7 +91,7 @@ AND users.picture = pictures.id`
 
 func GetUserByEmail(email string) (*models.User, error) {
 	var user models.User
-	err := connection.QueryRow(selectByEmail, email).Scan(&user.ID, &user.Login, &user.Email, &user.HashPassword, &user.Score, &user.Picture, &user.Games)
+	err := connection.QueryRow(selectByEmail, email).Scan(&user.ID, &user.Login, &user.Email, &user.HashPassword, &user.Score, &user.Picture, &user.Count)
 	if err != nil {
 		return nil, err
 	}
@@ -107,7 +107,7 @@ AND users.picture = pictures.id`
 
 func GetUserByID(id uint) (*models.User, error) {
 	var user models.User
-	err := connection.QueryRow(selectByID, id).Scan(&user.ID, &user.Login, &user.Email, &user.HashPassword, &user.Score, &user.Picture, &user.Games)
+	err := connection.QueryRow(selectByID, id).Scan(&user.ID, &user.Login, &user.Email, &user.HashPassword, &user.Score, &user.Picture, &user.Count)
 	if err != nil {
 		helpers.LogMsg(err)
 		return nil, err
@@ -125,7 +125,7 @@ AND users.picture = pictures.id`
 
 func GetUserByLogin(login string) (*models.User, error) {
 	var user models.User
-	err := connection.QueryRow(selectByLogin, login).Scan(&user.ID, &user.Login, &user.Email, &user.HashPassword, &user.Score, &user.Picture, &user.Games)
+	err := connection.QueryRow(selectByLogin, login).Scan(&user.ID, &user.Login, &user.Email, &user.HashPassword, &user.Score, &user.Picture, &user.Count)
 	if err != nil {
 		helpers.LogMsg(err)
 		return nil, err

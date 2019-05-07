@@ -68,7 +68,7 @@ func Me(w http.ResponseWriter, r *http.Request) {
 	//	w.WriteHeader(http.StatusUnauthorized)
 	//	return
 	//}
-	bytes, err := json.Marshal(helpers.ProtoToModel(user))
+	bytes, err := json.Marshal(user)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -145,7 +145,7 @@ func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	//var user models.User
-	var newUser *models.UserProto
+	var newUser *models.User
 	err = json.Unmarshal(body, &newUser)
 
 	if err != nil {
@@ -248,7 +248,7 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u := helpers.ProtoToModel(user)
+	u := user
 	err = database.UpdateImage(u.Login, fileName)
 	if err != nil {
 		helpers.LogMsg("Ошибка при обновлении картинки в базе данных")

@@ -5,7 +5,7 @@ syntax = "proto3";
 
 package models;
 
-message UserProto {
+message User {
     uint64 ID = 1;
     string login = 2;
     string email = 3;
@@ -13,7 +13,7 @@ message UserProto {
     string hashPassword = 5;
     uint64 score = 6;
     string picture = 7;
-    uint64 games = 8;
+    uint64 count = 8;
 }
 
 message JWT {
@@ -23,10 +23,10 @@ message JWT {
 message Nothing {}
 
 service AuthChecker {
-    rpc LoginUser (UserProto) returns (JWT) {}
-    rpc RegisterUser (UserProto) returns (JWT) {}
+    rpc LoginUser (User) returns (JWT) {}
+    rpc RegisterUser (User) returns (JWT) {}
     //GetUser() also checks JWT. If token if invalid, nil will be returned.
-    rpc GetUser (JWT) returns (UserProto) {}
-    rpc ChangeUser (UserProto) returns (Nothing) {}
+    rpc GetUser (JWT) returns (User) {}
+    rpc ChangeUser (User) returns (Nothing) {}
     rpc DeleteUser (JWT) returns (Nothing) {}
 }
