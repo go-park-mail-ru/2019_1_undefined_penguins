@@ -1,7 +1,6 @@
 package server
 
 import (
-	"2019_1_undefined_penguins/internal/app/auth"
 	"2019_1_undefined_penguins/internal/app/game"
 	"2019_1_undefined_penguins/internal/pkg/fileserver"
 	"net/http"
@@ -48,10 +47,10 @@ func StartApp(params Params) error {
 	go func() {
 		fileserver.Start()
 	}()
-
-	go func() {
-		auth.Start()
-	}()
+	//
+	//go func() {
+	//	auth.Start()
+	//}()
 
 	return http.ListenAndServe(":"+params.Port, handlers.LoggingHandler(os.Stdout, router))
 }
