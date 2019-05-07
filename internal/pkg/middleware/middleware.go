@@ -54,6 +54,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
+		//TODO go to auth micro or not?
 		token, err := jwt.Parse(cookie.Value, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				w.WriteHeader(http.StatusForbidden)
