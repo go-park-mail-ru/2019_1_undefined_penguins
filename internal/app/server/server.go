@@ -1,7 +1,6 @@
 package server
 
 import (
-	"2019_1_undefined_penguins/internal/app/game"
 	"2019_1_undefined_penguins/internal/app/metrics"
 	"2019_1_undefined_penguins/internal/pkg/fileserver"
 	"github.com/prometheus/client_golang/prometheus"
@@ -33,11 +32,11 @@ func StartApp(params Params) error {
 	defer db.Disconnect()
 
 	//to local package in local parametr (will be tested)
-	game.PingGame = game.InitGame(10)
-	go game.PingGame.Run()
+	//game.PingGame = game.InitGame(10)
+	//go game.PingGame.Run()
 
 	router := mux.NewRouter()
-	gameRouter := router.PathPrefix("/game").Subrouter()
+	//gameRouter := router.PathPrefix("/game").Subrouter()
 
 	router.Use(mw.PanicMiddleware)
 	router.Use(mw.MonitoringMiddleware)
@@ -53,9 +52,9 @@ func StartApp(params Params) error {
 	router.HandleFunc("/signout", c.SignOut).Methods("GET", "OPTIONS")
 	router.HandleFunc("/me", c.ChangeProfile).Methods("PUT")
 	router.HandleFunc("/upload", c.UploadImage).Methods("POST")
-	gameRouter.HandleFunc("/ws", c.StartWS)
+	//gameRouter.HandleFunc("/ws", c.StartWS)
 
-	prometheus.MustRegister(metrics.Hits, metrics.PlayersCountInGame, metrics.ActiveRooms)
+	prometheus.MustRegister(metrics.Hits)
 	router.Handle("/metrics", promhttp.Handler())
 
 
