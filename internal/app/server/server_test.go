@@ -11,10 +11,12 @@ func TestServerFail(t *testing.T) {
 	if params.Port == "" {
 		params.Port = "8080"
 	}
-	err := StartApp(params)
-	if err == nil {
-		t.Error(err)
-
-	}
+	go func() {
+		err := StartApp(params)
+		if err != nil {
+			t.Error(err)
+		}
+	}()
+	
 
 }

@@ -1,40 +1,59 @@
 package controllers
 
 import (
+	//"2019_1_undefined_penguins/internal/app/auth"
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 	"encoding/json"
+	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"time"
 
-	"io/ioutil"
+	"golang.org/x/net/context"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/status"
+
 	"net/http"
 
-	"2019_1_undefined_penguins/internal/pkg/database"
-	db "2019_1_undefined_penguins/internal/pkg/database"
+	//db "2019_1_undefined_penguins/internal/pkg/database"
 	"2019_1_undefined_penguins/internal/pkg/models"
-
-	"github.com/dgrijalva/jwt-go"
+	//"github.com/dgrijalva/jwt-go"
 )
 
 func Me(w http.ResponseWriter, r *http.Request) {
 	cookie, _ := r.Cookie("sessionid")
 
-	token, err := jwt.Parse(cookie.Value, func(token *jwt.Token) (interface{}, error) {
-		return SECRET, nil
-	})
-
-	claims, _ := token.Claims.(jwt.MapClaims)
-
-	temp := claims["userID"]
-	mytemp := uint(temp.(float64))
-
-	user, err := db.GetUserByID(mytemp)
-	if user == nil {
-		w.WriteHeader(http.StatusUnauthorized)
+	grcpConn, err := grpc.Dial(
+		"127.0.0.1:8083",
+		grpc.WithInsecure(),
+	)
+	if err != nil {
+		helpers.LogMsg("Can`t connect to grpc")
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	defer grcpConn.Close()
+
+	authManager := models.NewAuthCheckerClient(grcpConn)
+	ctx := context.Background()
+
+	user, err := authManager.GetUser(ctx, &models.JWT{Token: cookie.Value})
+
+	fmt.Println(err)
+	if err != nil {
+		switch errGRPC, _ := status.FromError(err); errGRPC.Code() {
+		case 2:
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		default:
+			helpers.LogMsg("Unknown gprc error")
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	}
+
 	bytes, err := json.Marshal(user)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -47,35 +66,56 @@ func Me(w http.ResponseWriter, r *http.Request) {
 func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("sessionid")
 
-	token, err := jwt.Parse(cookie.Value, func(token *jwt.Token) (interface{}, error) {
-		return SECRET, nil
-	})
+	grcpConn, err := grpc.Dial(
+		"127.0.0.1:8083",
+		grpc.WithInsecure(),
+	)
+	if err != nil {
+		helpers.LogMsg("Can`t connect to grpc")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	defer grcpConn.Close()
+	authManager := models.NewAuthCheckerClient(grcpConn)
+	ctx := context.Background()
 
-	claims, _ := token.Claims.(jwt.MapClaims)
+	user, err := authManager.GetUser(ctx, &models.JWT{Token: cookie.Value})
+
+	fmt.Println(err)
+
+	if err != nil {
+		switch errGRPC, _ := status.FromError(err); errGRPC.Code() {
+		case 2:
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		default:
+			helpers.LogMsg("Unknown gprc error")
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	}
+
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
+		helpers.LogMsg(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	defer r.Body.Close()
-	var user models.User
-	err = json.Unmarshal(body, &user)
+
+	//var user models.User
+	var newUser *models.User
+	err = json.Unmarshal(body, &newUser)
 
 	if err != nil {
+		helpers.LogMsg(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	temp := claims["userID"]
-	mytemp := uint(temp.(float64))
-	user, err = db.UpdateUserByID(user, mytemp)
-	if err != nil {
-		helpers.LogMsg(err)
-		w.WriteHeader(http.StatusConflict)
-		return
-	}
-
-	bytes, err := json.Marshal(user)
+	newUser.ID = user.ID
+	_, _ = authManager.ChangeUser(ctx, newUser)
+	bytes, err := json.Marshal(newUser)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -87,15 +127,44 @@ func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 func UploadImage(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("sessionid")
 
-	token, err := jwt.Parse(cookie.Value, func(token *jwt.Token) (interface{}, error) {
-		return SECRET, nil
-	})
+	//token, err := jwt.Parse(cookie.Value, func(token *jwt.Token) (interface{}, error) {
+	//	return SECRET, nil
+	//})
+	//
+	//claims, _ := token.Claims.(jwt.MapClaims)
+	//user, err := db.GetUserByEmail(claims["userEmail"].(string))
+	//if user == nil {
+	//	w.WriteHeader(http.StatusNotFound)
+	//	return
+	//}
 
-	claims, _ := token.Claims.(jwt.MapClaims)
-	user, err := db.GetUserByEmail(claims["userEmail"].(string))
-	if user == nil {
-		w.WriteHeader(http.StatusNotFound)
+	grcpConn, err := grpc.Dial(
+		"127.0.0.1:8083",
+		grpc.WithInsecure(),
+	)
+	if err != nil {
+		helpers.LogMsg("Can`t connect to grpc")
+		w.WriteHeader(http.StatusInternalServerError)
 		return
+	}
+	defer grcpConn.Close()
+
+	authManager := models.NewAuthCheckerClient(grcpConn)
+	ctx := context.Background()
+
+	user, err := authManager.GetUser(ctx, &models.JWT{Token: cookie.Value})
+
+	fmt.Println(err)
+	if err != nil {
+		switch errGRPC, _ := status.FromError(err); errGRPC.Code() {
+		case 2:
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		default:
+			helpers.LogMsg("Unknown gprc error")
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	}
 
 	err = r.ParseMultipartForm(5 * 1024 * 1025)
@@ -138,7 +207,8 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = database.UpdateImage(user.Login, fileName)
+	// u := user
+	// err = database.UpdateImage(u.Login, fileName)
 	if err != nil {
 		helpers.LogMsg("Ошибка при обновлении картинки в базе данных")
 

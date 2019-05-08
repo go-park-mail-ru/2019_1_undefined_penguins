@@ -14,5 +14,4 @@ func Start() error {
 
 	helpers.LogMsg("FileServer started at 8081")
 	return http.ListenAndServe(":8081", nil)
-
 }
