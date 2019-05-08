@@ -2,10 +2,12 @@ package middleware
 
 import (
 	"fmt"
-	"github.com/gorilla/mux"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 	"time"
+
+	"github.com/gorilla/mux"
 )
 
 func RootTestHandler(w http.ResponseWriter, r *http.Request) {
@@ -33,15 +35,18 @@ func TestMid(t *testing.T) {
 	router.Use(PanicMiddleware)
 	router.Use(CORSMiddleware)
 	router.Use(AuthMiddleware)
+	router.Use(MonitoringMiddleware)
 	router.HandleFunc("/", RootTestHandler).Methods("GET")
 	router.HandleFunc("/me", RootTestHandler).Methods("GET", "OPTIONS")
 	router.HandleFunc("/panic", PanicTestHandler).Methods("GET")
 	StartServer(":8085", router)
-
 	req, err := http.NewRequest("GET", "http://127.0.0.1:8085/me", nil)
+	client := &http.Client{Timeout: time.Second * 10}
+	_, err = client.Do(req)
+	req, err = http.NewRequest("GET", "http://127.0.0.1:8085/me", nil)
 	cookie := http.Cookie{Name: "sessionid", Value: "cookie_value"}
 	req.AddCookie(&cookie)
-	client := &http.Client{Timeout: time.Second * 10}
+	client = &http.Client{Timeout: time.Second * 10}
 	_, err = client.Do(req)
 
 	req, err = http.NewRequest("GET", "http://127.0.0.1:8085/me", nil)
@@ -57,5 +62,9 @@ func TestMid(t *testing.T) {
 	if err != nil {
 		t.Error(nil)
 	}
-
+	w := httptest.NewRecorder()
+	status := GetStatus(w)
+	status.Header()
+	status.Write([]byte("hi"))
+	status.WriteHeader(201)
 }
