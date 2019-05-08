@@ -1,6 +1,7 @@
 package controllers
 
 import (
+
 	//db "2019_1_undefined_penguins/internal/pkg/database"
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 	"2019_1_undefined_penguins/internal/pkg/models"
@@ -90,4 +91,5 @@ func GetLeaderboardInfo(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write(respBody)
 	}
+
 }
