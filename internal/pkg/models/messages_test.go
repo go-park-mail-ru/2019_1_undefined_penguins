@@ -65,9 +65,5 @@ func TestString(t *testing.T) {
 
 	var cc *grpc.ClientConn
 	_ = NewAuthCheckerClient(cc)
-	// server := grpc.NewServer()
-	// var srv interface{}
-	// var ctx context.Context
-	// jwt, _ = srv.(AuthCheckerServer).LoginUser(ctx, user)
-	// RegisterAuthCheckerServer(server)
+
 }
