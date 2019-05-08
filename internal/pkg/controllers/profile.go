@@ -207,7 +207,7 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u := user
+	// u := user
 	// err = database.UpdateImage(u.Login, fileName)
 	if err != nil {
 		helpers.LogMsg("Ошибка при обновлении картинки в базе данных")
