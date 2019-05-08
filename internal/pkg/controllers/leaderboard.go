@@ -7,11 +7,11 @@ import (
 	"2019_1_undefined_penguins/internal/pkg/models"
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/mux"
-	"google.golang.org/grpc"
 	"net/http"
 	"strconv"
 
+	"github.com/gorilla/mux"
+	"google.golang.org/grpc"
 
 	"golang.org/x/net/context"
 	//"google.golang.org/grpc/status"
@@ -43,13 +43,8 @@ func GetLeaderboardPage(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 
 	users, _ := authManager.GetUserArray(ctx, leaders)
-	//users, _ := db.GetLeaders(id)
-  //TODO: fix 404!!!!
+
 	fmt.Println("led: ", users)
-	if users == nil {
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
 
 	u := users.Users
 	if respBody, err := json.Marshal(u); err != nil {
