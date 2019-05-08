@@ -26,7 +26,7 @@ func ReturnCountOfSessions() int {
 	return len(Sessions)
 }
 
-type LeadersInfo struct {
+type LeadersInfo1 struct {
 	Count       uint `json:"count"`
 	UsersOnPage uint `json:"usersOnPage"`
 }
