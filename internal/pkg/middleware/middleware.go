@@ -82,7 +82,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 func MonitoringMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		status := GetStatus(w)
-		next.ServeHTTP(w, r)
+		next.ServeHTTP(status, r)
 
 		metrics.Hits.WithLabelValues(
 			strconv.FormatInt(int64(status.Code), 10),
