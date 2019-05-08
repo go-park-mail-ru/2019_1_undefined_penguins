@@ -9,8 +9,6 @@ import (
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 )
 
-var SECRET = []byte("myawesomesecret")
-
 func CORSMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		origin := r.Header.Get("Origin")
@@ -61,7 +59,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 				helpers.DeleteCookie(&w, cookie)
 				return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 			}
-			return SECRET, nil
+			return nil, nil
 		})
 
 		if _, ok := token.Claims.(jwt.MapClaims); !(ok && token.Valid) {

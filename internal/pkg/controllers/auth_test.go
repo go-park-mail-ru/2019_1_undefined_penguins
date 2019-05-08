@@ -187,6 +187,7 @@ func TestUpdateUser(t *testing.T) {
 	handler = http.HandlerFunc(UploadImage)
 	req.AddCookie(cookie)
 	handler.ServeHTTP(w, req)
+
 }
 
 // func GetUserFromJSON(fileName string) (*models.User, error) {

@@ -2,10 +2,11 @@ package middleware
 
 import (
 	"fmt"
-	"github.com/gorilla/mux"
 	"net/http"
 	"testing"
 	"time"
+
+	"github.com/gorilla/mux"
 )
 
 func RootTestHandler(w http.ResponseWriter, r *http.Request) {
@@ -37,11 +38,13 @@ func TestMid(t *testing.T) {
 	router.HandleFunc("/me", RootTestHandler).Methods("GET", "OPTIONS")
 	router.HandleFunc("/panic", PanicTestHandler).Methods("GET")
 	StartServer(":8085", router)
-
 	req, err := http.NewRequest("GET", "http://127.0.0.1:8085/me", nil)
+	client := &http.Client{Timeout: time.Second * 10}
+	_, err = client.Do(req)
+	req, err = http.NewRequest("GET", "http://127.0.0.1:8085/me", nil)
 	cookie := http.Cookie{Name: "sessionid", Value: "cookie_value"}
 	req.AddCookie(&cookie)
-	client := &http.Client{Timeout: time.Second * 10}
+	client = &http.Client{Timeout: time.Second * 10}
 	_, err = client.Do(req)
 
 	req, err = http.NewRequest("GET", "http://127.0.0.1:8085/me", nil)
