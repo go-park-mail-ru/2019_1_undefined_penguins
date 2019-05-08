@@ -3,6 +3,7 @@ package middleware
 import (
 	"fmt"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 	"time"
 
@@ -34,6 +35,7 @@ func TestMid(t *testing.T) {
 	router.Use(PanicMiddleware)
 	router.Use(CORSMiddleware)
 	router.Use(AuthMiddleware)
+	router.Use(MonitoringMiddleware)
 	router.HandleFunc("/", RootTestHandler).Methods("GET")
 	router.HandleFunc("/me", RootTestHandler).Methods("GET", "OPTIONS")
 	router.HandleFunc("/panic", PanicTestHandler).Methods("GET")
@@ -60,5 +62,9 @@ func TestMid(t *testing.T) {
 	if err != nil {
 		t.Error(nil)
 	}
-
+	w := httptest.NewRecorder()
+	status := GetStatus(w)
+	status.Header()
+	status.Write([]byte("hi"))
+	status.WriteHeader(201)
 }
