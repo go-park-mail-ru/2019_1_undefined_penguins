@@ -52,15 +52,15 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(err)
 	if err != nil {
 		switch errGRPC, _ := status.FromError(err); errGRPC.Code() {
-		case 2:
-			w.WriteHeader(http.StatusUnauthorized)
-			return
-		case 5:
-			w.WriteHeader(http.StatusNotFound)
-			return
-		case 7:
-			w.WriteHeader(http.StatusForbidden)
-			return
+		// case 2:
+		// 	w.WriteHeader(http.StatusUnauthorized)
+		// 	return
+		// case 5:
+		// 	w.WriteHeader(http.StatusNotFound)
+		// 	return
+		// case 7:
+		// 	w.WriteHeader(http.StatusForbidden)
+		// 	return
 		default:
 			helpers.LogMsg("Unknown gprc error")
 			w.WriteHeader(http.StatusInternalServerError)
@@ -124,21 +124,21 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(err)
 	if err != nil {
 		switch errGRPC, _ := status.FromError(err); errGRPC.Code() {
-		case 2:
-			w.WriteHeader(http.StatusUnauthorized)
-			return
-		case 5:
-			w.WriteHeader(http.StatusNotFound)
-			return
+		// case 2:
+		// 	w.WriteHeader(http.StatusUnauthorized)
+		// 	return
+		// case 5:
+		// 	w.WriteHeader(http.StatusNotFound)
+		// 	return
 		case 6:
 			w.WriteHeader(http.StatusConflict)
 			return
-		case 7:
-			w.WriteHeader(http.StatusForbidden)
-			return
-		case 13:
-			w.WriteHeader(http.StatusInternalServerError)
-			return
+		// case 7:
+		// 	w.WriteHeader(http.StatusForbidden)
+		// 	return
+		// case 13:
+		// 	w.WriteHeader(http.StatusInternalServerError)
+		// 	return
 		default:
 			helpers.LogMsg("Unknown gprc error")
 			w.WriteHeader(http.StatusInternalServerError)

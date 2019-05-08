@@ -5,11 +5,7 @@ import (
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
-	"os"
-	"path/filepath"
-	"time"
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -44,9 +40,9 @@ func Me(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(err)
 	if err != nil {
 		switch errGRPC, _ := status.FromError(err); errGRPC.Code() {
-		case 2:
-			w.WriteHeader(http.StatusUnauthorized)
-			return
+		// case 2:
+		// 	w.WriteHeader(http.StatusUnauthorized)
+		// 	return
 		default:
 			helpers.LogMsg("Unknown gprc error")
 			w.WriteHeader(http.StatusInternalServerError)
@@ -85,9 +81,9 @@ func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		switch errGRPC, _ := status.FromError(err); errGRPC.Code() {
-		case 2:
-			w.WriteHeader(http.StatusUnauthorized)
-			return
+		// case 2:
+		// 	w.WriteHeader(http.StatusUnauthorized)
+		// 	return
 		default:
 			helpers.LogMsg("Unknown gprc error")
 			w.WriteHeader(http.StatusInternalServerError)
@@ -152,14 +148,14 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 	authManager := models.NewAuthCheckerClient(grcpConn)
 	ctx := context.Background()
 
-	user, err := authManager.GetUser(ctx, &models.JWT{Token: cookie.Value})
+	_, err = authManager.GetUser(ctx, &models.JWT{Token: cookie.Value})
 
 	fmt.Println(err)
 	if err != nil {
 		switch errGRPC, _ := status.FromError(err); errGRPC.Code() {
-		case 2:
-			w.WriteHeader(http.StatusUnauthorized)
-			return
+		// case 2:
+		// 	w.WriteHeader(http.StatusUnauthorized)
+		// 	return
 		default:
 			helpers.LogMsg("Unknown gprc error")
 			w.WriteHeader(http.StatusInternalServerError)
@@ -173,47 +169,47 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	file, handler, err := r.FormFile("avatar")
-	if err != nil {
-		helpers.LogMsg("Ошибка при получении файла из тела запроса")
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	defer file.Close()
-	extension := filepath.Ext(handler.Filename)
-	if extension == "" {
-		helpers.LogMsg("Файл не имеет расширения")
+	// file, handler, err := r.FormFile("avatar")
+	// if err != nil {
+	// 	helpers.LogMsg("Ошибка при получении файла из тела запроса")
+	// 	w.WriteHeader(http.StatusInternalServerError)
+	// 	return
+	// }
+	// defer file.Close()
+	// extension := filepath.Ext(handler.Filename)
+	// if extension == "" {
+	// 	helpers.LogMsg("Файл не имеет расширения")
 
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+	// 	w.WriteHeader(http.StatusInternalServerError)
+	// 	return
+	// }
 
-	t := time.Now()
+	// t := time.Now()
 
-	fileName := user.Login + t.Format("20060102150405") + extension
-	fileAndPath := "static/" + fileName
-	saveFile, err := os.Create(fileAndPath)
-	if err != nil {
-		helpers.LogMsg("Create", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	defer saveFile.Close()
+	// fileName := user.Login + t.Format("20060102150405") + extension
+	// fileAndPath := "static/" + fileName
+	// saveFile, err := os.Create(fileAndPath)
+	// if err != nil {
+	// 	helpers.LogMsg("Create", err)
+	// 	w.WriteHeader(http.StatusInternalServerError)
+	// 	return
+	// }
+	// defer saveFile.Close()
 
-	_, err = io.Copy(saveFile, file)
-	if err != nil {
-		helpers.LogMsg("Copy", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+	// _, err = io.Copy(saveFile, file)
+	// if err != nil {
+	// 	helpers.LogMsg("Copy", err)
+	// 	w.WriteHeader(http.StatusInternalServerError)
+	// 	return
+	// }
 
-	// u := user
-	// err = database.UpdateImage(u.Login, fileName)
-	if err != nil {
-		helpers.LogMsg("Ошибка при обновлении картинки в базе данных")
+	// // u := user
+	// // err = database.UpdateImage(u.Login, fileName)
+	// if err != nil {
+	// 	helpers.LogMsg("Ошибка при обновлении картинки в базе данных")
 
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	return
+	// 	w.WriteHeader(http.StatusInternalServerError)
+	// 	return
+	// }
+	// return
 }
