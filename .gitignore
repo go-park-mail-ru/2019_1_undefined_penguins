@@ -3,3 +3,7 @@
 configs/
 static/
 .vscode/
+coverage.out
+c.out
+node_exporter-0.16.0.darwin-amd64/
+prometheus/

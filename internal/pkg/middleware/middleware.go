@@ -1,15 +1,20 @@
 package middleware
 
 import (
+	"2019_1_undefined_penguins/internal/app/metrics"
 	"fmt"
-	"github.com/dgrijalva/jwt-go"
 	"net/http"
+	"strconv"
+
+	"github.com/dgrijalva/jwt-go"
 
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 )
 
-var SECRET = []byte("myawesomesecret")
-
+type Status struct {
+	http.ResponseWriter
+	Code int
+}
 
 func CORSMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -25,13 +30,6 @@ func CORSMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		next.ServeHTTP(w, r)
-	})
-}
-
-func LoggingMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		helpers.LogMsg(r.Method + r.RequestURI)
 		next.ServeHTTP(w, r)
 	})
 }
@@ -61,13 +59,14 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
+		//TODO go to auth micro or not?
 		token, err := jwt.Parse(cookie.Value, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				w.WriteHeader(http.StatusForbidden)
 				helpers.DeleteCookie(&w, cookie)
 				return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 			}
-			return SECRET, nil
+			return nil, nil
 		})
 
 		if _, ok := token.Claims.(jwt.MapClaims); !(ok && token.Valid) {
@@ -75,6 +74,39 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			helpers.DeleteCookie(&w, cookie)
 			return
 		}
-			next.ServeHTTP(w, r)
+		next.ServeHTTP(w, r)
 	})
+}
+
+func MonitoringMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		status := GetStatus(w)
+		next.ServeHTTP(status, r)
+
+		metrics.Hits.WithLabelValues(
+			strconv.FormatInt(int64(status.Code), 10),
+			r.URL.String()).Inc()
+	})
+}
+
+func GetStatus(responseWriter http.ResponseWriter) *Status {
+	return &Status{ResponseWriter: responseWriter}
+}
+
+func (w *Status) WriteHeader(status int) {
+	w.Code = status
+	w.ResponseWriter.WriteHeader(status)
+}
+
+func (w *Status) Write(data []byte) (int, error) {
+	if w.Code == 0 {
+		w.Code = 200
+	}
+
+	n, err := w.ResponseWriter.Write(data)
+	return n, err
+}
+
+func (w *Status) Header() http.Header {
+	return w.ResponseWriter.Header()
 }

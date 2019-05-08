@@ -6,9 +6,8 @@ import (
 
 func TestFileServer(t *testing.T) {
 
-	err := Start()
-	if err == nil {
-		t.Error(err)
-	}
+	go func() {
+		Start()
+	}()
 
 }
