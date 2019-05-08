@@ -1,6 +1,7 @@
 package game
 
 import (
+	"2019_1_undefined_penguins/internal/app/metrics"
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 	"fmt"
 	"github.com/gorilla/websocket"
@@ -39,6 +40,7 @@ func (p *Player) Listen() {
 			fmt.Println("ReadJSON error: ", err)
 			if websocket.IsUnexpectedCloseError(err) {
 				p.RemovePlayerFromRoom()
+				metrics.PlayersCountInGame.Dec()
 				helpers.LogMsg("Player " + p.ID +" disconnected")
 				return
 			}

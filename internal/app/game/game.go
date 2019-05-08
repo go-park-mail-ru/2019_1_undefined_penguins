@@ -1,6 +1,7 @@
 package game
 
 import (
+	"2019_1_undefined_penguins/internal/app/metrics"
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 	"fmt"
 	"sync"
@@ -107,15 +108,18 @@ LOOP:
 }
 
 func (g *Game) AddToRoomSingle(room *RoomSingle) {
+	metrics.ActiveRooms.Inc()
 	g.roomsSingle = append(g.roomsSingle, room)
 }
 
 func (g *Game) AddToRoomMulti(room *RoomMulti) {
+	metrics.ActiveRooms.Inc()
 	g.roomsMulti = append(g.roomsMulti, room)
 }
 
 func (g *Game) AddPlayer(player *Player)  {
 	helpers.LogMsg("Player " + player.ID + " queued to add")
+	metrics.PlayersCountInGame.Inc()
 	g.register <- player
 }
 

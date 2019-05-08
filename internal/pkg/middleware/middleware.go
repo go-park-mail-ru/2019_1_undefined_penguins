@@ -1,13 +1,20 @@
 package middleware
 
 import (
+	"2019_1_undefined_penguins/internal/app/metrics"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/dgrijalva/jwt-go"
 
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 )
+
+type Status struct {
+	http.ResponseWriter
+	Code int
+}
 
 var SECRET = []byte("myawesomesecret")
 
@@ -70,4 +77,37 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		}
 		next.ServeHTTP(w, r)
 	})
+}
+
+func MonitoringMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		status := GetStatus(w)
+		next.ServeHTTP(w, r)
+
+		metrics.Hits.WithLabelValues(
+			strconv.FormatInt(int64(status.Code), 10),
+			r.URL.String()).Inc()
+	})
+}
+
+func GetStatus(responseWriter http.ResponseWriter) *Status {
+	return &Status{ResponseWriter: responseWriter}
+}
+
+func (w *Status) WriteHeader(status int) {
+	w.Code = status
+	w.ResponseWriter.WriteHeader(status)
+}
+
+func (w *Status) Write(data []byte) (int, error) {
+	if w.Code == 0 {
+		w.Code = 200
+	}
+
+	n, err := w.ResponseWriter.Write(data)
+	return n, err
+}
+
+func (w *Status) Header() http.Header {
+	return w.ResponseWriter.Header()
 }

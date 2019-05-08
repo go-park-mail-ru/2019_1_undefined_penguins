@@ -2,7 +2,10 @@ package server
 
 import (
 	"2019_1_undefined_penguins/internal/app/game"
+	"2019_1_undefined_penguins/internal/app/metrics"
 	"2019_1_undefined_penguins/internal/pkg/fileserver"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"net/http"
 	"os"
 
@@ -37,6 +40,7 @@ func StartApp(params Params) error {
 	gameRouter := router.PathPrefix("/game").Subrouter()
 
 	router.Use(mw.PanicMiddleware)
+	router.Use(mw.MonitoringMiddleware)
 	router.Use(mw.CORSMiddleware)
 	router.Use(mw.AuthMiddleware)
 
@@ -50,6 +54,9 @@ func StartApp(params Params) error {
 	router.HandleFunc("/me", c.ChangeProfile).Methods("PUT")
 	router.HandleFunc("/upload", c.UploadImage).Methods("POST")
 	gameRouter.HandleFunc("/ws", c.StartWS)
+
+	prometheus.MustRegister(metrics.Hits, metrics.PlayersCountInGame, metrics.ActiveRooms)
+	router.Handle("/metrics", promhttp.Handler())
 
 
 	helpers.LogMsg("Server started at " + params.Port)
