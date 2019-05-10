@@ -15,7 +15,7 @@ func main() {
 	viper.SetConfigName("config")
 	if err := viper.ReadInConfig(); err == nil {
 		params.Port = viper.GetString("port")
-		controllers.SetAuthAddress(viper.GetString("auth"))
+		server.SetAuthAddress(viper.GetString("auth"))
 		controllers.SetDefaultPictureAddress(viper.GetString("defaultPicture"))
 		err = server.StartApp(params)
 		if err != nil {

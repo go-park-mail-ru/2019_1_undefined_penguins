@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 
 	"golang.org/x/net/context"
-	"google.golang.org/grpc"
 	"google.golang.org/grpc/status"
 
 	"net/http"
@@ -21,21 +20,8 @@ import (
 func Me(w http.ResponseWriter, r *http.Request) {
 	cookie, _ := r.Cookie("sessionid")
 
-	grcpConn, err := grpc.Dial(
-		authAddress,
-		grpc.WithInsecure(),
-	)
-	if err != nil {
-		helpers.LogMsg("Can`t connect to grpc")
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	defer grcpConn.Close()
-
-	authManager := models.NewAuthCheckerClient(grcpConn)
 	ctx := context.Background()
-
-	user, err := authManager.GetUser(ctx, &models.JWT{Token: cookie.Value})
+	user, err := models.AuthManager.GetUser(ctx, &models.JWT{Token: cookie.Value})
 
 	fmt.Println(err)
 	if err != nil {
@@ -62,20 +48,8 @@ func Me(w http.ResponseWriter, r *http.Request) {
 func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("sessionid")
 
-	grcpConn, err := grpc.Dial(
-		authAddress,
-		grpc.WithInsecure(),
-	)
-	if err != nil {
-		helpers.LogMsg("Can`t connect to grpc")
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	defer grcpConn.Close()
-	authManager := models.NewAuthCheckerClient(grcpConn)
 	ctx := context.Background()
-
-	user, err := authManager.GetUser(ctx, &models.JWT{Token: cookie.Value})
+	user, err := models.AuthManager.GetUser(ctx, &models.JWT{Token: cookie.Value})
 
 	fmt.Println(err)
 
@@ -110,7 +84,7 @@ func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	newUser.ID = user.ID
-	_, _ = authManager.ChangeUser(ctx, newUser)
+	_, _ = models.AuthManager.ChangeUser(ctx, newUser)
 	bytes, err := json.Marshal(newUser)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -134,21 +108,9 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 	//	return
 	//}
 
-	grcpConn, err := grpc.Dial(
-		authAddress,
-		grpc.WithInsecure(),
-	)
-	if err != nil {
-		helpers.LogMsg("Can`t connect to grpc")
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	defer grcpConn.Close()
 
-	authManager := models.NewAuthCheckerClient(grcpConn)
 	ctx := context.Background()
-
-	_, err = authManager.GetUser(ctx, &models.JWT{Token: cookie.Value})
+	_, err = models.AuthManager.GetUser(ctx, &models.JWT{Token: cookie.Value})
 
 	fmt.Println(err)
 	if err != nil {

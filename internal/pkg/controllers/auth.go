@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"golang.org/x/net/context"
-	"google.golang.org/grpc"
 	"google.golang.org/grpc/status"
 
 	"io/ioutil"
@@ -34,20 +33,8 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	grcpConn, err := grpc.Dial(
-		authAddress,
-		grpc.WithInsecure(),
-	)
-	if err != nil {
-		helpers.LogMsg("Can`t connect to grpc")
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	defer grcpConn.Close()
-
-	authManager := models.NewAuthCheckerClient(grcpConn)
 	ctx := context.Background()
-	token, err := authManager.LoginUser(ctx, user)
+	token, err := models.AuthManager.LoginUser(ctx, user)
 
 	fmt.Println(err)
 	if err != nil {
@@ -75,7 +62,7 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 	}
 
-	user, _ = authManager.GetUser(ctx, token)
+	user, _ = models.AuthManager.GetUser(ctx, token)
 	bytes, err := json.Marshal(user)
 
 	if err != nil {
@@ -96,7 +83,6 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	//var user models.User
 	var user *models.User
 	err = json.Unmarshal(body, &user)
 
@@ -106,20 +92,8 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	grcpConn, err := grpc.Dial(
-		authAddress,
-		grpc.WithInsecure(),
-	)
-	if err != nil {
-		helpers.LogMsg("Can`t connect to grpc")
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	defer grcpConn.Close()
-
-	authManager := models.NewAuthCheckerClient(grcpConn)
 	ctx := context.Background()
-	token, err := authManager.RegisterUser(ctx, user)
+	token, err := models.AuthManager.RegisterUser(ctx, user)
 
 	fmt.Println(err)
 	if err != nil {
@@ -183,12 +157,7 @@ func RootHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("hello penguins"))
 }
 
-var authAddress string
 var defaultPictureAddress string
-
-func SetAuthAddress(address string) {
-	authAddress = address
-}
 
 func SetDefaultPictureAddress(address string) {
 	defaultPictureAddress = address
