@@ -35,8 +35,8 @@ func StartApp(params Params) error {
 	router := mux.NewRouter()
 
 	grcpConn, err := grpc.Dial(
-		//authAddress,
-		"127.0.0.1:8083",
+		authAddress,
+		//"127.0.0.1:8083",
 		grpc.WithInsecure(),
 	)
 	if err != nil {
