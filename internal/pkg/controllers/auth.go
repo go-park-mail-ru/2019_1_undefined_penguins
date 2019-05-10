@@ -35,7 +35,7 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 	}
 
 	grcpConn, err := grpc.Dial(
-		"127.0.0.1:8083",
+		authAddress,
 		grpc.WithInsecure(),
 	)
 	if err != nil {
@@ -107,7 +107,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	grcpConn, err := grpc.Dial(
-		"127.0.0.1:8083",
+		authAddress,
 		grpc.WithInsecure(),
 	)
 	if err != nil {
@@ -154,7 +154,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user.Password = ""
-	user.Picture = "http://localhost:8081/data/Default.png"
+	user.Picture = defaultPictureAddress
 	bytes, err := json.Marshal(user)
 
 	if err != nil {
@@ -181,4 +181,15 @@ func SignOut(w http.ResponseWriter, r *http.Request) {
 
 func RootHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("hello penguins"))
+}
+
+var authAddress string
+var defaultPictureAddress string
+
+func SetAuthAddress(address string) {
+	authAddress = address
+}
+
+func SetDefaultPictureAddress(address string) {
+	defaultPictureAddress = address
 }

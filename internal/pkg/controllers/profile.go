@@ -22,7 +22,7 @@ func Me(w http.ResponseWriter, r *http.Request) {
 	cookie, _ := r.Cookie("sessionid")
 
 	grcpConn, err := grpc.Dial(
-		"127.0.0.1:8083",
+		authAddress,
 		grpc.WithInsecure(),
 	)
 	if err != nil {
@@ -63,7 +63,7 @@ func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("sessionid")
 
 	grcpConn, err := grpc.Dial(
-		"127.0.0.1:8083",
+		authAddress,
 		grpc.WithInsecure(),
 	)
 	if err != nil {
@@ -135,7 +135,7 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 	//}
 
 	grcpConn, err := grpc.Dial(
-		"127.0.0.1:8083",
+		authAddress,
 		grpc.WithInsecure(),
 	)
 	if err != nil {

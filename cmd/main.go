@@ -2,6 +2,7 @@ package main
 
 import (
 	"2019_1_undefined_penguins/internal/app/server"
+	"2019_1_undefined_penguins/internal/pkg/controllers"
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 	"os"
 
@@ -14,11 +15,12 @@ func main() {
 	viper.SetConfigName("config")
 	if err := viper.ReadInConfig(); err == nil {
 		params.Port = viper.GetString("port")
+		controllers.SetAuthAddress(viper.GetString("auth"))
+		controllers.SetDefaultPictureAddress(viper.GetString("defaultPicture"))
 		err = server.StartApp(params)
 		if err != nil {
 			helpers.LogMsg("Server error: ", err)
 		}
 	}
-
 
 }
