@@ -5,15 +5,19 @@ import (
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc/status"
-
+	"io/ioutil"
 	"net/http"
+	"path/filepath"
+	"time"
 
 	//db "2019_1_undefined_penguins/internal/pkg/database"
 	"2019_1_undefined_penguins/internal/pkg/models"
+	//"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/aws"
 	//"github.com/dgrijalva/jwt-go"
 )
 
@@ -97,20 +101,8 @@ func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 func UploadImage(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("sessionid")
 
-	//token, err := jwt.Parse(cookie.Value, func(token *jwt.Token) (interface{}, error) {
-	//	return SECRET, nil
-	//})
-	//
-	//claims, _ := token.Claims.(jwt.MapClaims)
-	//user, err := db.GetUserByEmail(claims["userEmail"].(string))
-	//if user == nil {
-	//	w.WriteHeader(http.StatusNotFound)
-	//	return
-	//}
-
-
 	ctx := context.Background()
-	_, err = models.AuthManager.GetUser(ctx, &models.JWT{Token: cookie.Value})
+	user, err := models.AuthManager.GetUser(ctx, &models.JWT{Token: cookie.Value})
 
 	fmt.Println(err)
 	if err != nil {
@@ -131,6 +123,65 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
+
+	//////////////////////////
+	// The session the S3 Uploader will use
+	sess := session.Must(session.NewSession(&aws.Config{
+		Region: aws.String("ru-msk"),
+		//Credentials: credentials.NewStaticCredentials("sAAbC9Cnqau5FUHy1MaTNB", "bTaRWfSQigezBT4kMgTRcdTpbox42Ske7QHDgGYxAk3y", ""),
+		Endpoint: aws.String("http://hb.bizmrg.com"),
+	}))
+	svc := s3.New(sess)
+
+	f, handler, err := r.FormFile("avatar")
+	if err != nil {
+		helpers.LogMsg("Ошибка при получении файла из тела запроса")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	defer f.Close()
+
+	extension := filepath.Ext(handler.Filename)
+	t := time.Now()
+	fileName := user.Login + t.Format("20060102150405") + extension
+
+	res, err := svc.PutObject(&s3.PutObjectInput{
+		Bucket: aws.String("penguins_images"),
+		Key:    aws.String(fileName),
+		Body:   f,
+	})
+	if err != nil {
+		fmt.Println(err)
+		return
+	} else {
+		fmt.Println(res)
+	}
+
+	//get it back
+	res1, err := svc.GetObject(&s3.GetObjectInput{
+		Bucket: aws.String("penguins_images"),
+		Key:    aws.String(fileName),
+	})
+	if err != nil {
+		fmt.Println(err)
+		return
+	} else {
+		fmt.Println(res1)
+	}
+
+	//avatar := "https://hb.bizmrg.com/penguins_images/user1220190520235514.png"
+	newUser := new(models.User)
+	newUser = user
+	newUser.Picture = "https://hb.bizmrg.com/penguins_images/" + fileName
+	newUser.ID = user.ID
+	_, errr := models.AuthManager.ChangeUser(ctx, newUser)
+	fmt.Println(errr)
+	bytes, err := json.Marshal(newUser)
+	w.Write(bytes)
+	//////////////////////////
+
+
 	// file, handler, err := r.FormFile("avatar")
 	// if err != nil {
 	// 	helpers.LogMsg("Ошибка при получении файла из тела запроса")
