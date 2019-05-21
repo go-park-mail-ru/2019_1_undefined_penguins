@@ -1,11 +1,9 @@
 package controllers
 
 import (
-	//"2019_1_undefined_penguins/internal/app/auth"
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 	"encoding/json"
 	"fmt"
-	//"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"golang.org/x/net/context"
@@ -15,11 +13,8 @@ import (
 	"path/filepath"
 	"time"
 
-	//db "2019_1_undefined_penguins/internal/pkg/database"
 	"2019_1_undefined_penguins/internal/pkg/models"
-	//"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/aws"
-	//"github.com/dgrijalva/jwt-go"
 )
 
 func Me(w http.ResponseWriter, r *http.Request) {
@@ -31,9 +26,9 @@ func Me(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(err)
 	if err != nil {
 		switch errGRPC, _ := status.FromError(err); errGRPC.Code() {
-		// case 2:
-		// 	w.WriteHeader(http.StatusUnauthorized)
-		// 	return
+		case 2:
+			w.WriteHeader(http.StatusUnauthorized)
+			return
 		default:
 			helpers.LogMsg("Unknown gprc error")
 			w.WriteHeader(http.StatusInternalServerError)
@@ -60,9 +55,9 @@ func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		switch errGRPC, _ := status.FromError(err); errGRPC.Code() {
-		// case 2:
-		// 	w.WriteHeader(http.StatusUnauthorized)
-		// 	return
+		case 2:
+			w.WriteHeader(http.StatusUnauthorized)
+			return
 		default:
 			helpers.LogMsg("Unknown gprc error")
 			w.WriteHeader(http.StatusInternalServerError)
@@ -108,9 +103,9 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(err)
 	if err != nil {
 		switch errGRPC, _ := status.FromError(err); errGRPC.Code() {
-		// case 2:
-		// 	w.WriteHeader(http.StatusUnauthorized)
-		// 	return
+		case 2:
+			w.WriteHeader(http.StatusUnauthorized)
+			return
 		default:
 			helpers.LogMsg("Unknown gprc error")
 			w.WriteHeader(http.StatusInternalServerError)
@@ -178,79 +173,6 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 	newUser = user
 	newUser.Picture = "https://hb.bizmrg.com/penguins_images/" + fileName
 	newUser.ID = user.ID
-	//_, errr := models.AuthManager.ChangeUser(ctx, newUser)
-	//fmt.Println(errr)
 	bytes, err := json.Marshal(newUser)
 	w.Write(bytes)
-
-	// check object grands
-	//input := &s3.GetObjectAclInput{
-	//	Bucket: aws.String("penguins_images"),
-	//	Key: aws.String("user620190521134436.png"),
-	//}
-	//
-	//result1, err := svc.GetObjectAcl(input)
-	//if err != nil {
-	//	if aerr, ok := err.(awserr.Error); ok {
-	//		switch aerr.Code() {
-	//		case s3.ErrCodeNoSuchKey:
-	//			fmt.Println(s3.ErrCodeNoSuchKey, aerr.Error())
-	//		default:
-	//			fmt.Println(aerr.Error())
-	//		}
-	//	} else {
-	//		// Print the error, cast err to awserr.Error to get the Code and
-	//		// Message from an error.
-	//		fmt.Println(err.Error())
-	//	}
-	//	return
-	//}
-	//
-	//fmt.Println(result1)
-
-
-	// saving picture in fileserver
-	// file, handler, err := r.FormFile("avatar")
-	// if err != nil {
-	// 	helpers.LogMsg("Ошибка при получении файла из тела запроса")
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// 	return
-	// }
-	// defer file.Close()
-	// extension := filepath.Ext(handler.Filename)
-	// if extension == "" {
-	// 	helpers.LogMsg("Файл не имеет расширения")
-
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// 	return
-	// }
-
-	// t := time.Now()
-
-	// fileName := user.Login + t.Format("20060102150405") + extension
-	// fileAndPath := "static/" + fileName
-	// saveFile, err := os.Create(fileAndPath)
-	// if err != nil {
-	// 	helpers.LogMsg("Create", err)
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// 	return
-	// }
-	// defer saveFile.Close()
-
-	// _, err = io.Copy(saveFile, file)
-	// if err != nil {
-	// 	helpers.LogMsg("Copy", err)
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// 	return
-	// }
-
-	// // u := user
-	// // err = database.UpdateImage(u.Login, fileName)
-	// if err != nil {
-	// 	helpers.LogMsg("Ошибка при обновлении картинки в базе данных")
-
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// 	return
-	// }
-	// return
 }
