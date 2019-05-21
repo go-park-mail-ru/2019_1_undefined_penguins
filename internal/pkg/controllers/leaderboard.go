@@ -1,9 +1,6 @@
 package controllers
 
 import (
-
-	//db "2019_1_undefined_penguins/internal/pkg/database"
-	"2019_1_undefined_penguins/internal/pkg/helpers"
 	"2019_1_undefined_penguins/internal/pkg/models"
 	"encoding/json"
 	"fmt"
@@ -11,8 +8,6 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"google.golang.org/grpc"
-
 	"golang.org/x/net/context"
 	//"google.golang.org/grpc/status"
 )
@@ -28,21 +23,9 @@ func GetLeaderboardPage(w http.ResponseWriter, r *http.Request) {
 	}
 	leaders.ID = uint64(id)
 
-	grcpConn, err := grpc.Dial(
-		"127.0.0.1:8083",
-		grpc.WithInsecure(),
-	)
-	if err != nil {
-		helpers.LogMsg("Can`t connect to grpc")
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	defer grcpConn.Close()
 
-	authManager := models.NewAuthCheckerClient(grcpConn)
 	ctx := context.Background()
-
-	users, _ := authManager.GetUserArray(ctx, leaders)
+	users, _ := models.AuthManager.GetUserArray(ctx, leaders)
 
 	fmt.Println("led: ", users)
 
@@ -56,26 +39,9 @@ func GetLeaderboardPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetLeaderboardInfo(w http.ResponseWriter, r *http.Request) {
-	grcpConn, err := grpc.Dial(
-		"127.0.0.1:8083",
-		grpc.WithInsecure(),
-	)
-	if err != nil {
-		helpers.LogMsg("Can`t connect to grpc")
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	defer grcpConn.Close()
 
-	authManager := models.NewAuthCheckerClient(grcpConn)
 	ctx := context.Background()
-
-	//info, err := db.UsersCount()
-	info, _ := authManager.GetUserCountInfo(ctx, new(models.Nothing))
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+	info, _ := models.AuthManager.GetUserCountInfo(ctx, new(models.Nothing))
 
 	var i models.LeadersInfo1
 	i.UsersOnPage = uint(info.UsersOnPage)

@@ -1,48 +1,34 @@
 package controllers
 
 import (
-	//"2019_1_undefined_penguins/internal/app/auth"
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
 	"golang.org/x/net/context"
-	"google.golang.org/grpc"
 	"google.golang.org/grpc/status"
-
+	"io/ioutil"
 	"net/http"
+	"path/filepath"
+	"time"
 
-	//db "2019_1_undefined_penguins/internal/pkg/database"
 	"2019_1_undefined_penguins/internal/pkg/models"
-	//"github.com/dgrijalva/jwt-go"
+	"github.com/aws/aws-sdk-go/aws"
 )
 
 func Me(w http.ResponseWriter, r *http.Request) {
 	cookie, _ := r.Cookie("sessionid")
 
-	grcpConn, err := grpc.Dial(
-		"127.0.0.1:8083",
-		grpc.WithInsecure(),
-	)
-	if err != nil {
-		helpers.LogMsg("Can`t connect to grpc")
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	defer grcpConn.Close()
-
-	authManager := models.NewAuthCheckerClient(grcpConn)
 	ctx := context.Background()
-
-	user, err := authManager.GetUser(ctx, &models.JWT{Token: cookie.Value})
+	user, err := models.AuthManager.GetUser(ctx, &models.JWT{Token: cookie.Value})
 
 	fmt.Println(err)
 	if err != nil {
 		switch errGRPC, _ := status.FromError(err); errGRPC.Code() {
-		// case 2:
-		// 	w.WriteHeader(http.StatusUnauthorized)
-		// 	return
+		case 2:
+			w.WriteHeader(http.StatusUnauthorized)
+			return
 		default:
 			helpers.LogMsg("Unknown gprc error")
 			w.WriteHeader(http.StatusInternalServerError)
@@ -62,28 +48,16 @@ func Me(w http.ResponseWriter, r *http.Request) {
 func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("sessionid")
 
-	grcpConn, err := grpc.Dial(
-		"127.0.0.1:8083",
-		grpc.WithInsecure(),
-	)
-	if err != nil {
-		helpers.LogMsg("Can`t connect to grpc")
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	defer grcpConn.Close()
-	authManager := models.NewAuthCheckerClient(grcpConn)
 	ctx := context.Background()
-
-	user, err := authManager.GetUser(ctx, &models.JWT{Token: cookie.Value})
+	user, err := models.AuthManager.GetUser(ctx, &models.JWT{Token: cookie.Value})
 
 	fmt.Println(err)
 
 	if err != nil {
 		switch errGRPC, _ := status.FromError(err); errGRPC.Code() {
-		// case 2:
-		// 	w.WriteHeader(http.StatusUnauthorized)
-		// 	return
+		case 2:
+			w.WriteHeader(http.StatusUnauthorized)
+			return
 		default:
 			helpers.LogMsg("Unknown gprc error")
 			w.WriteHeader(http.StatusInternalServerError)
@@ -110,7 +84,7 @@ func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	newUser.ID = user.ID
-	_, _ = authManager.ChangeUser(ctx, newUser)
+	_, _ = models.AuthManager.ChangeUser(ctx, newUser)
 	bytes, err := json.Marshal(newUser)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -123,39 +97,15 @@ func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 func UploadImage(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("sessionid")
 
-	//token, err := jwt.Parse(cookie.Value, func(token *jwt.Token) (interface{}, error) {
-	//	return SECRET, nil
-	//})
-	//
-	//claims, _ := token.Claims.(jwt.MapClaims)
-	//user, err := db.GetUserByEmail(claims["userEmail"].(string))
-	//if user == nil {
-	//	w.WriteHeader(http.StatusNotFound)
-	//	return
-	//}
-
-	grcpConn, err := grpc.Dial(
-		"127.0.0.1:8083",
-		grpc.WithInsecure(),
-	)
-	if err != nil {
-		helpers.LogMsg("Can`t connect to grpc")
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	defer grcpConn.Close()
-
-	authManager := models.NewAuthCheckerClient(grcpConn)
 	ctx := context.Background()
-
-	_, err = authManager.GetUser(ctx, &models.JWT{Token: cookie.Value})
+	user, err := models.AuthManager.GetUser(ctx, &models.JWT{Token: cookie.Value})
 
 	fmt.Println(err)
 	if err != nil {
 		switch errGRPC, _ := status.FromError(err); errGRPC.Code() {
-		// case 2:
-		// 	w.WriteHeader(http.StatusUnauthorized)
-		// 	return
+		case 2:
+			w.WriteHeader(http.StatusUnauthorized)
+			return
 		default:
 			helpers.LogMsg("Unknown gprc error")
 			w.WriteHeader(http.StatusInternalServerError)
@@ -169,47 +119,60 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	// file, handler, err := r.FormFile("avatar")
-	// if err != nil {
-	// 	helpers.LogMsg("Ошибка при получении файла из тела запроса")
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// 	return
-	// }
-	// defer file.Close()
-	// extension := filepath.Ext(handler.Filename)
-	// if extension == "" {
-	// 	helpers.LogMsg("Файл не имеет расширения")
 
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// 	return
-	// }
+	sess := session.Must(session.NewSessionWithOptions(session.Options{
+		SharedConfigState:session.SharedConfigEnable,
+		Config: aws.Config{
+			Region:aws.String("ru-msk"),
+			Endpoint:aws.String("http://hb.bizmrg.com"),
+		},
+	}))
+	svc := s3.New(sess)
 
-	// t := time.Now()
+	f, handler, err := r.FormFile("avatar")
+	if err != nil {
+		helpers.LogMsg("Ошибка при получении файла из тела запроса")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	defer f.Close()
 
-	// fileName := user.Login + t.Format("20060102150405") + extension
-	// fileAndPath := "static/" + fileName
-	// saveFile, err := os.Create(fileAndPath)
-	// if err != nil {
-	// 	helpers.LogMsg("Create", err)
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// 	return
-	// }
-	// defer saveFile.Close()
+	extension := filepath.Ext(handler.Filename)
+	t := time.Now()
+	fileName := user.Login + t.Format("20060102150405") + extension
 
-	// _, err = io.Copy(saveFile, file)
-	// if err != nil {
-	// 	helpers.LogMsg("Copy", err)
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// 	return
-	// }
+	bucket := "penguins_images"
+	acl := "public-read"
+	key := fileName
 
-	// // u := user
-	// // err = database.UpdateImage(u.Login, fileName)
-	// if err != nil {
-	// 	helpers.LogMsg("Ошибка при обновлении картинки в базе данных")
+	_, err = svc.PutObject(&s3.PutObjectInput{
+		Bucket: aws.String(bucket),
+		Key:    aws.String(fileName),
+		Body:   f,
+	})
+	if err != nil {
+		helpers.LogMsg("Ошибка при сохранении файла: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// 	return
-	// }
-	// return
+	params := &s3.PutObjectAclInput{
+		Bucket:&bucket,
+		ACL:&acl,
+		Key:&key,
+	}
+
+	_, err = svc.PutObjectAcl(params)
+	if err != nil {
+		helpers.LogMsg("Ошибка при добавлении прав доступа: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	newUser := new(models.User)
+	newUser = user
+	newUser.Picture = "https://hb.bizmrg.com/penguins_images/" + fileName
+	newUser.ID = user.ID
+	bytes, err := json.Marshal(newUser)
+	w.Write(bytes)
 }

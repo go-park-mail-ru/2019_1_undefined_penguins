@@ -2,6 +2,8 @@ package server
 
 import (
 	"2019_1_undefined_penguins/internal/app/metrics"
+	"2019_1_undefined_penguins/internal/pkg/models"
+	"google.golang.org/grpc"
 
 	"2019_1_undefined_penguins/internal/pkg/fileserver"
 	"github.com/prometheus/client_golang/prometheus"
@@ -9,11 +11,10 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/gorilla/mux"
-
 	c "2019_1_undefined_penguins/internal/pkg/controllers"
 	"2019_1_undefined_penguins/internal/pkg/helpers"
 	mw "2019_1_undefined_penguins/internal/pkg/middleware"
+	"github.com/gorilla/mux"
 
 	"github.com/gorilla/handlers"
 )
@@ -22,11 +23,29 @@ type Params struct {
 	Port string
 }
 
+
+var authAddress string
+
+func SetAuthAddress(address string) {
+	authAddress = address
+}
+
 func StartApp(params Params) error {
 
 	router := mux.NewRouter()
 
+	grcpConn, err := grpc.Dial(
+		authAddress,
+		//"127.0.0.1:8083",
+		grpc.WithInsecure(),
+	)
+	if err != nil {
+		helpers.LogMsg("Can`t connect to grpc")
+		return err
+	}
+	defer grcpConn.Close()
 
+	models.AuthManager = models.NewAuthCheckerClient(grcpConn)
 
 	router.Use(mw.PanicMiddleware)
 	router.Use(mw.MonitoringMiddleware)
