@@ -26,9 +26,9 @@ func Me(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(err)
 	if err != nil {
 		switch errGRPC, _ := status.FromError(err); errGRPC.Code() {
-		// case 2:
-		// 	w.WriteHeader(http.StatusUnauthorized)
-		// 	return
+		case 2:
+			w.WriteHeader(http.StatusUnauthorized)
+			return
 		default:
 			helpers.LogMsg("Unknown gprc error")
 			w.WriteHeader(http.StatusInternalServerError)
@@ -55,9 +55,9 @@ func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		switch errGRPC, _ := status.FromError(err); errGRPC.Code() {
-		// case 2:
-		// 	w.WriteHeader(http.StatusUnauthorized)
-		// 	return
+		case 2:
+			w.WriteHeader(http.StatusUnauthorized)
+			return
 		default:
 			helpers.LogMsg("Unknown gprc error")
 			w.WriteHeader(http.StatusInternalServerError)
@@ -115,9 +115,9 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(err)
 	if err != nil {
 		switch errGRPC, _ := status.FromError(err); errGRPC.Code() {
-		// case 2:
-		// 	w.WriteHeader(http.StatusUnauthorized)
-		// 	return
+		case 2:
+			w.WriteHeader(http.StatusUnauthorized)
+			return
 		default:
 			helpers.LogMsg("Unknown gprc error")
 			w.WriteHeader(http.StatusInternalServerError)
