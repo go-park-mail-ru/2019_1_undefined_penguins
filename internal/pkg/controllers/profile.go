@@ -150,16 +150,15 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 	acl := "public-read"
 	key := fileName
 
-	res, err := svc.PutObject(&s3.PutObjectInput{
+	_, err = svc.PutObject(&s3.PutObjectInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(fileName),
 		Body:   f,
 	})
 	if err != nil {
-		fmt.Println(err)
+		helpers.LogMsg("Ошибка при сохранении файла: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
-	} else {
-		fmt.Println(res)
 	}
 
 	params := &s3.PutObjectAclInput{
@@ -170,7 +169,9 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 
 	_, err = svc.PutObjectAcl(params)
 	if err != nil {
-		fmt.Println(err)
+		helpers.LogMsg("Ошибка при добавлении прав доступа: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
 	newUser := new(models.User)
