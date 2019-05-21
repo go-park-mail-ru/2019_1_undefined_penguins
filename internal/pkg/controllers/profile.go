@@ -128,6 +128,7 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState:session.SharedConfigEnable,
 		Config: aws.Config{
+			Region:aws.String("ru-msk"),
 			Endpoint:aws.String("http://hb.bizmrg.com"),
 		},
 	}))
