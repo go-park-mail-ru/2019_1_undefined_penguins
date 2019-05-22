@@ -15,8 +15,11 @@ type EasyJSONUser struct {
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (eju *EasyJSONUser) ToModelUser(user *User) *EasyJSONUser {
+func ToEasyJsonUser(user *User) *EasyJSONUser {
 	result := new(EasyJSONUser)
+	if user == nil {
+		return result
+	}
 	result.ID = user.ID
 	result.Login = user.Login
 	result.Email = user.Email
@@ -30,6 +33,34 @@ func (eju *EasyJSONUser) ToModelUser(user *User) *EasyJSONUser {
 	//result.XXX_sizecache = user.XXX_sizecache
 	return result
 }
+
+func ToModelUser(user *EasyJSONUser) *User {
+	result := new(User)
+	if user == nil {
+		return result
+	}
+	result.ID = user.ID
+	result.Login = user.Login
+	result.Email = user.Email
+	result.Password = user.Password
+	result.HashPassword = user.HashPassword
+	result.Score = user.Score
+	result.Picture = user.Picture
+	result.Count = user.Count
+	//result.XXX_NoUnkeyedLiteral = user.XXX_NoUnkeyedLiteral
+	//result.XXX_unrecognized = user.XXX_unrecognized
+	//result.XXX_sizecache = user.XXX_sizecache
+	return result
+}
+
+func ToModelUsers(users []*User) []*EasyJSONUser {
+	var results []*EasyJSONUser
+	for _, user := range users {
+		results = append(results, ToEasyJsonUser(user))
+	}
+	return results
+}
+
 var AuthManager AuthCheckerClient
 
 type Session struct {
