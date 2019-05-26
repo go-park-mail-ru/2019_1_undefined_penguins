@@ -20,6 +20,7 @@ require (
 	github.com/jackc/pgx v3.3.0+incompatible
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/lib/pq v1.1.0
+	github.com/mailru/easyjson v0.0.0-20190403194419-1ea4449da983
 	github.com/mattn/go-colorable v0.1.1 // indirect
 	github.com/mattn/go-isatty v0.0.7 // indirect
 	github.com/pkg/errors v0.8.1 // indirect

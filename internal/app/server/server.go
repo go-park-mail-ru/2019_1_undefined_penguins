@@ -33,6 +33,7 @@ func SetAuthAddress(address string) {
 func StartApp(params Params) error {
 
 	router := mux.NewRouter()
+	authRouter := router.PathPrefix("/api").Subrouter()
 
 	grcpConn, err := grpc.Dial(
 		authAddress,
@@ -47,20 +48,20 @@ func StartApp(params Params) error {
 
 	models.AuthManager = models.NewAuthCheckerClient(grcpConn)
 
-	router.Use(mw.PanicMiddleware)
+	//router.Use(mw.PanicMiddleware)
 	router.Use(mw.MonitoringMiddleware)
 	router.Use(mw.CORSMiddleware)
 	router.Use(mw.AuthMiddleware)
 
 	router.HandleFunc("/", c.RootHandler)
-	router.HandleFunc("/me", c.Me).Methods("GET", "OPTIONS")
-	router.HandleFunc("/leaders/{id:[0-9]+}", c.GetLeaderboardPage).Methods("GET", "OPTIONS")
-	router.HandleFunc("/leaders/info", c.GetLeaderboardInfo).Methods("GET", "OPTIONS")
-	router.HandleFunc("/signup", c.SignUp).Methods("POST", "OPTIONS")
-	router.HandleFunc("/login", c.SignIn).Methods("POST", "OPTIONS")
-	router.HandleFunc("/signout", c.SignOut).Methods("GET", "OPTIONS")
-	router.HandleFunc("/me", c.ChangeProfile).Methods("PUT")
-	router.HandleFunc("/upload", c.UploadImage).Methods("POST")
+	authRouter.HandleFunc("/me", c.Me).Methods("GET", "OPTIONS")
+	authRouter.HandleFunc("/leaders/{id:[0-9]+}", c.GetLeaderboardPage).Methods("GET", "OPTIONS")
+	authRouter.HandleFunc("/leaders/info", c.GetLeaderboardInfo).Methods("GET", "OPTIONS")
+	authRouter.HandleFunc("/signup", c.SignUp).Methods("POST", "OPTIONS")
+	authRouter.HandleFunc("/login", c.SignIn).Methods("POST", "OPTIONS")
+	authRouter.HandleFunc("/signout", c.SignOut).Methods("GET", "OPTIONS")
+	authRouter.HandleFunc("/me", c.ChangeProfile).Methods("PUT")
+	authRouter.HandleFunc("/upload", c.UploadImage).Methods("POST")
 
 	//gameRouter.HandleFunc("/ws", c.StartWS)
 

@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"2019_1_undefined_penguins/internal/pkg/models"
-	"encoding/json"
 	"fmt"
 	"time"
 
@@ -24,14 +23,15 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 
 	defer r.Body.Close()
 
-	//var user models.User
 	var user *models.User
-	err = json.Unmarshal(body, &user)
+	easyJsonUser := models.ToEasyJsonUser(user)
+	//err = json.Unmarshal(body, &user)
+	err = easyJsonUser.UnmarshalJSON(body)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
+	user = models.ToModelUser(easyJsonUser)
 	ctx := context.Background()
 	token, err := models.AuthManager.LoginUser(ctx, user)
 
@@ -62,7 +62,9 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user, _ = models.AuthManager.GetUser(ctx, token)
-	bytes, err := json.Marshal(user)
+	easyJsonUser = models.ToEasyJsonUser(user)
+	//bytes, err := json.Marshal(user)
+	bytes, err := easyJsonUser.MarshalJSON()
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -83,7 +85,9 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	var user *models.User
-	err = json.Unmarshal(body, &user)
+	easyJsonUser := models.ToEasyJsonUser(user)
+	//err = json.Unmarshal(body, &user)
+	err = easyJsonUser.UnmarshalJSON(body)
 
 	if err != nil {
 		helpers.LogMsg(err)
@@ -91,6 +95,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	user = models.ToModelUser(easyJsonUser)
 	ctx := context.Background()
 	token, err := models.AuthManager.RegisterUser(ctx, user)
 
@@ -128,7 +133,9 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 
 	user.Password = ""
 	user.Picture = defaultPictureAddress
-	bytes, err := json.Marshal(user)
+	easyJsonUser = models.ToEasyJsonUser(user)
+	//bytes, err := json.Marshal(user)
+	bytes, err := easyJsonUser.MarshalJSON()
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
