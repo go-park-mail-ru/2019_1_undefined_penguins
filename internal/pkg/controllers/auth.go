@@ -13,7 +13,6 @@ import (
 	"net/http"
 
 	"2019_1_undefined_penguins/internal/pkg/helpers"
-	//"2019_1_undefined_penguins/internal/pkg/models"
 )
 
 func SignIn(w http.ResponseWriter, r *http.Request) {
