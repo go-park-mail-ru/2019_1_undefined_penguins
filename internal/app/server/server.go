@@ -34,7 +34,7 @@ func StartApp(params Params) error {
 
 	router := mux.NewRouter()
 	authRouter := router.PathPrefix("/api").Subrouter()
-	gameRouter := router.PathPrefix("/game").Subrouter()
+	//gameRouter := router.PathPrefix("/game").Subrouter()
 
 	grcpConn, err := grpc.Dial(
 		//authAddress,
@@ -63,8 +63,8 @@ func StartApp(params Params) error {
 	authRouter.HandleFunc("/signout", c.SignOut).Methods("GET", "OPTIONS")
 	authRouter.HandleFunc("/me", c.ChangeProfile).Methods("PUT")
 	authRouter.HandleFunc("/upload", c.UploadImage).Methods("POST")
-	gameRouter.HandleFunc("/single", c.StartSingle)
-	gameRouter.HandleFunc("/multi", c.StartMulti)
+	//gameRouter.HandleFunc("/single", c.StartSingle)
+	//gameRouter.HandleFunc("/multi", c.StartMulti)
 
 
 	//gameRouter.HandleFunc("/ws", c.StartWS)
