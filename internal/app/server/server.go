@@ -34,10 +34,11 @@ func StartApp(params Params) error {
 
 	router := mux.NewRouter()
 	authRouter := router.PathPrefix("/api").Subrouter()
+	gameRouter := router.PathPrefix("/game").Subrouter()
 
 	grcpConn, err := grpc.Dial(
-		authAddress,
-		//"127.0.0.1:8083",
+		//authAddress,
+		"127.0.0.1:8083",
 		grpc.WithInsecure(),
 	)
 	if err != nil {
@@ -48,8 +49,8 @@ func StartApp(params Params) error {
 
 	models.AuthManager = models.NewAuthCheckerClient(grcpConn)
 
-	//router.Use(mw.PanicMiddleware)
-	router.Use(mw.MonitoringMiddleware)
+	router.Use(mw.PanicMiddleware)
+	//router.Use(mw.MonitoringMiddleware)
 	router.Use(mw.CORSMiddleware)
 	router.Use(mw.AuthMiddleware)
 
@@ -62,6 +63,9 @@ func StartApp(params Params) error {
 	authRouter.HandleFunc("/signout", c.SignOut).Methods("GET", "OPTIONS")
 	authRouter.HandleFunc("/me", c.ChangeProfile).Methods("PUT")
 	authRouter.HandleFunc("/upload", c.UploadImage).Methods("POST")
+	gameRouter.HandleFunc("/single", c.StartSingle)
+	gameRouter.HandleFunc("/multi", c.StartMulti)
+
 
 	//gameRouter.HandleFunc("/ws", c.StartWS)
 

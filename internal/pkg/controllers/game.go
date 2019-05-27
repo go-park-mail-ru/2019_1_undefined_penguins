@@ -1,35 +1,109 @@
 package controllers
 
-// func StartWS(w http.ResponseWriter, r *http.Request) {
+import (
+	"fmt"
+	"2019_1_undefined_penguins/internal/pkg/helpers"
+	"2019_1_undefined_penguins/internal/pkg/models"
+	"net/http"
 
-// 	// if game.PingGame.RoomsCount() >= 10 {
-// 	// 	//TODO check response on the client side
-// 	// 	helpers.LogMsg("Too many clients")
-// 	// 	w.WriteHeader(http.StatusTooManyRequests)
-// 	// 	w.Write([]byte("Too many clients"))
-// 	// 	return
-// 	// }
+	"github.com/gorilla/websocket"
 
-// 	// upgrader := &websocket.Upgrader{}
+	"golang.org/x/net/context"
+)
 
-// 	// //check for multi in micro!!!!!
+var AuthManager models.AuthCheckerClient
 
-// 	// //cookie, err := r.Cookie("sessionid")
-// 	// //if err != nil {
-// 	// //	cookie.Value = "Anonumys"
-// 	// //}
+func StartSingle(w http.ResponseWriter, r *http.Request) {
+	//if PingGame.RoomsCount() >= 10 {
+	//	//TODO check response on the client side
+	//	helpers.LogMsg("Too many clients")
+	//	w.WriteHeader(http.StatusTooManyRequests)
+	//	w.Write([]byte("Too many clients"))
+	//	return
+	//}
 
-// 	// upgrader.CheckOrigin = func(r *http.Request) bool { return true }
-// 	// conn, err := upgrader.Upgrade(w, r, nil)
-// 	// if err != nil {
-// 	// 	helpers.LogMsg("Connection error: ", err)
-// 	// 	w.WriteHeader(http.StatusInternalServerError)
-// 	// 	return
-// 	// }
+	user := new(models.User)
+	cookie, err := r.Cookie("sessionid")
+	if err != nil || cookie.Value == "" {
+		user.Login = "Anonumys"
+	} else {
+		ctx := context.Background()
 
-// 	// helpers.LogMsg("Connected to client")
+		user, _ = models.AuthManager.GetUser(ctx, &models.JWT{Token: cookie.Value})
+		//cookie.Value = user.Login
+	}
 
-// 	// //TODO remove hardcore, get from front player value
-// 	// player := game.NewPlayer(conn)
-// 	// go player.Listen()
-// }
+	upgrader := &websocket.Upgrader{}
+
+	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		helpers.LogMsg("Connection error: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	helpers.LogMsg("Connected to client")
+
+
+	//TODO remove hardcore, get from front player value
+
+	//player := NewPlayer(conn, user.Login, user)
+	//player.ID = user.Login
+	//go player.Listen()
+}
+
+func StartMulti(w http.ResponseWriter, r *http.Request) {
+	if PingGame.RoomsCount() >= 10 {
+		//TODO check response on the client side
+		helpers.LogMsg("Too many clients")
+		w.WriteHeader(http.StatusTooManyRequests)
+		w.Write([]byte("Too many clients"))
+		return
+	}
+
+	var user *models.User
+	cookie, err := r.Cookie("sessionid")
+	if err != nil || cookie.Value == "" {
+		helpers.LogMsg("No Cookie in Multi")
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	} else {
+		ctx := context.Background()
+
+		user, err = models.AuthManager.GetUser(ctx, &models.JWT{Token: cookie.Value})
+		if err != nil {
+			helpers.LogMsg("Invalid Cookie in Multi")
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		//check if such user already in game
+		fmt.Println(PingGame.Players)
+		for _, player := range PingGame.Players {
+			if player.ID == user.Login {
+				helpers.LogMsg("Such user already in game")
+				//TODO and what's next with this user?
+				w.WriteHeader(http.StatusForbidden)
+				return
+			}
+		}
+
+		//cookie.Value = user.Login
+	}
+
+	upgrader := &websocket.Upgrader{}
+
+	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		helpers.LogMsg("Connection error: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	helpers.LogMsg("Connected to client")
+
+	player := NewPlayer(conn, user.Login, user)
+	go player.Listen()
+}
