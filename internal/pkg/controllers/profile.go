@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"2019_1_undefined_penguins/internal/pkg/helpers"
-	"encoding/json"
+	//"encoding/json"
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -19,6 +19,10 @@ import (
 
 func Me(w http.ResponseWriter, r *http.Request) {
 	cookie, _ := r.Cookie("sessionid")
+	if cookie == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
 
 	ctx := context.Background()
 	user, err := models.AuthManager.GetUser(ctx, &models.JWT{Token: cookie.Value})
@@ -36,7 +40,9 @@ func Me(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	bytes, err := json.Marshal(user)
+	easyJsonUser := models.ToEasyJsonUser(user)
+	//bytes, err := json.Marshal(user)
+	bytes, err := easyJsonUser.MarshalJSON()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -75,17 +81,21 @@ func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 
 	//var user models.User
 	var newUser *models.User
-	err = json.Unmarshal(body, &newUser)
+	easyJsonUser := models.ToEasyJsonUser(newUser)
+	//err = json.Unmarshal(body, &easyJsonUser)
+	err = easyJsonUser.UnmarshalJSON(body)
 
 	if err != nil {
 		helpers.LogMsg(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
+	newUser = models.ToModelUser(easyJsonUser)
 	newUser.ID = user.ID
 	_, _ = models.AuthManager.ChangeUser(ctx, newUser)
-	bytes, err := json.Marshal(newUser)
+	easyJsonUser = models.ToEasyJsonUser(newUser)
+	//bytes, err := json.Marshal(newUser)
+	bytes, err := easyJsonUser.MarshalJSON()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -173,6 +183,8 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 	newUser = user
 	newUser.Picture = "https://hb.bizmrg.com/penguins_images/" + fileName
 	newUser.ID = user.ID
-	bytes, err := json.Marshal(newUser)
+	easyJsonUser := models.ToEasyJsonUser(newUser)
+	//bytes, err := json.Marshal(newUser)
+	bytes, err := easyJsonUser.MarshalJSON()
 	w.Write(bytes)
 }
