@@ -19,6 +19,10 @@ import (
 
 func Me(w http.ResponseWriter, r *http.Request) {
 	cookie, _ := r.Cookie("sessionid")
+	if cookie == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
 
 	ctx := context.Background()
 	user, err := models.AuthManager.GetUser(ctx, &models.JWT{Token: cookie.Value})
