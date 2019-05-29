@@ -92,7 +92,11 @@ func ChangeProfile(w http.ResponseWriter, r *http.Request) {
 	}
 	newUser = models.ToModelUser(easyJsonUser)
 	newUser.ID = user.ID
-	_, _ = models.AuthManager.ChangeUser(ctx, newUser)
+	_, err = models.AuthManager.ChangeUser(ctx, newUser)
+	if err != nil {
+		w.WriteHeader(http.StatusConflict)
+		return
+	}
 	easyJsonUser = models.ToEasyJsonUser(newUser)
 	//bytes, err := json.Marshal(newUser)
 	bytes, err := easyJsonUser.MarshalJSON()
