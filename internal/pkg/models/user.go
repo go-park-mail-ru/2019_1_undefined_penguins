@@ -10,6 +10,7 @@ type EasyJSONUser struct {
 	Score                uint64   `protobuf:"varint,6,opt,name=score,proto3" json:"score"`
 	Picture              string   `protobuf:"bytes,7,opt,name=picture,proto3" json:"picture,omitempty"`
 	Count                uint64   `protobuf:"varint,8,opt,name=count,proto3" json:"count"`
+	IsPlaying            bool     `protobuf:"varint,9,opt,name=isPlaying,proto3" json:"isPlaying"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -28,6 +29,7 @@ func ToEasyJsonUser(user *User) *EasyJSONUser {
 	result.Score = user.Score
 	result.Picture = user.Picture
 	result.Count = user.Count
+	result.IsPlaying = user.IsPlaying
 	//result.XXX_NoUnkeyedLiteral = user.XXX_NoUnkeyedLiteral
 	//result.XXX_unrecognized = user.XXX_unrecognized
 	//result.XXX_sizecache = user.XXX_sizecache
@@ -47,6 +49,7 @@ func ToModelUser(user *EasyJSONUser) *User {
 	result.Score = user.Score
 	result.Picture = user.Picture
 	result.Count = user.Count
+	result.IsPlaying = user.IsPlaying
 	//result.XXX_NoUnkeyedLiteral = user.XXX_NoUnkeyedLiteral
 	//result.XXX_unrecognized = user.XXX_unrecognized
 	//result.XXX_sizecache = user.XXX_sizecache
