@@ -47,6 +47,7 @@ func Me(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
 	w.Write(bytes)
 	return
 }
@@ -188,6 +189,7 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 	newUser.Picture = "https://hb.bizmrg.com/penguins_images/" + fileName
 	newUser.ID = user.ID
 	easyJsonUser := models.ToEasyJsonUser(newUser)
+	_, _ = models.AuthManager.ChangeUserPicture(ctx, newUser)
 	//bytes, err := json.Marshal(newUser)
 	bytes, err := easyJsonUser.MarshalJSON()
 	w.Write(bytes)

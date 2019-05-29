@@ -1,0 +1,12 @@
+language: go
+go:
+- 1.12
+env:
+  - GO111MODULE=on
+script: bash deployment.sh
+branches: 
+only:
+- deployment
+before_install:
+- openssl aes-256-cbc -K $encrypted_7b7e8c559586_key -iv $encrypted_7b7e8c559586_iv
+  -in deployment_travis_key.enc -out deployment_travis_key -d
