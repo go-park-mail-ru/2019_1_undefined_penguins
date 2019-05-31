@@ -12,7 +12,7 @@ func DeleteCookie(w *http.ResponseWriter, cookie *http.Cookie) {
 		Name:     "sessionid",
 		Value:    "",
 		Expires:  time.Unix(0, 0),
-		Path:     "/",
+		//Path:     "/",
 		HttpOnly: true,
 		// Secure:   true,
 	})

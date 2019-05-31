@@ -59,6 +59,7 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 		Value:    token.Token,
 		Expires:  time.Now().Add(time.Hour),
 		HttpOnly: true,
+		//Secure: true,
 	}
 
 	user, _ = models.AuthManager.GetUser(ctx, token)
@@ -129,6 +130,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 		Value:    token.Token,
 		Expires:  time.Now().Add(time.Hour),
 		HttpOnly: true,
+		//Secure: true,
 	}
 
 	user.Password = ""
