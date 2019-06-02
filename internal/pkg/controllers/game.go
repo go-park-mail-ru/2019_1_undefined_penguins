@@ -45,6 +45,11 @@ func CheckWsMulti(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	user.IsPlaying = true
-	_, _ = models.AuthManager.AddUserToGame(ctx, user)
+	_, err = models.AuthManager.AddUserToGame(ctx, user)
+	if err != nil {
+		helpers.LogMsg("Already in game")
+		w.WriteHeader(http.StatusConflict)
+		return
+	}
 	w.WriteHeader(http.StatusOK)
 }
