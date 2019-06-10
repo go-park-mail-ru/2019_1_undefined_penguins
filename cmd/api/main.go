@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"2019_1_undefined_penguins/internal/app/server"
