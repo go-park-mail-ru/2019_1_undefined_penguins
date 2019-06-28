@@ -1,9 +1,9 @@
-package main
+package game
 
 import (
 	"fmt"
-	"game/helpers"
-	"game/models"
+	"2019_1_undefined_penguins/internal/pkg/helpers"
+	"2019_1_undefined_penguins/internal/pkg/models"
 	"golang.org/x/net/context"
 	//"game/helpers"
 	"sync"

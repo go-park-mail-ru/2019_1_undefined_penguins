@@ -2,7 +2,7 @@ package database
 
 import (
 	"fmt"
-	"auth/models"
+	"2019_1_undefined_penguins/internal/pkg/models"
 	"testing"
 	"time"
 

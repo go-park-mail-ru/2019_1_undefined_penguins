@@ -25,9 +25,10 @@ func GetLeaderboardPage(w http.ResponseWriter, r *http.Request) {
 
 
 	ctx := context.Background()
-	users, _ := models.AuthManager.GetUserArray(ctx, leaders)
+	users, err := models.AuthManager.GetUserArray(ctx, leaders)
 
 	fmt.Println("led: ", users)
+	fmt.Println("error: ", err)
 
 	u := users.Users
 	if respBody, err := json.Marshal(u); err != nil {

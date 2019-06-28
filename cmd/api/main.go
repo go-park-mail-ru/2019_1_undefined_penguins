@@ -11,7 +11,7 @@ import (
 
 func main() {
 	params := server.Params{Port: os.Getenv("PORT")}
-	viper.AddConfigPath("./configs")
+	viper.AddConfigPath("./configs/api")
 	viper.SetConfigName("config")
 	if err := viper.ReadInConfig(); err == nil {
 		params.Port = viper.GetString("port")

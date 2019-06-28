@@ -1,4 +1,4 @@
-package main
+package game
 
 //from back to front
 //(это я генерю и шлю)

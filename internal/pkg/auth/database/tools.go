@@ -1,8 +1,8 @@
 package database
 
 import (
-	"auth/helpers"
-	"auth/models"
+	"2019_1_undefined_penguins/internal/pkg/helpers"
+	"2019_1_undefined_penguins/internal/pkg/models"
 	"database/sql"
 )
 

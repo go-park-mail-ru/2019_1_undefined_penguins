@@ -1,7 +1,7 @@
 package database
 
 import (
-	"auth/helpers"
+	"2019_1_undefined_penguins/internal/pkg/helpers"
 	sq "database/sql"
 	"fmt"
 	"strconv"

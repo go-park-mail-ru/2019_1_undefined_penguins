@@ -1,9 +1,9 @@
-package main
+package auth
 
 import (
-	db "auth/database"
-	"auth/helpers"
-	"auth/models"
+	db "2019_1_undefined_penguins/internal/pkg/auth/database"
+	"2019_1_undefined_penguins/internal/pkg/helpers"
+	"2019_1_undefined_penguins/internal/pkg/models"
 	"fmt"
 
 	"github.com/dgrijalva/jwt-go"
@@ -12,8 +12,6 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	//"io/ioutil"
-	//"net/http"
 	"sync"
 	"time"
 )

@@ -1,8 +1,8 @@
-package main
+package game
 
 import (
-	"game/helpers"
-	"game/models"
+	"2019_1_undefined_penguins/internal/pkg/helpers"
+	"2019_1_undefined_penguins/internal/pkg/models"
 	"net/http"
 
 	"github.com/gorilla/websocket"

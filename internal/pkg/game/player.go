@@ -1,11 +1,11 @@
-package main
+package game
 
 import (
 	//"game/helpers"
 	"fmt"
-	"game/helpers"
-	"game/metrics"
-	"game/models"
+	"2019_1_undefined_penguins/internal/pkg/helpers"
+	"2019_1_undefined_penguins/internal/app/metrics"
+	"2019_1_undefined_penguins/internal/pkg/models"
 	"github.com/gorilla/websocket"
 	"golang.org/x/net/context"
 	"log"
