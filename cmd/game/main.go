@@ -19,7 +19,7 @@ import (
 )
 
 func setConfig() (string, int, string) {
-	viper.AddConfigPath("./configs/game")
+	viper.AddConfigPath("./configs")
 	viper.SetConfigName("game")
 	var port, authAddress string
 	var maxRooms int

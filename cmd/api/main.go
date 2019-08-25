@@ -11,8 +11,8 @@ import (
 
 func main() {
 	params := server.Params{Port: os.Getenv("PORT")}
-	viper.AddConfigPath("./configs/api")
-	viper.SetConfigName("config")
+	viper.AddConfigPath("./configs")
+	viper.SetConfigName("api")
 	if err := viper.ReadInConfig(); err == nil {
 		params.Port = viper.GetString("port")
 		server.SetAuthAddress(viper.GetString("auth"))
@@ -21,6 +21,8 @@ func main() {
 		if err != nil {
 			helpers.LogMsg("Server error: ", err)
 		}
+	} else {
+		helpers.LogMsg("Server error: ", err)
 	}
 
 }

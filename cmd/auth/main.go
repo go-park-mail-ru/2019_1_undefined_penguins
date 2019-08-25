@@ -14,8 +14,8 @@ import (
 var SECRET = []byte("myawesomesecret")
 
 func setConfig() string {
-	viper.AddConfigPath("./configs/auth")
-	viper.SetConfigName("config")
+	viper.AddConfigPath("./configs")
+	viper.SetConfigName("auth")
 	var port string
 	if err := viper.ReadInConfig(); err != nil {
 		port = ":8083"
